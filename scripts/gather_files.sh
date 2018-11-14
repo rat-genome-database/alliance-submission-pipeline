@@ -48,8 +48,8 @@ echo "  HUMAN GO GAF file staged!"
 ### gff3 files
 scp -p ${DATA_RELEASE_DIR}/*gff3.gz $DATA_DIR
 
-cp $DATA_DIR/${MOD_NAME}_1.0_9696.gff3.gz $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_GFF.9606.gff3.gz
-cp $DATA_DIR/${MOD_NAME}_1.0_10116.gff3.gz $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_GFF.10116.gff3.gz
+cp $DATA_DIR/genes_9606.gff3.gz $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_GFF.9606.gff3.gz
+cp $DATA_DIR/genes_10116.gff3.gz $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_GFF.10116.gff3.gz
 gunzip  $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_GFF.*.gff3.gz
 
 echo "  GFF3 files staged!"

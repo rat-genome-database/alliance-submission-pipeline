@@ -1,8 +1,8 @@
 #####
 ## EXPERIMENTAL: submission via API is still under development
 #
-MYFILESPEC="1.0.0.6_ALLELE_10116"
-MYFILELOC="data/RGD_1.0.0.6_1/RGD_1.0.0.6_allele.10116.json"
+MYFILESPEC="1.0.0.7_ALLELE_10116"
+MYFILELOC="data/RGD_1.0.0.7_8/RGD_1.0.0.7_allele.10116.json"
 MYFILE="$MYFILESPEC=@$MYFILELOC"
 APITOKEN=`cat api.token`
 

@@ -1,5 +1,4 @@
 # submit all files to AGR
-# the param required is submission directory
 
 echo "STAGE3: submit to AGR"
 echo "==="
