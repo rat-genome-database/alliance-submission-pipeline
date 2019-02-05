@@ -2,7 +2,7 @@
 
 export MOD_NAME=RGD
 export AGR_VER=1.0.0.7
-export UPLOAD_NR=10
+export UPLOAD_NR=18
 export BATCH="${MOD_NAME}_${AGR_VER}_${UPLOAD_NR}"
 
 export WORK_DIR=/home/rgddata/pipelines/AgrPipeline
