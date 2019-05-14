@@ -2,7 +2,7 @@
 ## submission via API for rat files (taxon id: 9606)
 #
 TAXON=9606
-SPECIES=Human
+SPECIES=HUMAN
 APITOKEN=`cat api.token`
 
 PHENOTYPE_SPEC="${AGR_VER}_PHENOTYPE_${SPECIES}"
