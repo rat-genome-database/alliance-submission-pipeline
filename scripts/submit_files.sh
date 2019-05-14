@@ -2,10 +2,14 @@
 
 echo "STAGE3: submit to AGR via API"
 echo "==="
-
 #
 $WORK_DIR/api_submit_files_for_rat.sh
 $WORK_DIR/api_submit_files_for_human.sh
+
+
+####
+#exit -4
+####
 
 echo "STAGE4: create a tarball and copy it to release dir"
 echo "==="
@@ -33,5 +37,3 @@ exit 0
 #echo "  submit files to AGR"
 #echo "aws s3 ls s3://mod-datadumps/"
 #aws s3 cp $TARBALL s3://mod-datadumps/
-
-

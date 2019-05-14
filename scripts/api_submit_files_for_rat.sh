@@ -9,6 +9,11 @@ ALLELE_LOC="data/$BATCH/${MOD_NAME}_${AGR_VER}_allele.${SPECIES}.json"
 ALLELE_FILE="${ALLELE_SPEC}=@${ALLELE_LOC}"
 echo "$ALLELE_FILE"
 
+VARIANT_SPEC="${AGR_VER}_VARIATION_${SPECIES}"
+VARIANT_LOC="data/$BATCH/${MOD_NAME}_${AGR_VER}_variant.${SPECIES}.json"
+VARIANT_FILE="${VARIANT_SPEC}=@${VARIANT_LOC}"
+echo "$VARIANT_FILE"
+
 EXPR_SPEC="${AGR_VER}_EXPRESSION_${SPECIES}"
 EXPR_LOC="data/$BATCH/${MOD_NAME}_${AGR_VER}_expression.${SPECIES}.json"
 EXPRESSION_FILE="${EXPR_SPEC}=@${EXPR_LOC}"
@@ -35,9 +40,10 @@ GFF_FILE="${GFF_SPEC}=@${GFF_LOC}"
 echo "$GFF_FILE"
 
 curl -k \
- -H "api_access_token: $APITOKEN" \
- -X POST "https://www.alliancegenome.org/api/data/submit" \
+ -H "Authorization: Bearer $APITOKEN" \
+ -X POST "https://fms.alliancegenome.org/api/data/submit" \
  -F "$ALLELE_FILE" \
+ -F "$VARIANT_FILE" \
  -F "$EXPRESSION_FILE" \
  -F "$PHENOTYPE_FILE" \
  -F "$DISEASE_FILE" \

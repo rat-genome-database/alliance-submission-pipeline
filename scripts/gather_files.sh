@@ -11,6 +11,11 @@ scp -p ${DATA_RELEASE_DIR}/alleles*json $DATA_DIR
 cp -p $DATA_DIR/alleles.10116.json $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_allele.10116.json
 echo "  alleles files staged!"
 
+# variants
+scp -p ${DATA_RELEASE_DIR}/variants*json $DATA_DIR
+cp -p $DATA_DIR/variants.10116.json $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_variant.10116.json
+echo "  variant files staged!"
+
 # gene expression
 scp -p ${DATA_RELEASE_DIR}/expression*json $DATA_DIR
 cp -p $DATA_DIR/expression.10116.json $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_expression.10116.json
@@ -54,4 +59,3 @@ gunzip  $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_GFF.*.gff3.gz
 
 echo "  GFF3 files staged!"
 echo "==="
-
