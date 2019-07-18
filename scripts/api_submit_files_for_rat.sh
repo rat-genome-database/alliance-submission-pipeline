@@ -30,10 +30,15 @@ DISEASE_LOC="data/$BATCH/${MOD_NAME}_${AGR_VER}_disease.${TAXON}.json"
 DISEASE_FILE="${DISEASE_SPEC}=@${DISEASE_LOC}"
 echo "$DISEASE_FILE"
 
-BGI_SPEC="${AGR_VER}_BGI_${SPECIES}"
-BGI_LOC="data/$BATCH/${MOD_NAME}_${AGR_VER}_BGI.${TAXON}.json"
-BGI_FILE="${BGI_SPEC}=@${BGI_LOC}"
-echo "$BGI_FILE"
+GENE_SPEC="${AGR_VER}_BGI_${SPECIES}"
+GENE_LOC="data/$BATCH/${MOD_NAME}_${AGR_VER}_gene.${TAXON}.json"
+GENE_FILE="${GENE_SPEC}=@${GENE_LOC}"
+echo "$GENE_FILE"
+
+AGM_SPEC="${AGR_VER}_AGM_${SPECIES}"
+AGM_LOC="data/$BATCH/${MOD_NAME}_${AGR_VER}_affectedGenomicModel.${TAXON}.json"
+AGM_FILE="${AGM_SPEC}=@${AGM_LOC}"
+echo "$AGM_FILE"
 
 GFF_SPEC="${AGR_VER}_GFF_${SPECIES}"
 GFF_LOC="data/$BATCH/${MOD_NAME}_${AGR_VER}_GFF.${TAXON}.gff3"
@@ -48,8 +53,9 @@ curl -k \
  -F "$EXPRESSION_FILE" \
  -F "$PHENOTYPE_FILE" \
  -F "$DISEASE_FILE" \
- -F "$BGI_FILE" \
+ -F "$GENE_FILE" \
  -F "$GFF_FILE" \
+ -F "$AGM_FILE" \
  | tee api_rat_submission.log
 
 echo "=== OK ==="

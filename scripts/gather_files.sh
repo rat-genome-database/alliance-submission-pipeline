@@ -16,6 +16,11 @@ scp -p ${DATA_RELEASE_DIR}/variants*json $DATA_DIR
 cp -p $DATA_DIR/variants.10116.json $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_variant.10116.json
 echo "  variant files staged!"
 
+# affected genomic models (strains)
+scp -p ${DATA_RELEASE_DIR}/affectedGenomicModels*json $DATA_DIR
+cp -p $DATA_DIR/affectedGenomicModels.10116.json $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_affectedGenomicModel.10116.json
+echo "  affected genomic models (strains) files staged!"
+
 # gene expression
 scp -p ${DATA_RELEASE_DIR}/expression*json $DATA_DIR
 cp -p $DATA_DIR/expression.10116.json $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_expression.10116.json
@@ -29,11 +34,11 @@ cp -p $DATA_DIR/phenotypes.10116.json $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_phe
 echo "  phenotype files staged!"
 
 # basic gene information
-scp -p ${DATA_RELEASE_DIR}/bgi*json $DATA_DIR
+scp -p ${DATA_RELEASE_DIR}/genes*json $DATA_DIR
 
-cp -p $DATA_DIR/bgi.9606.json $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_BGI.9606.json
-cp -p $DATA_DIR/bgi.10116.json $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_BGI.10116.json
-echo "  BGI files staged!"
+cp -p $DATA_DIR/genes.9606.json $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_gene.9606.json
+cp -p $DATA_DIR/genes.10116.json $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_gene.10116.json
+echo "  gene files staged!"
 
 ### disease files
 scp -p ${DATA_RELEASE_DIR}/*daf.json $DATA_DIR
