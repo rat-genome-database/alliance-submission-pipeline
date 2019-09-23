@@ -64,3 +64,4 @@ gunzip  $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_GFF.*.gff3.gz
 
 echo "  GFF3 files staged!"
 echo "==="
+
