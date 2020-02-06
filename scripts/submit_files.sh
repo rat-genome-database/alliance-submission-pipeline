@@ -1,5 +1,4 @@
 # submit all files to AGR
-
 echo "STAGE3: submit to AGR via API"
 echo "==="
 #
