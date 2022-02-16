@@ -13,7 +13,7 @@ apply plugin: 'application'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 mainClassName = 'edu.mcw.rgd.pipelines.agr.Main'
-String myAppName = 'alliance-submision-pipeline'
+String myAppName = 'alliance-submission-pipeline'
 
 project.archivesBaseName = myAppName
 
