@@ -20,7 +20,7 @@ public class Main {
 
     Logger log = LogManager.getLogger("status");
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
@@ -34,7 +34,7 @@ public class Main {
         }
     }
 
-    void run(String[] args, DefaultListableBeanFactory bf) {
+    void run(String[] args, DefaultListableBeanFactory bf) throws Exception {
 
         long time0 = System.currentTimeMillis();
 

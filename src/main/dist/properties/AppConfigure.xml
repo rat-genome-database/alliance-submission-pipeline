@@ -11,6 +11,57 @@
 
     <bean id="variantVcfGenerator" class="edu.mcw.rgd.pipelines.agr.VariantVcfGenerator" >
         <property name="dao" ref="dao"/>
+        <property name="rn7Samples">
+            <set>
+                <value>3001</value>
+                <value>3036</value>
+                <value>3047</value>
+                <value>3006</value>
+                <value>3005</value>
+                <value>3003</value>
+                <value>3043</value>
+                <value>3037</value>
+                <value>3046</value>
+                <value>3030</value>
+                <value>3014</value>
+                <value>3009</value>
+                <value>3010</value>
+                <value>3038</value>
+                <value>3011</value>
+                <value>3023</value>
+                <value>3029</value>
+                <value>3015</value>
+                <value>3024</value>
+                <value>3025</value>
+                <value>3026</value>
+                <value>3016</value>
+                <value>3013</value>
+                <value>3028</value>
+                <value>3027</value>
+                <value>3039</value>
+                <value>3045</value>
+                <value>3042</value>
+                <value>3040</value>
+                <value>3044</value>
+                <value>3000</value>
+                <value>3017</value>
+                <value>3031</value>
+                <value>3033</value>
+                <value>3012</value>
+                <value>3018</value>
+                <value>3041</value>
+                <value>3002</value>
+                <value>3035</value>
+                <value>3032</value>
+                <value>3034</value>
+                <value>3022</value>
+                <value>3021</value>
+                <value>3020</value>
+                <value>3019</value>
+                <value>3007</value>
+                <value>3008</value>
+            </set>
+        </property>
     </bean>
 
 </beans>
