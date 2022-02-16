@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class VariantVcfGenerator {
@@ -30,6 +31,9 @@ public class VariantVcfGenerator {
     }
 
     public void createVariantFile(int mapKey) throws Exception{
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        String fileDate = sdf.format(new Date());
 
         int speciesTypeKey = dao.getSpeciesFromMap(mapKey);
         List<String> chrs = dao.getChromosomes(mapKey);
@@ -67,7 +71,8 @@ public class VariantVcfGenerator {
 
             Map<String, Integer> chromosomeMap = dao.getChromosomeSizes(mapKey);
             //header
-            writer.write(" ##fileformat=VCF4.2\n");
+            writer.write("##fileformat=VCFv4.2\n");
+            writer.write("##fileDate="+fileDate+"\n");
             writer.write("##INFO=<ID=VT,Number=0,Type=Integer,Description=\"Variant type: SNV, INS, and DEL\">\n");
             writer.write("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n");
             writer.write("##FORMAT=<ID=DP,Number=2,Type=String,Description=\"Depth\">\n");
