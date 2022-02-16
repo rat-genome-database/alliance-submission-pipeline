@@ -1,0 +1,18 @@
+#####
+#
+APITOKEN=`cat api.token`
+
+set -e
+
+GFF_SPEC="4.0.0_GFF_HUMAN"
+GFF_LOC="/home/rgddata/data_release/agr/genes_9606.gff3.gz"
+GFF_FILE="${GFF_SPEC}=@${GFF_LOC}"
+echo "$GFF_FILE"
+
+curl -k \
+ -H "Authorization: Bearer $APITOKEN" \
+ -X POST "https://fms.alliancegenome.org/api/data/submit" \
+ -F "$GFF_FILE" \
+ | tee gff_submission_human.log
+
+echo "=== OK ==="

@@ -61,7 +61,24 @@ scp -p ${DATA_RELEASE_DIR}/*gff3.gz $DATA_DIR
 cp $DATA_DIR/genes_9606.gff3.gz $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_GFF.9606.gff3.gz
 cp $DATA_DIR/genes_10116.gff3.gz $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_GFF.10116.gff3.gz
 gunzip  $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_GFF.*.gff3.gz
-
 echo "  GFF3 files staged!"
+
+
+### HTP files
+scp -p ${DATA_RELEASE_DIR}/HTPDATA*.json $DATA_DIR
+
+cp -p $DATA_DIR/HTPDATASET_RGD.json $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_HTPDATASET.10116.json
+cp -p $DATA_DIR/HTPDATASAMPLES_RGD.json $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_HTPDATASAMPLE.10116.json
+echo "  HTP files staged!"
+
+
+
+### REF files
+scp -p ${DATA_RELEASE_DIR}/REF*.json $DATA_DIR
+
+cp -p $DATA_DIR/REFERENCE_RGD.json $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_REFERENCE.10116.json
+cp -p $DATA_DIR/REF-EXCHANGE_RGD.json $SUBMISSION_DIR/${MOD_NAME}_${AGR_VER}_REF-EXCHANGE.10116.json
+echo "  REF files staged!"
+
 echo "==="
 

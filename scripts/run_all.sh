@@ -1,10 +1,10 @@
 # MASTER script to submit files to AGR (the Alliance)
 
 export MOD_NAME=RGD
-export AGR_VER=1.0.1.1
-export UPLOAD_NR=2
+export AGR_VER=1.0.1.4
+export UPLOAD_NR=14
 export BATCH="${MOD_NAME}_${AGR_VER}_${UPLOAD_NR}"
-export AGR_RELEASE="3.1.0"
+export AGR_RELEASE="5.1.1"
 
 export WORK_DIR=/home/rgddata/pipelines/AgrPipeline
 cd $WORK_DIR
@@ -40,6 +40,6 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-$WORK_DIR/submit_files.sh
+ $WORK_DIR/submit_files.sh
 
 echo "=== OK ==="

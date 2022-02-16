@@ -11,10 +11,18 @@ cd agr_schemas
 
 #refresh local copy of AGR schemas, from https://github.com/alliance-genome/agr_schemas :
 #
+GITHUB_BRANCH="release-${AGR_VER}"
 git fetch
 git tag
-git checkout ${AGR_VER}
-git pull origin ${AGR_VER}
+git checkout $GITHUB_BRANCH
+git pull origin $GITHUB_BRANCH
+
+
+bin/agr_validate.py -d ../data/REFERENCE_RGD.json -s ingest/resourcesAndReferences/referenceMetaData.json
+bin/agr_validate.py -d ../data/REF-EXCHANGE_RGD.json -s ingest/resourcesAndReferences/referenceExchangeMetaData.json
+
+bin/agr_validate.py -d ../data/HTPDATASET_RGD.json -s ingest/htp/dataset/datasetMetaDataDefinition.json
+bin/agr_validate.py -d ../data/HTPDATASAMPLES_RGD.json -s ingest/htp/datasetSample/datasetSampleMetaDataDefinition.json
 
 #validate variant file against schema
 bin/agr_validate.py -d ../data/variants.10116.json -s ingest/allele/variantMetaData.json
@@ -43,9 +51,21 @@ echo
 #validate genes file against schema
 echo "== genes 10116 =="
 bin/agr_validate.py -d ../data/genes.10116.json -s ingest/gene/geneMetaData.json
+grep primaryId ../data/genes.10116.json | sort | uniq -d > ../data/genes.10116.duplicates
+if [ -s ../data/genes.10116.duplicates ]
+then
+  echo "ERROR! duplicate primaryIds in file genes.10116.json! ABORTING..."
+  exit 25;
+fi
 echo
 echo "== genes 9606 =="
 bin/agr_validate.py -d ../data/genes.9606.json -s ingest/gene/geneMetaData.json
+grep primaryId ../data/genes.9606.json | sort | uniq -d > ../data/genes.9606.duplicates
+if [ -s ../data/genes.9606.duplicates ]
+then
+  echo "ERROR! duplicate primaryIds in file genes.10116.json! ABORTING..."
+  exit 25;
+fi
 echo
 
 #validate disease file against schema

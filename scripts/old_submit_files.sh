@@ -12,7 +12,7 @@ $WORK_DIR/api_submit_files_for_human2.sh
 
 
 ####
-exit -4
+#exit -4
 ####
 
 echo "STAGE4: create a tarball and copy it to release dir"
@@ -21,7 +21,6 @@ echo "==="
 cd $SUBMISSION_DIR
 TARBALL=$SUBMISSION_DIR/${BATCH}.tar.gz
 echo "  create a tarball"
-gunzip *.gz
 tar -czvf $TARBALL *.json *.gaf *.gff3
 echo "  tarball $TARBALL created"
 echo ""
