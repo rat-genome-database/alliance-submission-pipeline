@@ -1,0 +1,16 @@
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+    <bean id="main" class="edu.mcw.rgd.pipelines.agr.Main" >
+        <property name="version" value="Alliance Submission Pipeline  -- build Feb 16, 2022" />
+        <property name="dao" ref="dao"/>
+    </bean>
+
+    <bean id="dao" class="edu.mcw.rgd.pipelines.agr.Dao" >
+    </bean>
+
+    <bean id="variantVcfGenerator" class="edu.mcw.rgd.pipelines.agr.VariantVcfGenerator" >
+        <property name="dao" ref="dao"/>
+    </bean>
+
+</beans>

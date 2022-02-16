@@ -1,0 +1,2 @@
+Feb 16, 2022
+  added module VariantVcfGenerator, to produce VCF file with high throughput variants for rn7 assembly in VCF format
