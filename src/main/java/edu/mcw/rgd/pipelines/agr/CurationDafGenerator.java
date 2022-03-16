@@ -3,6 +3,7 @@ package edu.mcw.rgd.pipelines.agr;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.mcw.rgd.datamodel.RgdId;
+import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.process.Utils;
@@ -24,18 +25,20 @@ public class CurationDafGenerator {
 
     public void run() throws Exception {
 
-        log.info("START Human DAF file");
+        loadHgncIdMap();
 
-        createHumanDafFile();
+        createDafFile(SpeciesType.RAT);
+        createDafFile(SpeciesType.HUMAN);
 
-        log.info("END human daf file");
         log.info("===");
         log.info("");
     }
 
-    void createHumanDafFile() throws Exception {
+    void createDafFile(int speciesTypeKey) throws Exception {
 
-        loadHgncIdMap();
+        String speciesName = SpeciesType.getCommonName(speciesTypeKey).toUpperCase();
+
+        log.info("START "+speciesName+" DAF file");
 
         CurationDaf daf = new CurationDaf();
 
@@ -45,10 +48,10 @@ public class CurationDafGenerator {
         json.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
 
-        Collection<Annotation> annots = getAnnotations(1);
+        Collection<Annotation> annots = getAnnotations(speciesTypeKey);
         log.info("  annotations: "+annots.size());
         for( Annotation a: annots ) {
-            daf.addGeneDiseaseAnnotation(a, dao, rgdId2HgncIdMap);
+            daf.addGeneDiseaseAnnotation(a, dao, rgdId2HgncIdMap, speciesTypeKey);
         }
 
         // sort data, alphabetically by object symbols
@@ -56,7 +59,7 @@ public class CurationDafGenerator {
 
         // dump DafAnnotation records to a file in JSON format
         try {
-            String jsonFileName = "human.daf";
+            String jsonFileName = "CURATION-"+speciesName+".daf";
             BufferedWriter jsonWriter = Utils.openWriter(jsonFileName);
 
             jsonWriter.write(json.writerWithDefaultPrettyPrinter().writeValueAsString(daf));
@@ -64,6 +67,8 @@ public class CurationDafGenerator {
             jsonWriter.close();
         } catch(IOException ignore) {
         }
+
+        log.info("END "+speciesName+" daf file");
     }
 
     void loadHgncIdMap() throws Exception {
@@ -84,26 +89,29 @@ public class CurationDafGenerator {
         annots.addAll(getDao().getAnnotationsBySpecies(speciesTypeKey, "D", "OMIM"));
 
         int annotCount1 = annots.size();
-        annots.parallelStream().filter(a ->
+        Collection<Annotation> annots2 = annots.parallelStream().filter(a ->
             a.getRgdObjectKey()==1
         ).collect(Collectors.toList());
-        int annotCount2 = annots.size();
+        int annotCount2 = annots2.size();
         log.info(annotCount1+" annotations; excluded non-genes; new count: "+annotCount2);
 
-        Collection<Annotation> annots2 = deconsolidateAnnotations(annots);
-        Collection<Annotation> annots3 = applyFilters(annots2);
-        return annots3;
+        Collection<Annotation> annots3 = deconsolidateAnnotations(annots2);
+        Collection<Annotation> annots4 = applyFilters(annots3, speciesTypeKey);
+        return annots4;
     }
 
-    Collection<Annotation> applyFilters(Collection<Annotation> annots) throws Exception {
+    Collection<Annotation> applyFilters(Collection<Annotation> annots, int speciesTypeKey) throws Exception {
 
         List<Annotation> annots2 = new ArrayList<>(annots.size());
 
         for( Annotation a: annots ) {
 
-            String hgncId = rgdId2HgncIdMap.get(a.getAnnotatedObjectRgdId());
-            if( hgncId==null ) {
-                continue;
+            // for human, annotated object rgd id must map to HGNC id
+            if( speciesTypeKey==SpeciesType.HUMAN ) {
+                String hgncId = rgdId2HgncIdMap.get(a.getAnnotatedObjectRgdId());
+                if (hgncId == null) {
+                    continue;
+                }
             }
 
             // for genes evidence code must be a manual evidence code

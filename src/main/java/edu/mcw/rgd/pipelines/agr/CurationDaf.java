@@ -1,11 +1,10 @@
 package edu.mcw.rgd.pipelines.agr;
 
 import edu.mcw.rgd.datamodel.EvidenceCode;
+import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CurationDaf {
 
@@ -13,8 +12,7 @@ public class CurationDaf {
 
     public List<GeneDiseaseAnnotation> disease_gene_ingest_set = new ArrayList<>();
 
-    public void addGeneDiseaseAnnotation(Annotation a, Dao dao, Map<Integer,String> geneRgdId2HgncIdMap) throws Exception {
-
+    public void addGeneDiseaseAnnotation(Annotation a, Dao dao, Map<Integer, String> geneRgdId2HgncIdMap, int speciesTypeKey) throws Exception {
 
         GeneDiseaseAnnotation r = new GeneDiseaseAnnotation();
         r.creation_date = sdf_agr.format(a.getCreatedDate());
@@ -41,14 +39,22 @@ public class CurationDaf {
             r.single_reference = "PMID:"+pmid;
         }
 
-        r.subject = geneRgdId2HgncIdMap.get(a.getAnnotatedObjectRgdId());
+        if( speciesTypeKey== SpeciesType.HUMAN ) {
+            r.subject = geneRgdId2HgncIdMap.get(a.getAnnotatedObjectRgdId());
+        } else if( speciesTypeKey==SpeciesType.RAT ) {
+            r.subject = "RGD:"+a.getAnnotatedObjectRgdId();
+        }
 
         if( a.getWithInfo()!=null ) {
             System.out.println("WITH "+a.getWithInfo());
             String[] with = a.getWithInfo().split("[\\,\\|\\ ]");
-            r.with = new ArrayList<>();
             for( String w: with ) {
                 if( w.startsWith("RGD:") ) {
+
+                    if( r.with==null ) {
+                        r.with = new ArrayList<>();
+                    }
+
                     String idStr = w.substring(4).trim();
                     int rgdId = Integer.parseInt(idStr);
                     String hgncId = geneRgdId2HgncIdMap.get(rgdId);
@@ -74,10 +80,7 @@ public class CurationDaf {
         String qualifier = a.getQualifier().trim();
 
         switch( qualifier ) {
-            case "onset":
-            case "sexual_dimorphism":
             case "susceptibility":
-            case "resistance":
             case "penetrance":
                 qualifiers = new ArrayList<>();
                 qualifiers.add(qualifier);
@@ -90,11 +93,31 @@ public class CurationDaf {
                 qualifiers.add("severity");
                 break;
 
+            case "onset":
+            case "MODEL: onset":
+                qualifiers = new ArrayList<>();
+                qualifiers.add("onset");
+                break;
+
+            case "resistance":
+            case "resistant":
+                qualifiers = new ArrayList<>();
+                qualifiers.add("resistance");
+                break;
+
+            case "sexual_dimorphism":
+            case "sexual dimorphism":
+                qualifiers = new ArrayList<>();
+                qualifiers.add("sexual_dimorphism");
+                break;
+
             case "disease_progression":
             case "disease progression":
+            case "MODEL: disease progression":
                 qualifiers = new ArrayList<>();
                 qualifiers.add("disease_progression");
                 break;
+
 
             case "no_association":
             case "NOT":
@@ -104,6 +127,16 @@ public class CurationDaf {
             case "spontaneous":
             case "treatment":
             case "Treatment":
+                break; // ignore
+
+            // ignored for rat gene annotations
+            case "MODEL":
+            case "MODEL: control":
+            case "MODEL:spontaneous":
+            case "MODEL: spontaneous":
+            case "MODEL: treatment":
+            case "MODEL:induced":
+            case "MODEL: induced":
                 break; // ignore
 
             default:
@@ -166,5 +199,16 @@ public class CurationDaf {
 
 
     public void sort() {
+
+        Collections.sort(disease_gene_ingest_set, new Comparator<GeneDiseaseAnnotation>() {
+            @Override
+            public int compare(GeneDiseaseAnnotation a1, GeneDiseaseAnnotation a2) {
+                int r = a1.object.compareTo(a2.object);
+                if( r!=0 ) {
+                    return r;
+                }
+                return a1.subject.compareTo(a2.subject);
+            }
+        });
     }
 }
