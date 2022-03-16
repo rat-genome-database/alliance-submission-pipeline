@@ -64,4 +64,8 @@
         </property>
     </bean>
 
+    <bean id="curationDafGenerator" class="edu.mcw.rgd.pipelines.agr.CurationDafGenerator" >
+        <property name="dao" ref="dao"/>
+    </bean>
+
 </beans>

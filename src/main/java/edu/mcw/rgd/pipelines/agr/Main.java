@@ -52,6 +52,10 @@ public class Main {
                     VariantVcfGenerator g = (VariantVcfGenerator) (bf.getBean("variantVcfGenerator"));
                     g.run();
                 }
+                case "--curation-daf-generator": {
+                    CurationDafGenerator d = (CurationDafGenerator) (bf.getBean("curationDafGenerator"));
+                    d.run();
+                }
             }
         }
 
