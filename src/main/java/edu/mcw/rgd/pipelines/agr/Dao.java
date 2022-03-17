@@ -8,6 +8,7 @@ import edu.mcw.rgd.dao.spring.StringListQuery;
 import edu.mcw.rgd.dao.spring.variants.VariantMapQuery;
 import edu.mcw.rgd.dao.spring.variants.VariantSampleQuery;
 import edu.mcw.rgd.dao.spring.variants.VariantTranscriptQuery;
+import edu.mcw.rgd.datamodel.RgdId;
 import edu.mcw.rgd.datamodel.Sample;
 import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
@@ -33,6 +34,7 @@ public class Dao {
     private AnnotationDAO annotationDAO = new AnnotationDAO();
     private MapDAO mapDAO = new MapDAO();
     private ReferenceDAO refDAO = new ReferenceDAO();
+    private RGDManagementDAO rgdIdDAO = new RGDManagementDAO();
     private XdbIdDAO xdbIdDAO = new XdbIdDAO();
     private edu.mcw.rgd.dao.impl.variants.VariantDAO variantDAO = new VariantDAO();
 
@@ -160,4 +162,11 @@ public class Dao {
         return xdbIdDAO.getActiveXdbIds(xdbKey, objectKey);
     }
 
+    public List<XdbId> getXdbIds(int rgdId, int xdbKey) throws Exception {
+        return xdbIdDAO.getXdbIdsByRgdId(xdbKey, rgdId);
+    }
+
+    public RgdId getRgdId(int rgdId) throws Exception {
+        return rgdIdDAO.getRgdId2(rgdId);
+    }
 }

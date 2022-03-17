@@ -1,8 +1,12 @@
 package edu.mcw.rgd.pipelines.agr;
 
 import edu.mcw.rgd.datamodel.EvidenceCode;
+import edu.mcw.rgd.datamodel.RgdId;
 import edu.mcw.rgd.datamodel.SpeciesType;
+import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
+import edu.mcw.rgd.process.Utils;
+
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -45,26 +49,15 @@ public class CurationDaf {
             r.subject = "RGD:"+a.getAnnotatedObjectRgdId();
         }
 
-        if( a.getWithInfo()!=null ) {
-            System.out.println("WITH "+a.getWithInfo());
-            String[] with = a.getWithInfo().split("[\\,\\|\\ ]");
-            for( String w: with ) {
-                if( w.startsWith("RGD:") ) {
+        handleWithInfo(a, r, dao);
 
-                    if( r.with==null ) {
-                        r.with = new ArrayList<>();
-                    }
-
-                    String idStr = w.substring(4).trim();
-                    int rgdId = Integer.parseInt(idStr);
-                    String hgncId = geneRgdId2HgncIdMap.get(rgdId);
-                    if( hgncId!=null ) {
-                        r.with.add(hgncId);
-                    } else {
-                        r.with.add(w);
-                    }
-                }
-            }
+        if( !Utils.isStringEmpty(a.getNotes()) ) {
+            r.related_notes = new ArrayList();
+            HashMap noteMap = new HashMap();
+            noteMap.put("internal", false);
+            noteMap.put("note_type", "comment");
+            noteMap.put("free_text", a.getNotes().trim());
+            r.related_notes.add(noteMap);
         }
 
         disease_gene_ingest_set.add(r);
@@ -175,7 +168,208 @@ public class CurationDaf {
                 return true;
 
             default:
+                if( qualifier.contains("control") ) {
+                    return true;
+                } else {
+                    return null;
+                }
+        }
+    }
+
+    boolean handleWithInfo(Annotation a, GeneDiseaseAnnotation r, Dao dao) throws Exception {
+
+        if( a.getWithInfo()==null ) {
+            return true;
+        }
+
+        // only a subset of qualifiers is allowed
+        String condRelType = null;
+        if( a.getQualifier() == null ) {
+            condRelType = "has_condition";
+        } else if( a.getQualifier().contains("induced") || a.getQualifier().contains("induces") ) {
+            condRelType = "induced_by";
+        } else if( a.getQualifier().contains("treatment") || a.getQualifier().contains("ameliorates") ) {
+            condRelType = "ameliorated_by";
+        } else if( a.getQualifier().contains("exacerbates") ) {
+            condRelType = "exacerbated_by";
+        } else {
+            System.out.println("UNMAPPED QUALIFIER: "+a.getQualifier());
+            condRelType = "has_condition";
+        }
+        if( !condRelType.equals("has_condition") && (r.negated!=null && r.negated==true) ) {
+            condRelType = "not_"+condRelType;
+        }
+
+
+        // remove all whitespace from WITH field to simplify parsing
+        String withInfo = a.getWithInfo().replaceAll("\\s", "");
+        List conditionRelations = new ArrayList();
+
+        // if the separator is '|', create separate conditionRelation object
+        // if the separator is ',', combine conditions
+        boolean or;
+
+        // out[0]: token;  out[1]: separator before token
+        String[] out = new String[2];
+        String str = withInfo;
+        for( ;; ) {
+            str = getNextToken(str, out);
+            if( out[0]==null ) {
+                break;
+            }
+
+            String withValue = out[0];
+            if( out[1]!=null && out[1].equals(",") ) {
+                or = false;
+            } else {
+                or = true;
+            }
+
+            withValue = transformRgdId(withValue, dao);
+            if( withValue==null ) {
+                return false;
+            }
+
+            if( withValue.startsWith("XCO:") ) {
+                AgrExperimentalConditionMapper.Info info = AgrExperimentalConditionMapper.getInstance().getInfo(withValue);
+                if (info == null) {
+                    System.out.println("UNEXPECTED WITH VALUE: " + withValue);
+                    return false;
+                }
+
+
+                HashMap h = new HashMap();
+                h.put("condition_class", info.zecoAcc);
+                if (info.xcoAcc != null && info.xcoAcc.startsWith("CHEBI:")) {
+                    h.put("condition_chemical", info.xcoAcc);
+                } else if( info.xcoAcc != null && info.xcoAcc.startsWith("UBERON:")) {
+                    h.put("condition_anatomy", info.xcoAcc);
+                } else if( info.xcoAcc != null && info.xcoAcc.startsWith("GO:")) {
+                    h.put("condition_gene_ontology", info.xcoAcc);
+                } else {
+                    h.put("condition_id", info.xcoAcc);
+                }
+                h.put("condition_statement", info.conditionStatement);
+
+                if (or) {
+                    Map condRel = new HashMap();
+                    condRel.put("condition_relation_type", condRelType);
+
+                    List conditions = new ArrayList();
+                    condRel.put("conditions", conditions);
+                    conditions.add(h);
+
+                    conditionRelations.add(condRel);
+                } else {
+                    // 'and' operator: update last condition
+                    Map condRel = (Map) conditionRelations.get(conditionRelations.size() - 1);
+                    List conditions = (List) condRel.get("conditions");
+                    conditions.add(h);
+                }
+            } else {
+                // NOTE: per Alliance request, we suppress export of any WITH fields
+                //
+                // non-XCO with value
+                if( r.with==null ) {
+                    r.with = new ArrayList<>();
+                }
+                r.with.add(withValue);
+            }
+        }
+
+        if( !conditionRelations.isEmpty() ) {
+            r.condition_relations = conditionRelations;
+
+            if( conditionRelations.size()>2 ) {
+                System.out.println("MULTI CONDRELS "+r.object+" "+r.subject);
+            }
+        }
+        return true;
+    }
+
+    // convert human rgd ids to HGNC ids, and mouse rgd ids to MGI ids
+    String transformRgdId(String with, Dao dao) throws Exception {
+
+        if (with.startsWith("RGD:")) {
+            Integer rgdId = Integer.parseInt(with.substring(4));
+            RgdId id = dao.getRgdId(rgdId);
+            if (id == null) {
+                System.out.println("ERROR: invalid RGD ID " + with + "; skipping annotation");
                 return null;
+            }
+
+            if (id.getSpeciesTypeKey() == SpeciesType.HUMAN) {
+                List<XdbId> xdbIds = dao.getXdbIds(rgdId, XdbId.XDB_KEY_HGNC);
+                if (xdbIds.isEmpty()) {
+                    System.out.println("ERROR: cannot map " + with + " to human HGNC ID");
+                    return null;
+                }
+                if (xdbIds.size() > 1) {
+                    System.out.println("WARNING: multiple HGNC ids for " + with);
+                }
+                String hgncId = xdbIds.get(0).getAccId();
+                return hgncId;
+            } else if (id.getSpeciesTypeKey() == SpeciesType.MOUSE) {
+                List<XdbId> xdbIds = dao.getXdbIds(rgdId, XdbId.XDB_KEY_MGD);
+                if (xdbIds.isEmpty()) {
+                    System.out.println("ERROR: cannot map " + with + " to mouse MGI ID");
+                    return null;
+                }
+                if (xdbIds.size() > 1) {
+                    System.out.println("WARNING: multiple MGI ids for " + with);
+                }
+                String mgiId = xdbIds.get(0).getAccId();
+                return mgiId;
+            } else if (id.getSpeciesTypeKey() == SpeciesType.RAT) {
+                return with;
+            } else {
+                System.out.println("ERROR: RGD id for species other than rat,mouse,human in WITH field");
+                return null;
+            }
+        }
+
+        return with;
+    }
+
+    // str: string to be parsed
+    // out: out[0]-extracted term; out[1]-separator before term
+    // return rest of string 'str' after extracting the token
+    String getNextToken(String str, String[] out) {
+
+        if( str==null ) {
+            out[0] = null;
+            out[1] = null;
+            return null;
+        }
+
+        int startPos = 0;
+        if( str.startsWith("|") ) {
+            out[1] = "|";
+            startPos = 1;
+        } else if( str.startsWith(",") ) {
+            out[1] = ",";
+            startPos = 1;
+        } else {
+            out[1] = null;
+        }
+
+        int endPos = str.length();
+
+        int barPos = str.indexOf('|', startPos);
+        if( barPos>=0 && barPos < endPos ) {
+            endPos = barPos;
+        }
+        int commaPos = str.indexOf(',', startPos);
+        if( commaPos>=0 && commaPos < endPos ) {
+            endPos = commaPos;
+        }
+
+        out[0] = str.substring(startPos, endPos);
+
+        if( endPos < str.length() ) {
+            return str.substring(endPos);
+        } else {
+            return null;
         }
     }
 
@@ -195,6 +389,8 @@ public class CurationDaf {
         public String single_reference;
         public String subject; // HGNC ID
         public List<String> with;
+        public List related_notes;
+        public List condition_relations;
     }
 
 
