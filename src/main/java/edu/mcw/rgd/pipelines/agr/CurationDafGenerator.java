@@ -11,7 +11,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -102,6 +101,7 @@ public class CurationDafGenerator {
 
     Collection<Annotation> applyFilters(Collection<Annotation> annots, int speciesTypeKey) throws Exception {
 
+        int omimPsReplacements = 0;
         List<Annotation> annots2 = new ArrayList<>(annots.size());
 
         for( Annotation a: annots ) {
@@ -122,10 +122,8 @@ public class CurationDafGenerator {
 
             // exclude DO+ custom terms (that were added by RGD and are not present in DO ontology)
             if( a.getTermAcc().startsWith("DOID:90") && a.getTermAcc().length() == 12) {
-                continue;
 
-                // TODO: perform DO+ child-to-parent PS mapping, if possible
-                /*
+                // perform DO+ child-to-parent PS mapping, if possible
                 // see if this term could be mapped to an OMIM PS id
                 String parentTermAcc = getDao().getOmimPSTermAccForChildTerm(a.getTermAcc());
                 if (parentTermAcc == null) {
@@ -133,19 +131,18 @@ public class CurationDafGenerator {
                 }
 
                 if (parentTermAcc.startsWith("DOID:90") && parentTermAcc.length() == 12) {
-                    //counters.increment("OMIM:PS conversion FAILED: " + rec.termAccId + " [" + rec.annot.getTerm() + "]) has DO+ parent " + parentTermAcc);
                     continue;
                 } else {
-                    //counters.increment("OMIM:PS conversion OK: " + rec.termAccId + " [" + rec.annot.getTerm() + "]) replaced with " + parentTermAcc);
-                    //counters.increment("omimPSConversions");
+                    // replaced custom DO+ term with a parent non-DO+ term, via OMIM:PS mapping
                     a.setTermAcc(parentTermAcc);
+                    omimPsReplacements++;
                 }
-                */
             }
             annots2.add(a);
         }
 
         log.info(annots.size()+";  excluded DO+ terms;  annotations left: "+annots2.size());
+        log.info("    OMIM:PS replacements: "+omimPsReplacements);
         return annots2;
     }
 

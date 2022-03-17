@@ -1,3 +1,6 @@
+Mar 17, 2022
+  CurationDafGenerator -- added annotations with OMIM:PS mappings
+
 Mar 16, 2022
   added CurationDafGenerator -- generates daf file for HUMAN, gene-disease annotations
 

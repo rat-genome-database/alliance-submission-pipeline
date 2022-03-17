@@ -22,7 +22,6 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author mtutaj
@@ -114,33 +113,13 @@ public class Dao {
     }
 
     public String getOmimPSTermAccForChildTerm(String childTermAcc) throws Exception {
-
-        String parentTermAcc = _omimPSCache.get(childTermAcc);
-        if( parentTermAcc==null ) {
-            String sql = "SELECT term_acc FROM ont_synonyms WHERE synonym_name IN\n" +
-                    "(SELECT phenotypic_series_number omim_ps FROM omim_phenotypic_series WHERE phenotype_mim_number IN\n" +
-                    " (SELECT synonym_name FROM ont_synonyms WHERE term_acc=? AND synonym_name like 'OMIM:______')" +
-                    ")";
-            List<String> termAccIds = StringListQuery.execute(annotationDAO, sql, childTermAcc);
-            if (termAccIds.isEmpty()) {
-                parentTermAcc = "";
-            }
-            else if (termAccIds.size() > 1) {
-                //counters.increment("OMIM:PS problem: multiple OMIM:PS parents for child term " + childTermAcc + ": " + Utils.concatenate(termAccIds, ","));
-                parentTermAcc = "";
-            } else {
-                parentTermAcc = termAccIds.get(0);
-            }
-
-            _omimPSCache.put(childTermAcc, parentTermAcc);
-        }
-
-        if( parentTermAcc==null || parentTermAcc.isEmpty() ) {
+        String sql = "SELECT parent_term_acc FROM omim_ps_custom_do WHERE child_term_acc=?";
+        List<String> termAccIds = StringListQuery.execute(annotationDAO, sql, childTermAcc);
+        if( termAccIds.isEmpty() ) {
             return null;
         }
-        return parentTermAcc;
+        return termAccIds.get(0);
     }
-    static Map<String,String> _omimPSCache = new ConcurrentHashMap<>();
 
 
     public String getPmid(int refRgdId) throws Exception {
