@@ -55,7 +55,7 @@ public class CurationDaf {
             r.related_notes = new ArrayList();
             HashMap noteMap = new HashMap();
             noteMap.put("internal", false);
-            noteMap.put("note_type", "comment");
+            noteMap.put("note_type", "disease_note");
             noteMap.put("free_text", a.getNotes().trim());
             r.related_notes.add(noteMap);
         }

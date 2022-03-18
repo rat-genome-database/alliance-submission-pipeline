@@ -1,3 +1,6 @@
+Mar 18, 2022
+  CurationDafGenerator -- note_type fixed to be 'disease_note' instead of 'comment'
+
 Mar 17, 2022
   CurationDafGenerator -- added annotations with OMIM:PS mappings
 
