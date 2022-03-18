@@ -2,6 +2,7 @@ package edu.mcw.rgd.pipelines.agr;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.RgdId;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.XdbId;
@@ -19,6 +20,7 @@ public class CurationDafGenerator {
 
     private Dao dao;
     private Map<Integer, String> rgdId2HgncIdMap;
+    private Set<Integer> alleleRgdIds;
 
     Logger log = LogManager.getLogger("status");
 
@@ -39,6 +41,8 @@ public class CurationDafGenerator {
 
         log.info("START "+speciesName+" DAF file");
 
+        loadAlleleRgdIds(speciesTypeKey);
+
         CurationDaf daf = new CurationDaf();
 
         // setup a JSON object array to collect all DafAnnotation objects
@@ -50,7 +54,7 @@ public class CurationDafGenerator {
         Collection<Annotation> annots = getAnnotations(speciesTypeKey);
         log.info("  annotations: "+annots.size());
         for( Annotation a: annots ) {
-            daf.addGeneDiseaseAnnotation(a, dao, rgdId2HgncIdMap, speciesTypeKey);
+            daf.addDiseaseAnnotation(a, dao, rgdId2HgncIdMap, speciesTypeKey, alleleRgdIds.contains(a.getAnnotatedObjectRgdId()));
         }
 
         // sort data, alphabetically by object symbols
@@ -67,7 +71,8 @@ public class CurationDafGenerator {
         } catch(IOException ignore) {
         }
 
-        log.info("END "+speciesName+" daf file");
+        log.info("END "+speciesName+" daf file:  genes="+daf.disease_gene_ingest_set.size()+", agm="+daf.disease_agm_ingest_set.size()+", alleles="+daf.disease_allele_ingest_set.size());
+        log.info("");
     }
 
     void loadHgncIdMap() throws Exception {
@@ -83,13 +88,22 @@ public class CurationDafGenerator {
         }
     }
 
+    void loadAlleleRgdIds(int speciesTypeKey) throws Exception {
+        alleleRgdIds = new HashSet<>();
+        List<Gene> alleles = getDao().getGeneAlleles(speciesTypeKey);
+        for( Gene g: alleles ) {
+            alleleRgdIds.add(g.getRgdId());
+        }
+    }
+
+
     Collection<Annotation> getAnnotations(int speciesTypeKey) throws Exception {
         List<Annotation> annots = getDao().getAnnotationsBySpecies(speciesTypeKey, "D", "RGD");
         annots.addAll(getDao().getAnnotationsBySpecies(speciesTypeKey, "D", "OMIM"));
 
         int annotCount1 = annots.size();
         Collection<Annotation> annots2 = annots.parallelStream().filter(a ->
-            a.getRgdObjectKey()==1
+            a.getRgdObjectKey()==1 || a.getRgdObjectKey()==5  // accept only genes and strains
         ).collect(Collectors.toList());
         int annotCount2 = annots2.size();
         log.info(annotCount1+" annotations; excluded non-genes; new count: "+annotCount2);
@@ -115,7 +129,7 @@ public class CurationDafGenerator {
             }
 
             // for genes evidence code must be a manual evidence code
-            String assocType = Utils2.getGeneAssocType(a.getEvidence());
+            String assocType = Utils2.getGeneAssocType(a.getEvidence(), a.getRgdObjectKey(), alleleRgdIds.contains(a.getAnnotatedObjectRgdId()));
             if( assocType==null ) {
                 continue;
             }

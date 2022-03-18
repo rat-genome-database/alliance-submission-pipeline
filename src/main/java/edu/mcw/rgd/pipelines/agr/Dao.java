@@ -8,6 +8,7 @@ import edu.mcw.rgd.dao.spring.StringListQuery;
 import edu.mcw.rgd.dao.spring.variants.VariantMapQuery;
 import edu.mcw.rgd.dao.spring.variants.VariantSampleQuery;
 import edu.mcw.rgd.dao.spring.variants.VariantTranscriptQuery;
+import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.RgdId;
 import edu.mcw.rgd.datamodel.Sample;
 import edu.mcw.rgd.datamodel.XdbId;
@@ -31,6 +32,7 @@ import java.util.Map;
 public class Dao {
 
     private AnnotationDAO annotationDAO = new AnnotationDAO();
+    private GeneDAO geneDAO = new GeneDAO();
     private MapDAO mapDAO = new MapDAO();
     private ReferenceDAO refDAO = new ReferenceDAO();
     private RGDManagementDAO rgdIdDAO = new RGDManagementDAO();
@@ -147,5 +149,9 @@ public class Dao {
 
     public RgdId getRgdId(int rgdId) throws Exception {
         return rgdIdDAO.getRgdId2(rgdId);
+    }
+
+    public List<Gene> getGeneAlleles(int speciesTypeKey) throws Exception {
+        return geneDAO.getActiveGenesByType("allele", speciesTypeKey);
     }
 }

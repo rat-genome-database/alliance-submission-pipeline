@@ -14,11 +14,13 @@ public class CurationDaf {
 
     static SimpleDateFormat sdf_agr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
-    public List<GeneDiseaseAnnotation> disease_gene_ingest_set = new ArrayList<>();
+    public List<DiseaseAnnotation> disease_agm_ingest_set = new ArrayList<>();
+    public List<DiseaseAnnotation> disease_allele_ingest_set = new ArrayList<>();
+    public List<DiseaseAnnotation> disease_gene_ingest_set = new ArrayList<>();
 
-    public void addGeneDiseaseAnnotation(Annotation a, Dao dao, Map<Integer, String> geneRgdId2HgncIdMap, int speciesTypeKey) throws Exception {
+    public void addDiseaseAnnotation(Annotation a, Dao dao, Map<Integer, String> geneRgdId2HgncIdMap, int speciesTypeKey, boolean isAllele) throws Exception {
 
-        GeneDiseaseAnnotation r = new GeneDiseaseAnnotation();
+        DiseaseAnnotation r = new DiseaseAnnotation();
         r.creation_date = sdf_agr.format(a.getCreatedDate());
         if( a.getLastModifiedDate()!=null ) {
             r.data_last_modified = sdf_agr.format(a.getLastModifiedDate());
@@ -27,7 +29,7 @@ public class CurationDaf {
         r.evidence_codes = getEvidenceCodes(a.getEvidence());
         r.negated = getNegatedValue(a);
         r.object = a.getTermAcc();
-        r.predicate = Utils2.getGeneAssocType(a.getEvidence());
+        r.predicate = Utils2.getGeneAssocType(a.getEvidence(), a.getRgdObjectKey(), isAllele);
 
         if( a.getDataSrc().equals("OMIM") ) {
             r.data_provider = "OMIM";
@@ -60,7 +62,14 @@ public class CurationDaf {
             r.related_notes.add(noteMap);
         }
 
-        disease_gene_ingest_set.add(r);
+        if( isAllele ) {
+            disease_allele_ingest_set.add(r);
+        }
+        else if( a.getRgdObjectKey()==1 ) {
+            disease_gene_ingest_set.add(r);
+        } else {
+            disease_agm_ingest_set.add(r);
+        }
     }
 
     List<String> getDiseaseQualifiers(Annotation a) {
@@ -176,7 +185,7 @@ public class CurationDaf {
         }
     }
 
-    boolean handleWithInfo(Annotation a, GeneDiseaseAnnotation r, Dao dao) throws Exception {
+    boolean handleWithInfo(Annotation a, DiseaseAnnotation r, Dao dao) throws Exception {
 
         if( a.getWithInfo()==null ) {
             return true;
@@ -373,7 +382,7 @@ public class CurationDaf {
         }
     }
 
-    class GeneDiseaseAnnotation {
+    class DiseaseAnnotation {
         public String annotation_type = "manually_curated";
         public String created_by = "RGD:curator";
         public String creation_date;
@@ -396,9 +405,16 @@ public class CurationDaf {
 
     public void sort() {
 
-        Collections.sort(disease_gene_ingest_set, new Comparator<GeneDiseaseAnnotation>() {
+        sort(disease_agm_ingest_set);
+        sort(disease_allele_ingest_set);
+        sort(disease_gene_ingest_set);
+    }
+
+    void sort(List<DiseaseAnnotation> list) {
+
+        Collections.sort(list, new Comparator<DiseaseAnnotation>() {
             @Override
-            public int compare(GeneDiseaseAnnotation a1, GeneDiseaseAnnotation a2) {
+            public int compare(DiseaseAnnotation a1, DiseaseAnnotation a2) {
                 int r = a1.object.compareTo(a2.object);
                 if( r!=0 ) {
                     return r;
