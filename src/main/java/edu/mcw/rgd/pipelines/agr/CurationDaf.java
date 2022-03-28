@@ -52,6 +52,8 @@ public class CurationDaf {
         }
 
         handleWithInfo(a, r, dao);
+        // TODO: temporarily suppressed export of WITH field
+        r.with = null;
 
         if( !Utils.isStringEmpty(a.getNotes()) ) {
             r.related_notes = new ArrayList();
