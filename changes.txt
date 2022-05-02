@@ -1,3 +1,6 @@
+May 02, 2022
+  CurationDafGenerator -- added 'internal' field to comply with new schema
+
 Mar 28, 2022
   CurationDafGenerator -- suppressed export of WITH info field
 

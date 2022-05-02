@@ -1,10 +1,10 @@
 # MASTER script to submit files to AGR (the Alliance)
 
 export MOD_NAME=RGD
-export AGR_VER=1.0.1.4
-export UPLOAD_NR=19
+export AGR_VER=1.0.1.6
+export UPLOAD_NR=1
 export BATCH="${MOD_NAME}_${AGR_VER}_${UPLOAD_NR}"
-export AGR_RELEASE="5.1.1"
+export AGR_RELEASE="5.2.0"
 
 export WORK_DIR=/home/rgddata/pipelines/AgrPipeline
 cd $WORK_DIR

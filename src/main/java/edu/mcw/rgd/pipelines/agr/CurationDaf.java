@@ -261,10 +261,12 @@ public class CurationDaf {
                     h.put("condition_id", info.xcoAcc);
                 }
                 h.put("condition_statement", info.conditionStatement);
+                h.put("internal", false);
 
                 if (or) {
                     Map condRel = new HashMap();
                     condRel.put("condition_relation_type", condRelType);
+                    condRel.put("internal", false);
 
                     List conditions = new ArrayList();
                     condRel.put("conditions", conditions);
@@ -402,6 +404,7 @@ public class CurationDaf {
         public List<String> with;
         public List related_notes;
         public List condition_relations;
+        public Boolean internal = false;
     }
 
 
