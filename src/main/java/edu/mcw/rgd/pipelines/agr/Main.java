@@ -56,6 +56,10 @@ public class Main {
                     CurationDafGenerator d = (CurationDafGenerator) (bf.getBean("curationDafGenerator"));
                     d.run();
                 }
+                case "--curation-gene-generator": {
+                    CurationGeneGenerator d = (CurationGeneGenerator) (bf.getBean("curationGeneGenerator"));
+                    d.run();
+                }
             }
         }
 

@@ -8,10 +8,7 @@ import edu.mcw.rgd.dao.spring.StringListQuery;
 import edu.mcw.rgd.dao.spring.variants.VariantMapQuery;
 import edu.mcw.rgd.dao.spring.variants.VariantSampleQuery;
 import edu.mcw.rgd.dao.spring.variants.VariantTranscriptQuery;
-import edu.mcw.rgd.datamodel.Gene;
-import edu.mcw.rgd.datamodel.RgdId;
-import edu.mcw.rgd.datamodel.Sample;
-import edu.mcw.rgd.datamodel.XdbId;
+import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.variants.VariantMapData;
 import edu.mcw.rgd.datamodel.variants.VariantSampleDetail;
@@ -20,8 +17,7 @@ import org.springframework.jdbc.core.SqlParameter;
 
 import javax.sql.DataSource;
 import java.sql.Types;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.Map;
 
 /**
@@ -31,9 +27,11 @@ import java.util.Map;
  */
 public class Dao {
 
+    private AliasDAO aliasDAO = new AliasDAO();
     private AnnotationDAO annotationDAO = new AnnotationDAO();
     private GeneDAO geneDAO = new GeneDAO();
     private MapDAO mapDAO = new MapDAO();
+    private ProteinDAO proteinDAO = new ProteinDAO();
     private ReferenceDAO refDAO = new ReferenceDAO();
     private RGDManagementDAO rgdIdDAO = new RGDManagementDAO();
     private XdbIdDAO xdbIdDAO = new XdbIdDAO();
@@ -98,6 +96,10 @@ public class Dao {
         return mapDAO.getChromosomeSizes(mapKey);
     }
 
+    public List<MapData> getMapData(int rgdId, int mapKey) throws Exception {
+        return mapDAO.getMapData(rgdId, mapKey);
+    }
+
     public List<VariantMapData> executeVariantQuery(String query, Object... params) throws Exception {
         VariantMapQuery q = new VariantMapQuery(getVariantDataSource(), query);
         return q.execute(params);
@@ -153,5 +155,27 @@ public class Dao {
 
     public List<Gene> getGeneAlleles(int speciesTypeKey) throws Exception {
         return geneDAO.getActiveGenesByType("allele", speciesTypeKey);
+    }
+
+    public List<Gene> getAllGenes(int speciesTypeKey) throws Exception {
+        List<Gene> genes = geneDAO.getAllGenes(speciesTypeKey);
+        genes.removeIf(Gene::isVariant);
+        return genes;
+    }
+
+    public List<Alias> getAliases(int rgdId, String[]aliasTypes) throws Exception {
+        return aliasDAO.getAliases(rgdId, aliasTypes);
+    }
+
+    public Set<String> getCanonicalProteins(int speciesTypeKey) throws Exception {
+        Set<String> canonicalProteinSet = new HashSet<>();
+
+        List<Protein> proteins = proteinDAO.getProteins(speciesTypeKey);
+        for( Protein p: proteins ) {
+            if( p.isCanonical() ) {
+                canonicalProteinSet.add(p.getUniprotId());
+            }
+        }
+        return canonicalProteinSet;
     }
 }
