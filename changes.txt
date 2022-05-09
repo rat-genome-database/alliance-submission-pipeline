@@ -1,3 +1,6 @@
+May 09, 2022
+  CurationGeneGenerator, CurationAGMGenerator -- added
+
 May 02, 2022
   CurationDafGenerator -- added 'internal' field to comply with new schema
 

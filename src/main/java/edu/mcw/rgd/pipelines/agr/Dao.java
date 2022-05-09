@@ -3,6 +3,7 @@ package edu.mcw.rgd.pipelines.agr;
 import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.impl.variants.VariantDAO;
+import edu.mcw.rgd.dao.spring.IntListQuery;
 import edu.mcw.rgd.dao.spring.IntStringMapQuery;
 import edu.mcw.rgd.dao.spring.StringListQuery;
 import edu.mcw.rgd.dao.spring.variants.VariantMapQuery;
@@ -34,6 +35,7 @@ public class Dao {
     private ProteinDAO proteinDAO = new ProteinDAO();
     private ReferenceDAO refDAO = new ReferenceDAO();
     private RGDManagementDAO rgdIdDAO = new RGDManagementDAO();
+    private StrainDAO strainDAO = new StrainDAO();
     private XdbIdDAO xdbIdDAO = new XdbIdDAO();
     private edu.mcw.rgd.dao.impl.variants.VariantDAO variantDAO = new VariantDAO();
 
@@ -153,6 +155,10 @@ public class Dao {
         return rgdIdDAO.getRgdId2(rgdId);
     }
 
+    public List<Integer> getOldRgdIds(int rgdId) throws Exception {
+        return rgdIdDAO.getOldRgdIds(rgdId);
+    }
+
     public List<Gene> getGeneAlleles(int speciesTypeKey) throws Exception {
         return geneDAO.getActiveGenesByType("allele", speciesTypeKey);
     }
@@ -161,6 +167,10 @@ public class Dao {
         List<Gene> genes = geneDAO.getAllGenes(speciesTypeKey);
         genes.removeIf(Gene::isVariant);
         return genes;
+    }
+
+    public List<Alias> getAliases(int rgdId) throws Exception {
+        return aliasDAO.getAliases(rgdId);
     }
 
     public List<Alias> getAliases(int rgdId, String[]aliasTypes) throws Exception {
@@ -177,5 +187,9 @@ public class Dao {
             }
         }
         return canonicalProteinSet;
+    }
+
+    public List<Strain> getActiveStrains() throws Exception {
+        return strainDAO.getActiveStrains();
     }
 }

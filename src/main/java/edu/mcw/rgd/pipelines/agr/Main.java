@@ -60,6 +60,10 @@ public class Main {
                     CurationGeneGenerator d = (CurationGeneGenerator) (bf.getBean("curationGeneGenerator"));
                     d.run();
                 }
+                case "--curation-agm-generator": {
+                    CurationAGMGenerator d = (CurationAGMGenerator) (bf.getBean("curationAGMGenerator"));
+                    d.run();
+                }
             }
         }
 
