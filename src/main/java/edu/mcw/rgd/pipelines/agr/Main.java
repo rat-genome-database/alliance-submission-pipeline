@@ -51,18 +51,27 @@ public class Main {
                 case "--variant-vcf-generator": {
                     VariantVcfGenerator g = (VariantVcfGenerator) (bf.getBean("variantVcfGenerator"));
                     g.run();
+                    break;
                 }
                 case "--curation-daf-generator": {
                     CurationDafGenerator d = (CurationDafGenerator) (bf.getBean("curationDafGenerator"));
                     d.run();
+                    break;
                 }
                 case "--curation-gene-generator": {
                     CurationGeneGenerator d = (CurationGeneGenerator) (bf.getBean("curationGeneGenerator"));
                     d.run();
+                    break;
                 }
                 case "--curation-agm-generator": {
                     CurationAGMGenerator d = (CurationAGMGenerator) (bf.getBean("curationAGMGenerator"));
                     d.run();
+                    break;
+                }
+                case "--curation-allele-generator": {
+                    CurationAlleleGenerator d = (CurationAlleleGenerator) (bf.getBean("curationAlleleGenerator"));
+                    d.run();
+                    break;
                 }
             }
         }

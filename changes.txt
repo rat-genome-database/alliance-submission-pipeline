@@ -1,5 +1,5 @@
 May 17, 2022
-  added scripts
+  added CurationAlleleGenerator
 
 May 09, 2022
   CurationGeneGenerator, CurationAGMGenerator -- added

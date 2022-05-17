@@ -75,4 +75,8 @@
     <bean id="curationAGMGenerator" class="edu.mcw.rgd.pipelines.agr.CurationAGMGenerator" >
         <property name="dao" ref="dao"/>
     </bean>
+
+    <bean id="curationAlleleGenerator" class="edu.mcw.rgd.pipelines.agr.CurationAlleleGenerator" >
+        <property name="dao" ref="dao"/>
+    </bean>
 </beans>
