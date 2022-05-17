@@ -1,3 +1,6 @@
+May 17, 2022
+  added scripts
+
 May 09, 2022
   CurationGeneGenerator, CurationAGMGenerator -- added
 
