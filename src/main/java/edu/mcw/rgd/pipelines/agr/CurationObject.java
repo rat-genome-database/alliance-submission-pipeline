@@ -120,7 +120,8 @@ public class CurationObject {
             Logger log = LogManager.getLogger("status");
             log.error(msg);
         }
-        return secondaryIds;
+
+        return secondaryIds.isEmpty() ? null : secondaryIds;
     }
 
 }
