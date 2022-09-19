@@ -21,9 +21,9 @@ public class CurationDaf {
     public void addDiseaseAnnotation(Annotation a, Dao dao, Map<Integer, String> geneRgdId2HgncIdMap, int speciesTypeKey, boolean isAllele) throws Exception {
 
         DiseaseAnnotation r = new DiseaseAnnotation();
-        r.creation_date = sdf_agr.format(a.getCreatedDate());
+        r.date_created = sdf_agr.format(a.getCreatedDate());
         if( a.getLastModifiedDate()!=null ) {
-            r.data_last_modified = sdf_agr.format(a.getLastModifiedDate());
+            r.date_updated = sdf_agr.format(a.getLastModifiedDate());
         }
         r.disease_qualifiers = getDiseaseQualifiers(a);
         r.evidence_codes = getEvidenceCodes(a.getEvidence());
@@ -389,12 +389,12 @@ public class CurationDaf {
     class DiseaseAnnotation {
         public String annotation_type = "manually_curated";
         public String created_by = "RGD:curator";
-        public String creation_date;
+        public String date_created;
         public String data_provider;
-        public String data_last_modified;
+        public String date_updated;
         public List<String> disease_qualifiers;
         public List<String> evidence_codes;
-        public String modified_by = "RGD:curator";
+        public String updated_by = "RGD:curator";
         public Boolean negated = null;
         public String object; // DOID
         public String predicate; // assoc_type, one of (is_implicated_in, is_marker_for)

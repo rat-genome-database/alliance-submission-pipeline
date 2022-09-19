@@ -42,5 +42,3 @@ exit 0
 #echo "  submit files to AGR"
 #echo "aws s3 ls s3://mod-datadumps/"
 #aws s3 cp $TARBALL s3://mod-datadumps/
-
-
