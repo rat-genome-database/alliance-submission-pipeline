@@ -1,6 +1,7 @@
 Sep 19, 2022
   CurationDafGenerator - KANBAN-219 - Update 'creation_date', ‘data_last_modified’ and ‘modified_by’
     to ‘date_created', 'date_updated’ and ‘updated_by' in RGD and HUMAN disease annotation submissions
+  CurationDafGenerator - KANBAN-212: reviewed XCO to ZECO mappings
 
 May 17, 2022
   added CurationAlleleGenerator
