@@ -162,6 +162,9 @@ public class Dao {
     public List<Gene> getGeneAlleles(int speciesTypeKey) throws Exception {
         return geneDAO.getActiveGenesByType("allele", speciesTypeKey);
     }
+    public List<Gene> getGenesForAllele(int alleleRgdId) throws Exception {
+        return geneDAO.getGeneFromVariant(alleleRgdId);
+    }
 
     public List<Gene> getAllGenes(int speciesTypeKey) throws Exception {
         List<Gene> genes = geneDAO.getAllGenes(speciesTypeKey);

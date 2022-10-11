@@ -1,19 +1,18 @@
 package edu.mcw.rgd.pipelines.agr;
 
-import edu.mcw.rgd.datamodel.EvidenceCode;
-import edu.mcw.rgd.datamodel.RgdId;
-import edu.mcw.rgd.datamodel.SpeciesType;
-import edu.mcw.rgd.datamodel.XdbId;
+import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.process.Utils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Map;
 
 public class CurationDaf {
 
     static SimpleDateFormat sdf_agr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
+    public String linkml_version = "1.3.1";
     public List<DiseaseAnnotation> disease_agm_ingest_set = new ArrayList<>();
     public List<DiseaseAnnotation> disease_allele_ingest_set = new ArrayList<>();
     public List<DiseaseAnnotation> disease_gene_ingest_set = new ArrayList<>();
@@ -65,6 +64,13 @@ public class CurationDaf {
         }
 
         if( isAllele ) {
+            List<Gene> assertedGenes = dao.getGenesForAllele(a.getAnnotatedObjectRgdId());
+            if( assertedGenes.size()!=1 ) {
+                System.out.println("ERROR: allele associated with "+assertedGenes.size()+" genes; ALLELE_RGD_ID="+a.getAnnotatedObjectRgdId());
+            } else {
+                r.asserted_gene = "RGD:"+assertedGenes.get(0).getRgdId();
+            }
+
             disease_allele_ingest_set.add(r);
         }
         else if( a.getRgdObjectKey()==1 ) {
@@ -388,23 +394,26 @@ public class CurationDaf {
 
     class DiseaseAnnotation {
         public String annotation_type = "manually_curated";
+        public String asserted_gene;
+        public List condition_relations;
         public String created_by = "RGD:curator";
         public String date_created;
         public String data_provider;
         public String date_updated;
         public List<String> disease_qualifiers;
+        public List<String> evidence;
         public List<String> evidence_codes;
-        public String updated_by = "RGD:curator";
+        public String inferred_gene;
+        public Boolean internal = false;
         public Boolean negated = null;
         public String object; // DOID
         public String predicate; // assoc_type, one of (is_implicated_in, is_marker_for)
+        public List related_notes;
         public String secondary_data_provider;
         public String single_reference;
         public String subject; // HGNC ID
+        public String updated_by = "RGD:curator";
         public List<String> with;
-        public List related_notes;
-        public List condition_relations;
-        public Boolean internal = false;
     }
 
 
@@ -427,5 +436,56 @@ public class CurationDaf {
                 return a1.subject.compareTo(a2.subject);
             }
         });
+    }
+
+    public void removeDiseaseAnnotsSameAsAlleleAnnots() {
+
+        // key: subject+object+predicate+data_provider+single_reference
+        Map<String, Integer> diseaseGeneMap = new HashMap<>();
+        for( int i=0; i<disease_gene_ingest_set.size(); i++ ) {
+            DiseaseAnnotation ga = disease_gene_ingest_set.get(i);
+            String key = createGeneKey(ga);
+            Integer old = diseaseGeneMap.put(key, i);
+            if( old!=null ) {
+                DiseaseAnnotation gaOld = disease_gene_ingest_set.get(old);
+                System.out.println("ERROR: problem in removeDiseaseAnnotsSameAsAlleleAnnots");
+            }
+        }
+
+        Set<Integer> geneAnnotIndexesForDelete = new TreeSet<>(); // use TreeSet to store indexes in numeric order
+
+        System.out.println(" disease alleles annots to process: "+disease_allele_ingest_set.size());
+
+        for( DiseaseAnnotation aa: disease_allele_ingest_set) {
+            String alleleKey = createAlleleKey(aa);
+            Integer geneAnnotIndex = diseaseGeneMap.get(alleleKey);
+            if( geneAnnotIndex!=null ) {
+                geneAnnotIndexesForDelete.add(-geneAnnotIndex); // store negative indexes to enforce descending order
+            } else {
+                System.out.println(" unexpected");
+            }
+        }
+
+        for( int geneAnnotIndex: geneAnnotIndexesForDelete ) {
+            disease_gene_ingest_set.remove(-geneAnnotIndex);
+        }
+
+        System.out.println(" disease gene annots deleted: "+geneAnnotIndexesForDelete.size());
+    }
+
+    String createGeneKey(DiseaseAnnotation ga) {
+        String key = ga.subject+"|"+ga.object+"|"+ga.predicate+"|"+ga.data_provider+"|"+ga.single_reference+"|"+ga.negated
+            +"|"+Utils.concatenate(ga.disease_qualifiers,",")
+            +"|"+Utils.concatenate(ga.evidence_codes,",")
+            +"|"+(ga.condition_relations==null ? 0 : ga.condition_relations.size());
+        return key;
+    }
+
+    String createAlleleKey(DiseaseAnnotation ga) {
+        String key = ga.asserted_gene+"|"+ga.object+"|"+ga.predicate+"|"+ga.data_provider+"|"+ga.single_reference+"|"+ga.negated
+                +"|"+Utils.concatenate(ga.disease_qualifiers,",")
+                +"|"+Utils.concatenate(ga.evidence_codes,",")
+                +"|"+(ga.condition_relations==null ? 0 : ga.condition_relations.size());
+        return key;
     }
 }

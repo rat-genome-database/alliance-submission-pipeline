@@ -57,6 +57,8 @@ public class CurationDafGenerator {
             daf.addDiseaseAnnotation(a, dao, rgdId2HgncIdMap, speciesTypeKey, alleleRgdIds.contains(a.getAnnotatedObjectRgdId()));
         }
 
+        daf.removeDiseaseAnnotsSameAsAlleleAnnots();
+
         // sort data, alphabetically by object symbols
         daf.sort();
 
