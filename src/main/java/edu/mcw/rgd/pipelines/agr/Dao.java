@@ -14,6 +14,7 @@ import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.variants.VariantMapData;
 import edu.mcw.rgd.datamodel.variants.VariantSampleDetail;
 import edu.mcw.rgd.datamodel.variants.VariantTranscript;
+import edu.mcw.rgd.process.Utils;
 import org.springframework.jdbc.core.SqlParameter;
 
 import javax.sql.DataSource;
@@ -30,12 +31,13 @@ public class Dao {
 
     private AliasDAO aliasDAO = new AliasDAO();
     private AnnotationDAO annotationDAO = new AnnotationDAO();
-    private GeneDAO geneDAO = new GeneDAO();
+    private AssociationDAO associationDAO = new AssociationDAO();
+    private GeneDAO geneDAO = associationDAO.getGeneDAO();
     private MapDAO mapDAO = new MapDAO();
     private ProteinDAO proteinDAO = new ProteinDAO();
-    private ReferenceDAO refDAO = new ReferenceDAO();
+    private ReferenceDAO refDAO = associationDAO.getReferenceDAO();
     private RGDManagementDAO rgdIdDAO = new RGDManagementDAO();
-    private StrainDAO strainDAO = new StrainDAO();
+    private StrainDAO strainDAO = associationDAO.getStrainDAO();
     private XdbIdDAO xdbIdDAO = new XdbIdDAO();
     private edu.mcw.rgd.dao.impl.variants.VariantDAO variantDAO = new VariantDAO();
 
@@ -164,6 +166,22 @@ public class Dao {
     }
     public List<Gene> getGenesForAllele(int alleleRgdId) throws Exception {
         return geneDAO.getGeneFromVariant(alleleRgdId);
+    }
+
+    List<Integer> getGeneAllelesForStrain(int strainRgdId) throws Exception {
+        List<Integer> alleleRgdIds = new ArrayList<>();
+        List<Strain2MarkerAssociation> geneAlleles = associationDAO.getStrain2GeneAssociations(strainRgdId);
+        for( Strain2MarkerAssociation a: geneAlleles ) {
+            if( Utils.stringsAreEqual(Utils.NVL(a.getMarkerType(),"allele"), "allele") ) {
+
+                int geneRgdId = a.getMarkerRgdId();
+                Gene g = geneDAO.getGene(geneRgdId);
+                if( g.getType().equals("allele") ) {
+                    alleleRgdIds.add(geneRgdId);
+                }
+            }
+        }
+        return alleleRgdIds;
     }
 
     public List<Gene> getAllGenes(int speciesTypeKey) throws Exception {

@@ -1,6 +1,8 @@
 Oct 11, 2022
   CurationDafGenerator - KANBAN-193 - 'asserted_gene' populated for disease_allele_ingest_set
                          corresponding disease gene annotations removed from disease_gene_ingest_set
+  CurationDafGenerator - KANBAN-193 - 'asserted_gene' and 'asserted_allele' populated for disease_agm_ingest_set
+                         corresponding disease allele/gene annotations removed
 
 Sep 19, 2022
   CurationDafGenerator - KANBAN-219 - Update 'creation_date', ‘data_last_modified’ and ‘modified_by’

@@ -76,6 +76,26 @@ public class CurationDaf {
         else if( a.getRgdObjectKey()==1 ) {
             disease_gene_ingest_set.add(r);
         } else {
+            // AGM
+            List<Integer> assertedAlleles = dao.getGeneAllelesForStrain(a.getAnnotatedObjectRgdId());
+            if( assertedAlleles.size()!=1 ) {
+                if( assertedAlleles.size()>1 ) {
+                    System.out.println("ERROR: strain associated with " + assertedAlleles.size() + " alleles; STRAIN_RGD_ID=" + a.getAnnotatedObjectRgdId());
+                }
+            } else {
+                int alleleRgdId = assertedAlleles.get(0);
+                r.asserted_allele = "RGD:"+alleleRgdId;
+
+                List<Gene> assertedGenes = dao.getGenesForAllele(alleleRgdId);
+                if( assertedGenes.size()!=1 ) {
+                    if( assertedGenes.size()>1 ) {
+                        System.out.println("ERROR: AGM allele associated with " + assertedGenes.size() + " genes; ALLELE_RGD_ID=" + a.getAnnotatedObjectRgdId());
+                    }
+                } else {
+                    r.asserted_gene = "RGD:"+assertedGenes.get(0).getRgdId();
+                }
+            }
+
             disease_agm_ingest_set.add(r);
         }
     }
@@ -394,7 +414,8 @@ public class CurationDaf {
 
     class DiseaseAnnotation {
         public String annotation_type = "manually_curated";
-        public String asserted_gene;
+        public String asserted_allele; // for AGMs
+        public String asserted_gene; // for AGMs and alleles
         public List condition_relations;
         public String created_by = "RGD:curator";
         public String date_created;
@@ -440,49 +461,129 @@ public class CurationDaf {
 
     public void removeDiseaseAnnotsSameAsAlleleAnnots() {
 
-        // key: subject+object+predicate+data_provider+single_reference
-        Map<String, Integer> diseaseGeneMap = new HashMap<>();
-        for( int i=0; i<disease_gene_ingest_set.size(); i++ ) {
-            DiseaseAnnotation ga = disease_gene_ingest_set.get(i);
-            String key = createGeneKey(ga);
-            Integer old = diseaseGeneMap.put(key, i);
-            if( old!=null ) {
-                DiseaseAnnotation gaOld = disease_gene_ingest_set.get(old);
-                System.out.println("ERROR: problem in removeDiseaseAnnotsSameAsAlleleAnnots");
+        if( !disease_allele_ingest_set.isEmpty() ) {
+            System.out.println("=== removing gene disease annotations same as allele annotations===");
+
+
+            Map<String, Integer> diseaseGeneMap = new HashMap<>();
+            for (int i = 0; i < disease_gene_ingest_set.size(); i++) {
+                DiseaseAnnotation ga = disease_gene_ingest_set.get(i);
+                String key = createKey(ga, ga.subject);
+                Integer old = diseaseGeneMap.put(key, i);
+                if (old != null) {
+                    DiseaseAnnotation gaOld = disease_gene_ingest_set.get(old);
+                    System.out.println("ERROR: problem in removeDiseaseAnnotsSameAsAlleleAnnots");
+                }
             }
-        }
 
-        Set<Integer> geneAnnotIndexesForDelete = new TreeSet<>(); // use TreeSet to store indexes in numeric order
+            Set<Integer> geneAnnotIndexesForDelete = new TreeSet<>(); // use TreeSet to store indexes in numeric order
 
-        System.out.println(" disease alleles annots to process: "+disease_allele_ingest_set.size());
+            System.out.println(" disease alleles annots to process: " + disease_allele_ingest_set.size());
 
-        for( DiseaseAnnotation aa: disease_allele_ingest_set) {
-            String alleleKey = createAlleleKey(aa);
-            Integer geneAnnotIndex = diseaseGeneMap.get(alleleKey);
-            if( geneAnnotIndex!=null ) {
-                geneAnnotIndexesForDelete.add(-geneAnnotIndex); // store negative indexes to enforce descending order
-            } else {
-                System.out.println(" unexpected");
+            for (DiseaseAnnotation aa : disease_allele_ingest_set) {
+                if (aa.asserted_gene != null) {
+                    String alleleKey = createKey(aa, aa.asserted_gene);
+                    Integer geneAnnotIndex = diseaseGeneMap.get(alleleKey);
+                    if (geneAnnotIndex != null) {
+                        geneAnnotIndexesForDelete.add(-geneAnnotIndex); // store negative indexes to enforce descending order
+                    } else {
+                        System.out.println(" unexpected 1");
+                    }
+                }
             }
-        }
 
-        for( int geneAnnotIndex: geneAnnotIndexesForDelete ) {
-            disease_gene_ingest_set.remove(-geneAnnotIndex);
-        }
+            for (int geneAnnotIndex : geneAnnotIndexesForDelete) {
+                disease_gene_ingest_set.remove(-geneAnnotIndex);
+            }
 
-        System.out.println(" disease gene annots deleted: "+geneAnnotIndexesForDelete.size());
+            System.out.println(" disease gene annots deleted: " + geneAnnotIndexesForDelete.size());
+        }
     }
 
-    String createGeneKey(DiseaseAnnotation ga) {
-        String key = ga.subject+"|"+ga.object+"|"+ga.predicate+"|"+ga.data_provider+"|"+ga.single_reference+"|"+ga.negated
-            +"|"+Utils.concatenate(ga.disease_qualifiers,",")
-            +"|"+Utils.concatenate(ga.evidence_codes,",")
-            +"|"+(ga.condition_relations==null ? 0 : ga.condition_relations.size());
+    public void removeDiseaseAnnotsSameAsAGMAnnots() {
+        System.out.println("=== removing gene disease annotations same as AGM annotations===");
+        System.out.println(" disease AGM annots to process: "+disease_agm_ingest_set.size());
+
+        // remove disease gene annots same as disease AGM annots
+        //
+        if( !disease_agm_ingest_set.isEmpty() )
+        {
+            Map<String, Integer> diseaseGeneMap = new HashMap<>();
+            for (int i = 0; i < disease_gene_ingest_set.size(); i++) {
+                DiseaseAnnotation ga = disease_gene_ingest_set.get(i);
+                String key = createKey2(ga, ga.subject);
+                Integer old = diseaseGeneMap.put(key, i);
+                if (old != null) {
+                    DiseaseAnnotation gaOld = disease_gene_ingest_set.get(old);
+                    System.out.println("ERROR: problem 1 in removeDiseaseAnnotsSameAsAGMAnnots");
+                }
+            }
+
+            Set<Integer> geneAnnotIndexesForDelete = new TreeSet<>(); // use TreeSet to store indexes in numeric order
+
+            for (DiseaseAnnotation aa : disease_agm_ingest_set) {
+                if( aa.asserted_gene!=null ) {
+                    String alleleKey = createKey2(aa, aa.asserted_gene);
+                    Integer geneAnnotIndex = diseaseGeneMap.get(alleleKey);
+                    if (geneAnnotIndex != null) {
+                        geneAnnotIndexesForDelete.add(-geneAnnotIndex); // store negative indexes to enforce descending order
+                    }
+                }
+            }
+
+            for (int geneAnnotIndex : geneAnnotIndexesForDelete) {
+                disease_gene_ingest_set.remove(-geneAnnotIndex);
+            }
+
+            System.out.println(" AGM: disease gene annots deleted: " + geneAnnotIndexesForDelete.size());
+        }
+
+        // remove disease allele annots same as disease AGM annots
+        //
+        if( !disease_agm_ingest_set.isEmpty() )
+        {
+            Map<String, Integer> diseaseAlleleMap = new HashMap<>();
+            for (int i = 0; i < disease_allele_ingest_set.size(); i++) {
+                DiseaseAnnotation ga = disease_allele_ingest_set.get(i);
+                String key = createKey2(ga, ga.subject);
+                Integer old = diseaseAlleleMap.put(key, i);
+                if (old != null) {
+                    DiseaseAnnotation gaOld = disease_allele_ingest_set.get(old);
+                    System.out.println("ERROR: problem 2 in removeDiseaseAnnotsSameAsAGMAnnots");
+                }
+            }
+
+            TreeSet<Integer> alleleAnnotIndexesForDelete = new TreeSet<>(); // use TreeSet to store indexes in numeric order
+
+            for (DiseaseAnnotation aa : disease_agm_ingest_set) {
+                if( aa.asserted_allele!=null ) {
+                    String alleleKey = createKey2(aa, aa.asserted_allele);
+                    Integer alleleAnnotIndex = diseaseAlleleMap.get(alleleKey);
+                    if (alleleAnnotIndex != null) {
+                        alleleAnnotIndexesForDelete.add(-alleleAnnotIndex); // store negative indexes to enforce descending order
+                    }
+                }
+            }
+
+            for (int alleleAnnotIndex : alleleAnnotIndexesForDelete) {
+                disease_allele_ingest_set.remove(-alleleAnnotIndex);
+            }
+
+            System.out.println(" AGM: disease allele annots deleted: " + alleleAnnotIndexesForDelete.size());
+        }
+    }
+
+    String createKey(DiseaseAnnotation ga, String id) {
+        String key = id+"|"+ga.object+"|"+ga.predicate+"|"+ga.data_provider+"|"+ga.single_reference+"|"+ga.negated
+                +"|"+Utils.concatenate(ga.disease_qualifiers,",")
+                +"|"+Utils.concatenate(ga.evidence_codes,",")
+                +"|"+(ga.related_notes==null ? 0 : ga.related_notes.size())
+                +"|"+(ga.condition_relations==null ? 0 : ga.condition_relations.size());
         return key;
     }
 
-    String createAlleleKey(DiseaseAnnotation ga) {
-        String key = ga.asserted_gene+"|"+ga.object+"|"+ga.predicate+"|"+ga.data_provider+"|"+ga.single_reference+"|"+ga.negated
+    String createKey2(DiseaseAnnotation ga, String id) {
+        String key = id+"|"+ga.object+"|"+ga.data_provider+"|"+ga.single_reference+"|"+ga.negated
                 +"|"+Utils.concatenate(ga.disease_qualifiers,",")
                 +"|"+Utils.concatenate(ga.evidence_codes,",")
                 +"|"+(ga.condition_relations==null ? 0 : ga.condition_relations.size());
