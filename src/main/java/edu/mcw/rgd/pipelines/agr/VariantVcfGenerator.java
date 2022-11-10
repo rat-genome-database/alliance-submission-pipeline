@@ -175,6 +175,9 @@ public class VariantVcfGenerator {
         }
         out.write("\n");
 
+        int totalLinesWritten = 0;
+        int linesWithRsIdWritten = 0;
+
         //#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT
         for(String chr:chrs) {
 
@@ -194,7 +197,7 @@ public class VariantVcfGenerator {
                 }
                 mdata.put(v.getSampleId(), v);
             }
-            log.info("    variants retrieved: "+variants.size());
+            log.info("    variants retrieved: "+Utils.formatThousands(variants.size()));
             int linesWritten = 0;
 
             for (VariantMapData variant : variants) {
@@ -225,6 +228,7 @@ public class VariantVcfGenerator {
                     out.write(".");
                 } else {
                     out.write(variant.getRsId());
+                    linesWithRsIdWritten++;
                 }
                 out.write("\t");
                 out.write(refNuc);
@@ -258,9 +262,13 @@ public class VariantVcfGenerator {
                 out.write("\n");
                 linesWritten++;
             }
-            log.info("    vcf lines written: " + linesWritten);
+            log.info("    vcf lines written: " + Utils.formatThousands(linesWritten));
         }
         out.close();
+
+        log.info("===");
+        log.info("TOTAL DATA LINES WRITTEN: "+Utils.formatThousands(totalLinesWritten));
+        log.info("   DATA LINES WITH RS ID: "+Utils.formatThousands(linesWithRsIdWritten));
     }
 
     public void setDao(Dao dao) {
