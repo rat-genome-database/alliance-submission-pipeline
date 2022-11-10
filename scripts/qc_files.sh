@@ -11,7 +11,7 @@ cd agr_schemas
 
 #refresh local copy of AGR schemas, from https://github.com/alliance-genome/agr_schemas :
 #
-GITHUB_BRANCH="release-${AGR_VER}"
+GITHUB_BRANCH="release-${AGR_SCHEMA}"
 git fetch
 git tag
 git checkout $GITHUB_BRANCH

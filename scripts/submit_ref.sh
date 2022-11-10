@@ -9,7 +9,7 @@ APITOKEN=`cat api.token`
 
 
 export MOD_NAME=RGD
-export AGR_VER=1.0.1.4
+export AGR_SCHEMA=1.0.1.4
 export AGR_RELEASE="4.1.0"
 
 export WORK_DIR=/home/rgddata/pipelines/AgrPipeline
