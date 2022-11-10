@@ -194,57 +194,71 @@ public class VariantVcfGenerator {
                 }
                 mdata.put(v.getSampleId(), v);
             }
-            log.info("Variants retrieved successfully for mapkey " + mapKey + " and chr " + chr);
+            log.info("    variants retrieved: "+variants.size());
+            int linesWritten = 0;
 
             for (VariantMapData variant : variants) {
 
-                log.debug("Processing variant id: " + variant.getId());
+                log.debug("    processing variant id: " + variant.getId());
                 HashMap<Integer, VariantSampleDetail> sampleDetailList = sampleMap.get(variant.getId());
-                if (sampleDetailList!=null && sampleDetailList.size() != 0) {
+                if (sampleDetailList==null || sampleDetailList.isEmpty() ) {
+                    continue;
+                }
 
-                    long pos = variant.getStartPos();
-                    String refNuc = Utils.defaultString(variant.getReferenceNucleotide());
-                    String varNuc = Utils.defaultString(variant.getVariantNucleotide());
+                long pos = variant.getStartPos();
+                String refNuc = Utils.defaultString(variant.getReferenceNucleotide());
+                String varNuc = Utils.defaultString(variant.getVariantNucleotide());
 
-                    // adjust for padding base
-                    String paddingBase = Utils.defaultString(variant.getPaddingBase());
-                    if( paddingBase.length()>0  ) {
-                        pos -= paddingBase.length();
-                        refNuc = paddingBase + refNuc;
-                        varNuc = paddingBase + varNuc;
-                    }
+                // adjust for padding base
+                String paddingBase = Utils.defaultString(variant.getPaddingBase());
+                if( paddingBase.length()>0  ) {
+                    pos -= paddingBase.length();
+                    refNuc = paddingBase + refNuc;
+                    varNuc = paddingBase + varNuc;
+                }
 
-                    out.write(chr);
-                    out.write("\t");
-                    out.write(String.valueOf(pos));
-                    out.write("\t");
+                out.write(chr);
+                out.write("\t");
+                out.write(String.valueOf(pos));
+                out.write("\t");
+                if( Utils.isStringEmpty(variant.getRsId()) ) {
                     out.write(".");
-                    out.write("\t");
-                    out.write(refNuc);
-                    out.write("\t");
-                    out.write(varNuc);
-                    out.write("\t");
-                    out.write(".");//Qual
-                    out.write("\t");
-                    out.write("PASS"); //Filter
-                    out.write("\t");
-                    out.write("VT=" + variant.getVariantType());
-                    out.write("\t");
-                    out.write("GT:DP");
-                    out.write("\t");
-                    for (int sampleId: rn7Samples) {
-                        VariantSampleDetail detail = sampleDetailList.get(sampleId);
-                        if (detail == null)
-                            out.write("./.\t");
-                        else if (detail.getZygosityStatus().equalsIgnoreCase("heterozygous"))
+                } else {
+                    out.write(variant.getRsId());
+                }
+                out.write("\t");
+                out.write(refNuc);
+                out.write("\t");
+                out.write(varNuc);
+                out.write("\t");
+                out.write(".");//Qual
+                out.write("\t");
+                out.write("PASS"); //Filter
+                out.write("\t");
+                out.write("VT=" + variant.getVariantType());
+                out.write("\t");
+                out.write("GT:DP");
+                out.write("\t");
+                for (int sampleId: rn7Samples) {
+                    VariantSampleDetail detail = sampleDetailList.get(sampleId);
+                    if (detail == null)
+                        out.write("./.\t");
+                    else {
+                        if( detail.getZygosityStatus()==null ) {
+                            // for EVA
+                            out.write("1/1:"+ detail.getDepth() + "\t");
+                        } else
+                        if (detail.getZygosityStatus().equalsIgnoreCase("heterozygous"))
                             out.write("0/1:" + detail.getDepth() + "\t");
                         else if (detail.getZygosityStatus().equalsIgnoreCase("homozygous") || detail.getZygosityStatus().equalsIgnoreCase("possibly homozygous"))
                             out.write("1/1:" + detail.getDepth() + "\t");
-
                     }
-                    out.write("\n");
+
                 }
+                out.write("\n");
+                linesWritten++;
             }
+            log.info("    vcf lines written: " + linesWritten);
         }
         out.close();
     }
