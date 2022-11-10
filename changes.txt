@@ -1,3 +1,6 @@
+Nov 10, 2022
+  VariantVcfGenerator - added EVA rn7
+
 Oct 11, 2022
   CurationDafGenerator - KANBAN-193 - 'asserted_gene' populated for disease_allele_ingest_set
                          corresponding disease gene annotations removed from disease_gene_ingest_set

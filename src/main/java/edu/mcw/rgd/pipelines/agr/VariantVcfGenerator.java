@@ -23,7 +23,7 @@ public class VariantVcfGenerator {
         log.info("START VariantVcfGenerator for rn7");
 
         final int mapKey = 372;
-        createVariantFile(mapKey);
+        createVariantFile2(mapKey);
 
         log.info("END VariantVcfGenerator for rn7");
         log.info("===");
@@ -139,6 +139,114 @@ public class VariantVcfGenerator {
                 f1.renameTo(f2);
             }
         }
+    }
+
+    public void createVariantFile2(int mapKey) throws Exception{
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        String fileDate = sdf.format(new Date());
+
+        int speciesTypeKey = dao.getSpeciesFromMap(mapKey);
+        List<String> chrs = dao.getChromosomes(mapKey);
+
+        String fname = "data/rn7.vcf.gz";
+        BufferedWriter out = Utils.openWriter(fname);
+
+        // write header
+        Map<String, Integer> chromosomeMap = dao.getChromosomeSizes(mapKey);
+        //header
+        out.write("##fileformat=VCFv4.2\n");
+        out.write("##fileDate="+fileDate+"\n");
+        out.write("##INFO=<ID=VT,Number=0,Type=Integer,Description=\"Variant type: SNV, INS, and DEL\">\n");
+        out.write("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n");
+        out.write("##FORMAT=<ID=DP,Number=2,Type=String,Description=\"Depth\">\n");
+        for(String chr:chrs) {
+            out.write("##contig=<ID=" + chr + ",length=" + chromosomeMap.get(chr) + ",assembly=mRatBN7.2,species=\"Rattus norvegicus\">\n");
+        }
+        out.write("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT");
+
+        for( int sampleId: rn7Samples) {
+            edu.mcw.rgd.datamodel.Sample s = dao.getSample(sampleId);
+            if( s.getId()==23 ) { // EVA sample does not have a strain rgd id
+                out.write("\tEVA release 3");
+            } else {
+                out.write("\tRGD:" + s.getStrainRgdId());
+            }
+        }
+        out.write("\n");
+
+        //#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT
+        for(String chr:chrs) {
+
+            log.info("start for mapkey " + mapKey + " and chr " + chr);
+
+            List<VariantMapData> variants = dao.getVariants(speciesTypeKey, mapKey, chr);
+            List<VariantSampleDetail> sampleDetails = dao.getSampleIds(mapKey, chr);
+            HashMap<Long, HashMap<Integer, VariantSampleDetail>> sampleMap = new HashMap<>();
+            for (VariantSampleDetail v : sampleDetails) {
+                if( !rn7Samples.contains(v.getSampleId()) ) {
+                    continue;
+                }
+                HashMap<Integer, VariantSampleDetail> mdata = sampleMap.get(v.getId());
+                if (mdata == null) {
+                    mdata = new HashMap<>();
+                    sampleMap.put(v.getId(), mdata);
+                }
+                mdata.put(v.getSampleId(), v);
+            }
+            log.info("Variants retrieved successfully for mapkey " + mapKey + " and chr " + chr);
+
+            for (VariantMapData variant : variants) {
+
+                log.debug("Processing variant id: " + variant.getId());
+                HashMap<Integer, VariantSampleDetail> sampleDetailList = sampleMap.get(variant.getId());
+                if (sampleDetailList!=null && sampleDetailList.size() != 0) {
+
+                    long pos = variant.getStartPos();
+                    String refNuc = Utils.defaultString(variant.getReferenceNucleotide());
+                    String varNuc = Utils.defaultString(variant.getVariantNucleotide());
+
+                    // adjust for padding base
+                    String paddingBase = Utils.defaultString(variant.getPaddingBase());
+                    if( paddingBase.length()>0  ) {
+                        pos -= paddingBase.length();
+                        refNuc = paddingBase + refNuc;
+                        varNuc = paddingBase + varNuc;
+                    }
+
+                    out.write(chr);
+                    out.write("\t");
+                    out.write(String.valueOf(pos));
+                    out.write("\t");
+                    out.write(".");
+                    out.write("\t");
+                    out.write(refNuc);
+                    out.write("\t");
+                    out.write(varNuc);
+                    out.write("\t");
+                    out.write(".");//Qual
+                    out.write("\t");
+                    out.write("PASS"); //Filter
+                    out.write("\t");
+                    out.write("VT=" + variant.getVariantType());
+                    out.write("\t");
+                    out.write("GT:DP");
+                    out.write("\t");
+                    for (int sampleId: rn7Samples) {
+                        VariantSampleDetail detail = sampleDetailList.get(sampleId);
+                        if (detail == null)
+                            out.write("./.\t");
+                        else if (detail.getZygosityStatus().equalsIgnoreCase("heterozygous"))
+                            out.write("0/1:" + detail.getDepth() + "\t");
+                        else if (detail.getZygosityStatus().equalsIgnoreCase("homozygous") || detail.getZygosityStatus().equalsIgnoreCase("possibly homozygous"))
+                            out.write("1/1:" + detail.getDepth() + "\t");
+
+                    }
+                    out.write("\n");
+                }
+            }
+        }
+        out.close();
     }
 
     public void setDao(Dao dao) {

@@ -12,7 +12,7 @@
     <bean id="variantVcfGenerator" class="edu.mcw.rgd.pipelines.agr.VariantVcfGenerator" >
         <property name="dao" ref="dao"/>
         <property name="rn7Samples">
-            <set>
+            <set><!-- sorted by RGD ID of associated strain -->
                 <value>3001</value>
                 <value>3036</value>
                 <value>3047</value>
@@ -60,6 +60,7 @@
                 <value>3019</value>
                 <value>3007</value>
                 <value>3008</value>
+                <value>23</value><!-- eva rn7-->
             </set>
         </property>
     </bean>
