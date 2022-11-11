@@ -263,6 +263,7 @@ public class VariantVcfGenerator {
                 linesWritten++;
             }
             log.info("    vcf lines written: " + Utils.formatThousands(linesWritten));
+            totalLinesWritten += linesWritten;
         }
         out.close();
 
