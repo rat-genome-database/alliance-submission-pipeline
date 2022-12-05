@@ -153,6 +153,10 @@ public class Dao {
         return xdbIdDAO.getXdbIdsByRgdId(xdbKey, rgdId);
     }
 
+    public List<XdbId> getCuratedPubmedIds ( int rgdId ) throws Exception {
+        return xdbIdDAO.getCuratedPubmedIds(rgdId);
+    }
+
     public RgdId getRgdId(int rgdId) throws Exception {
         return rgdIdDAO.getRgdId2(rgdId);
     }
@@ -212,5 +216,10 @@ public class Dao {
 
     public List<Strain> getActiveStrains() throws Exception {
         return strainDAO.getActiveStrains();
+    }
+
+    public List<Reference> getReferenceAssociations(int rgdId) throws Exception{
+
+        return associationDAO.getReferenceAssociations(rgdId);
     }
 }
