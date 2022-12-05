@@ -45,7 +45,7 @@ public class CurationAllele extends CurationObject {
         for( Alias a: aliases ) {
             HashMap synonym = new HashMap();
             synonym.put("internal", false);
-            synonym.put("synonym", a.getValue());
+            synonym.put("name", a.getValue());
             results.add(synonym);
         }
         return results;
