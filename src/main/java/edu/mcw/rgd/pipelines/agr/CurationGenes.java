@@ -3,8 +3,11 @@ package edu.mcw.rgd.pipelines.agr;
 import edu.mcw.rgd.datamodel.*;
 
 import java.util.*;
+import java.util.Map;
 
 public class CurationGenes extends CurationObject {
+
+    public String linkml_version = "1.5.0";
 
     public List<GeneModel> gene_ingest_set = new ArrayList<>();
 
@@ -12,12 +15,35 @@ public class CurationGenes extends CurationObject {
 
         GeneModel m = new GeneModel();
         m.curie = curie;
-        m.symbol = g.getSymbol();
-        m.taxon = "NCBITaxon:" + SpeciesType.getTaxonomicId(g.getSpeciesTypeKey());
-        m.automated_gene_description = g.getAgrDescription();
-        m.gene_synopsis = g.getMergedDescription();
-        m.gene_type = g.getSoAccId();
-        m.name = g.getName();
+        m.taxon_curie = "NCBITaxon:" + SpeciesType.getTaxonomicId(g.getSpeciesTypeKey());
+        m.gene_type_curie = g.getSoAccId();
+
+        if( g.getSymbol().contains("<") || g.getSymbol().contains("'") || g.getSymbol().contains("\"")) {
+            System.out.println("aha");
+        }
+        Map symbolDTO = new HashMap<>();
+        symbolDTO.put("display_text", g.getSymbol());
+        symbolDTO.put("format_text", g.getSymbol());
+        symbolDTO.put("internal", false);
+        symbolDTO.put("name_type_name", "nomenclature_symbol");
+        m.gene_symbol_dto = symbolDTO;
+
+        Map systematicNameDTO = new HashMap<>();
+        systematicNameDTO.put("display_text", g.getSymbol());
+        systematicNameDTO.put("format_text", g.getSymbol());
+        systematicNameDTO.put("internal", false);
+        systematicNameDTO.put("name_type_name", "systematic_name");
+        m.gene_systematic_name_dto = systematicNameDTO;
+
+        if( g.getSymbol().contains("<") || g.getSymbol().contains("'") || g.getSymbol().contains("\"")) {
+            System.out.println("aha2");
+        }
+        Map nameDTO = new HashMap<>();
+        nameDTO.put("display_text", g.getName());
+        nameDTO.put("format_text", g.getName());
+        nameDTO.put("internal", false);
+        nameDTO.put("name_type_name", "full_name");
+        m.gene_full_name_dto = nameDTO;
 
         RgdId id = dao.getRgdId(g.getRgdId());
         if( !id.getObjectStatus().equals("ACTIVE") ) {
@@ -30,9 +56,9 @@ public class CurationGenes extends CurationObject {
         }
 
         m.secondary_identifiers = getSecondaryIdentifiers(curie, g.getRgdId(), dao);
-        m.synonyms = getSynonyms(g.getRgdId(), dao);
-        m.genomic_locations = getGenomicLocations(g.getRgdId(), g.getSpeciesTypeKey(), dao);
-        m.cross_references = getCrossReferences(g, dao, canonicalProteins);
+        m.gene_synonym_dtos = getSynonyms(g.getRgdId(), dao);
+        m.genomic_location_dtos = getGenomicLocations_DTO(g.getRgdId(), g.getSpeciesTypeKey(), dao, curie);
+        m.cross_reference_dtos = getCrossReferences(g, dao, canonicalProteins);
 
         gene_ingest_set.add(m);
 
@@ -50,7 +76,9 @@ public class CurationGenes extends CurationObject {
         for( Alias a: aliases ) {
             HashMap synonym = new HashMap();
             synonym.put("internal", false);
-            synonym.put("synonym", a.getValue());
+            synonym.put("display_text", a.getValue());
+            synonym.put("format_text", a.getValue());
+            synonym.put("name_type_name", a.getTypeName().equals("old_gene_symbol") ? "nomenclature_symbol" : "full_name");
             results.add(synonym);
         }
         return results;
@@ -84,22 +112,22 @@ public class CurationGenes extends CurationObject {
     }
 
     class GeneModel {
-        public String automated_gene_description;
-        public String created_by = "RGD";
-        public List cross_references = null;
+        public String created_by_curie = "RGD";
+        public List cross_reference_dtos = null;
         public String curie;
         public String date_created;
         public String date_updated;
-        public String gene_synopsis;
-        public String gene_type;
-        public List genomic_locations = null;
+        public Map gene_full_name_dto;
+        public Map gene_symbol_dto;
+        public List gene_synonym_dtos = null;
+        public Map gene_systematic_name_dto;
+        public String gene_type_curie;
+        public List genomic_location_dtos = null;
+
         public boolean internal = false;
-        public String name;
         public Boolean obsolete = null;
         public List<String> secondary_identifiers = null;
-        public String symbol;
-        public List synonyms = null;
-        public String taxon;
+        public String taxon_curie;
     }
 
 
@@ -113,7 +141,7 @@ public class CurationGenes extends CurationObject {
         Collections.sort(list, new Comparator<GeneModel>() {
             @Override
             public int compare(GeneModel a1, GeneModel a2) {
-                return a1.symbol.compareToIgnoreCase(a2.symbol);
+                return a1.curie.compareToIgnoreCase(a2.curie);
             }
         });
     }
