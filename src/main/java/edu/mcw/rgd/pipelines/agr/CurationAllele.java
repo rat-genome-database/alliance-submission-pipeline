@@ -6,7 +6,7 @@ import java.util.*;
 
 public class CurationAllele extends CurationObject {
 
-    public String linkml_version = "1.3.2";
+    public String linkml_version = "1.5.0";
     public List<AlleleModel> allele_ingest_set = new ArrayList<>();
 
     public AlleleModel add(Gene a, Dao dao, String curie) throws Exception {
@@ -84,7 +84,7 @@ public class CurationAllele extends CurationObject {
         public List<String> secondary_identifiers = null;
         public String symbol;
         public List synonyms = null;
-        public String taxon = "NCBITaxon:10116";
+        public String taxon_curie = "NCBITaxon:10116";
     }
 
 

@@ -6,6 +6,8 @@ import java.util.*;
 
 public class CurationAGM extends CurationObject {
 
+    public String linkml_version = "1.5.0";
+
     public List<AgmModel> agm_ingest_set = new ArrayList<>();
 
     public AgmModel add(Strain s, Dao dao, String curie) throws Exception {
@@ -25,8 +27,8 @@ public class CurationAGM extends CurationObject {
         }
 
         m.secondary_identifiers = getSecondaryIdentifiers(curie, s.getRgdId(), dao);
-        m.synonyms = getSynonyms(s.getRgdId(), dao);
-        m.genomic_locations = getGenomicLocations(s.getRgdId(), SpeciesType.RAT, dao);
+        //m.synonyms = getSynonyms(s.getRgdId(), dao);
+        m.genomic_location_dtos = getGenomicLocations_DTO(s.getRgdId(), SpeciesType.RAT, dao, curie);
 
         agm_ingest_set.add(m);
 
@@ -49,21 +51,21 @@ public class CurationAGM extends CurationObject {
     }
 
     class AgmModel {
-        public List components = null;
-        public String created_by = "RGD";
-        public List cross_references = null;
+        public List component_dtos = null;
+        public List cross_reference_dtos = null;
         public String curie;
+        public String data_provider_name = "RGD";
         public String date_created;
         public String date_updated;
-        public List genomic_locations = null;
+        public List genomic_location_dtos = null;
         public boolean internal = false;
         public String name;
         public Boolean obsolete = null;
-        public List references = null;
+        public List references_curies = null;
         public List<String> secondary_identifiers = null;
-        public String subtype = "strain";
-        public List synonyms = null;
-        public String taxon = "NCBITaxon:10116";
+        public String subtype_name = "strain";
+        //public List synonyms = null;
+        public String taxon_curie = "NCBITaxon:10116";
     }
 
 
