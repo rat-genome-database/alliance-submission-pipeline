@@ -12,7 +12,7 @@ public class CurationDaf {
 
     static SimpleDateFormat sdf_agr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
-    public String linkml_version = "1.3.1";
+    public String linkml_version = "1.5.0";
     public List<DiseaseAnnotation> disease_agm_ingest_set = new ArrayList<>();
     public List<DiseaseAnnotation> disease_allele_ingest_set = new ArrayList<>();
     public List<DiseaseAnnotation> disease_gene_ingest_set = new ArrayList<>();

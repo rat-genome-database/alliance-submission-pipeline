@@ -1,3 +1,6 @@
+Feb 08, 2023
+  CurationAlleleGenerator -- upgraded to linkml_model 1.5.0
+
 Feb 02, 2023
   CurationGeneGenerator -- upgraded to linkml_model 1.5.0
   CurationAGMGenerator -- upgraded to linkml_model 1.5.0

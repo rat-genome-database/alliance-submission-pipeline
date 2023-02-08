@@ -1,6 +1,7 @@
 package edu.mcw.rgd.pipelines.agr;
 
 import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.process.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,9 +18,12 @@ public class CurationAllele extends CurationObject {
         AlleleModel m = new AlleleModel();
         m.curie = curie;
 
+        // if allele name is not available, we use allele symbol instead
+        String alleleName = Utils.NVL(a.getName(), a.getSymbol());
+
         Map nameMap = new HashMap();
-        nameMap.put("display_text", a.getName());
-        nameMap.put("format_text", getHumanFriendlyName(a.getName()));
+        nameMap.put("display_text", alleleName);
+        nameMap.put("format_text", getHumanFriendlyName(alleleName));
         nameMap.put("name_type_name", "full_name");
         nameMap.put("internal", false);
         m.allele_full_name_dto = nameMap;
