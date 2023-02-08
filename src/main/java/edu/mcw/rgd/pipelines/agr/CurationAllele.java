@@ -1,8 +1,11 @@
 package edu.mcw.rgd.pipelines.agr;
 
 import edu.mcw.rgd.datamodel.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.Map;
 
 public class CurationAllele extends CurationObject {
 
@@ -13,8 +16,20 @@ public class CurationAllele extends CurationObject {
 
         AlleleModel m = new AlleleModel();
         m.curie = curie;
-        m.name = a.getName();
-        m.symbol = a.getSymbol();
+
+        Map nameMap = new HashMap();
+        nameMap.put("display_text", a.getName());
+        nameMap.put("format_text", getHumanFriendlyName(a.getName()));
+        nameMap.put("name_type_name", "full_name");
+        nameMap.put("internal", false);
+        m.allele_full_name_dto = nameMap;
+
+        Map symbolMap = new HashMap();
+        symbolMap.put("display_text", a.getSymbol());
+        symbolMap.put("format_text", getHumanFriendlyName(a.getSymbol()));
+        symbolMap.put("name_type_name", "nomenclature_symbol");
+        symbolMap.put("internal", false);
+        m.allele_symbol_dto = symbolMap;
 
         RgdId id = dao.getRgdId(a.getRgdId());
         if( !id.getObjectStatus().equals("ACTIVE") ) {
@@ -26,14 +41,48 @@ public class CurationAllele extends CurationObject {
             m.date_updated = sdf_agr.format(id.getLastModifiedDate());
         }
 
-        m.secondary_identifiers = getSecondaryIdentifiers(curie, a.getRgdId(), dao);
-        m.synonyms = getSynonyms(a.getRgdId(), dao);
-        m.genomic_locations = getGenomicLocations(a.getRgdId(), SpeciesType.RAT, dao);
-        m.references = getReferences(a.getRgdId(), dao);
+        m.allele_secondary_id_dtos = getSecondaryIdentifiers(curie, a.getRgdId(), dao);
+        m.genomic_location_dtos = getGenomicLocations_DTO(a.getRgdId(), SpeciesType.RAT, dao, curie);
+        m.reference_curies = getReferences(a.getRgdId(), dao);
+
+        m.allele_nomenclature_event_dtos = getNomenEvents(a.getRgdId(), dao);
+        m.allele_note_dtos = getNotes(a.getRgdId(), dao);
+        m.allele_synonym_dtos = getSynonyms(a.getRgdId(), dao);
 
         allele_ingest_set.add(m);
 
         return m;
+    }
+
+    List getNomenEvents(int rgdId, Dao dao) throws Exception {
+        List<NomenclatureEvent> events = dao.getNomenEvents(rgdId);
+        if( events.isEmpty() ) {
+            return null;
+        }
+        List results = new ArrayList();
+        for( NomenclatureEvent event: events ) {
+
+            String info = event.getDesc()
+                    +"; original curie = RGD:"+event.getOriginalRGDId()
+                    +"; old symbol = ["+event.getPreviousSymbol()+"]"
+                    +"; new symbol = ["+event.getSymbol()+"]"
+                    +"; old name = ["+event.getPreviousName()+"]"
+                    +"; new name = ["+event.getName()+"]";
+            Map eventMap = new HashMap();
+            eventMap.put("internal", false);
+            eventMap.put("nomenclature_event_name", info);
+            eventMap.put("created_by_curie", "RGD");
+            eventMap.put("date_created", sdf_agr.format(event.getEventDate()));
+            int refRgdId = dao.getRefRgdId(Integer.parseInt(event.getRefKey()));
+            if( refRgdId!=0 ) {
+                List<String> refRgdIds = new ArrayList<>();
+                refRgdIds.add("RGD:"+refRgdId);
+                eventMap.put("evidence_curies", refRgdIds);
+            }
+            results.add(eventMap);
+        }
+
+        return results;
     }
 
     List getSynonyms(int rgdId, Dao dao) throws Exception {
@@ -45,8 +94,37 @@ public class CurationAllele extends CurationObject {
         for( Alias a: aliases ) {
             HashMap synonym = new HashMap();
             synonym.put("internal", false);
-            synonym.put("name", a.getValue());
+            synonym.put("display_text", a.getValue());
+            synonym.put("format_text", getHumanFriendlyName(a.getValue()));
+            if( a.getTypeName().equals("old_gene_symbol") ) {
+                synonym.put("name_type_name", "nomenclature_symbol");
+            }
+            else if( a.getTypeName().equals("old_gene_name") ) {
+                synonym.put("name_type_name", "full_name");
+            }
+            else {
+                synonym.put("name_type_name", "unspecified");
+            }
             results.add(synonym);
+        }
+        return results;
+    }
+
+    List getNotes(int rgdId, Dao dao) throws Exception {
+        List<Note> notes = dao.getNotes(rgdId);
+        if( notes.isEmpty() ) {
+            return null;
+        }
+        List results = new ArrayList();
+        for( Note n: notes ) {
+            HashMap note = new HashMap();
+            note.put("internal", !n.getPublicYN().equals("Y"));
+            HashMap noteDto = new HashMap();
+            note.put("note_dto", noteDto);
+            noteDto.put("name_type_name", n.getNotesTypeName());
+            noteDto.put("free_text", n.getNotes());
+            noteDto.put("internal", !n.getPublicYN().equals("Y"));
+            results.add(note);
         }
         return results;
     }
@@ -71,19 +149,54 @@ public class CurationAllele extends CurationObject {
         return results;
     }
 
+    List getSecondaryIdentifiers(String curie, int rgdId, Dao dao) throws Exception {
+
+        List<Map> secondaryIds = null;
+        try {
+            List<Integer> secondaryRgdIds = dao.getOldRgdIds(rgdId);
+            if (!secondaryRgdIds.isEmpty()) {
+                secondaryIds = new ArrayList<>();
+                for (Integer secRgdId : secondaryRgdIds) {
+                    RgdId id = dao.getRgdId(secRgdId);
+                    Map map = new HashMap();
+                    map.put("internal", "false");
+                    map.put("created_by_curie", "RGD");
+                    map.put("secondary_id", secRgdId);
+                    if( id.getCreatedDate()!=null ) {
+                        map.put("date_created", sdf_agr.format(id.getCreatedDate()));
+                    }
+                    if( id.getLastModifiedDate()!=null ) {
+                        map.put("date_updated", sdf_agr.format(id.getLastModifiedDate()));
+                    }
+                    secondaryIds.add(map);
+                }
+            }
+        } catch(Exception e) {
+            String msg = "getOldRgdIds problem for "+curie+" RGD:"+rgdId;
+            System.out.println(msg);
+            Logger log = LogManager.getLogger("status");
+            log.error(msg);
+        }
+
+        return secondaryIds==null ? null : secondaryIds.isEmpty() ? null : secondaryIds;
+    }
+
     class AlleleModel {
-        public String created_by = "RGD";
+        public Map allele_full_name_dto;
+        public List allele_nomenclature_event_dtos;
+        public List allele_note_dtos;
+        public List allele_secondary_id_dtos = null;
+        public Map allele_symbol_dto;
+        public List allele_synonym_dtos = null;
+
+        public String created_by_curie = "RGD";
         public String curie;
         public String date_created;
         public String date_updated;
-        public List genomic_locations = null;
+        public List genomic_location_dtos = null;
         public boolean internal = false;
-        public String name;
         public Boolean obsolete = null;
-        public List<String> references = null;
-        public List<String> secondary_identifiers = null;
-        public String symbol;
-        public List synonyms = null;
+        public List<String> reference_curies = null;
         public String taxon_curie = "NCBITaxon:10116";
     }
 
@@ -98,7 +211,7 @@ public class CurationAllele extends CurationObject {
         Collections.sort(list, new Comparator<AlleleModel>() {
             @Override
             public int compare(AlleleModel a1, AlleleModel a2) {
-                return a1.symbol.compareToIgnoreCase(a2.symbol);
+                return a1.curie.compareToIgnoreCase(a2.curie);
             }
         });
     }

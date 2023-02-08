@@ -34,6 +34,8 @@ public class Dao {
     private AssociationDAO associationDAO = new AssociationDAO();
     private GeneDAO geneDAO = associationDAO.getGeneDAO();
     private MapDAO mapDAO = new MapDAO();
+    private NomenclatureDAO nomenclatureDAO = new NomenclatureDAO();
+    private NotesDAO notesDAO = new NotesDAO();
     private ProteinDAO proteinDAO = new ProteinDAO();
     private ReferenceDAO refDAO = associationDAO.getReferenceDAO();
     private RGDManagementDAO rgdIdDAO = new RGDManagementDAO();
@@ -221,5 +223,21 @@ public class Dao {
     public List<Reference> getReferenceAssociations(int rgdId) throws Exception{
 
         return associationDAO.getReferenceAssociations(rgdId);
+    }
+
+    public List<Note> getNotes(int rgdId) throws Exception {
+        return notesDAO.getNotes(rgdId);
+    }
+
+    public List<NomenclatureEvent> getNomenEvents(int rgdId) throws Exception {
+        return nomenclatureDAO.getNomenclatureEvents(rgdId);
+    }
+
+    public int getRefRgdId(int refKey) throws Exception {
+        Reference ref = refDAO.getReferenceByKey(refKey);
+        if( ref == null ) {
+            return 0;
+        }
+        return ref.getRgdId();
     }
 }

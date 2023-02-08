@@ -6,7 +6,7 @@ import java.util.*;
 
 public class CurationAGM extends CurationObject {
 
-    public String linkml_version = "1.5.0";
+    public String linkml_version = "1.5.0"; // 1.5.0-revised
 
     public List<AgmModel> agm_ingest_set = new ArrayList<>();
 

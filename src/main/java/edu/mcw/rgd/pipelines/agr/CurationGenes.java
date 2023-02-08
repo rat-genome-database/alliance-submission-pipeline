@@ -35,9 +35,6 @@ public class CurationGenes extends CurationObject {
         systematicNameDTO.put("name_type_name", "systematic_name");
         m.gene_systematic_name_dto = systematicNameDTO;
 
-        if( g.getSymbol().contains("<") || g.getSymbol().contains("'") || g.getSymbol().contains("\"")) {
-            System.out.println("aha2");
-        }
         Map nameDTO = new HashMap<>();
         nameDTO.put("display_text", g.getName());
         nameDTO.put("format_text", g.getName());

@@ -32,36 +32,25 @@ public class CurationObject {
         return rgdId2HgncIdMap;
     }
 
-    List getGenomicLocations(int rgdId, int speciesTypeKey, Dao dao) throws Exception {
+    // human friendly name: we replace all html tags with square brackets
+    String getHumanFriendlyName(String name) {
 
-        int mapKey1 = 0, mapKey2 = 0; // NCBI/Ensembl assemblies
-        if( speciesTypeKey== SpeciesType.HUMAN ) {
-            mapKey1 = 38;
-            mapKey2 = 40;
-        } else {
-            mapKey1 = 372;
-            mapKey2 = 373;
+        if( name==null || !name.contains("<") ) {
+            return name;
         }
-        String assembly = MapManager.getInstance().getMap(mapKey1).getName();
 
-        List<MapData> mds = getLoci(rgdId, mapKey1, mapKey2, dao);
-        if( mds.isEmpty() ) {
-            return null;
+        String name2 = name
+            .replace("<i>", "")
+            .replace("</i>", "")
+            .replace("<sup>", "[")
+            .replace("</sup>", "]");
+
+        if( name2.contains("<") ) {
+            System.out.println("unhandled conversion in getHumanFriendlyName("+name+")");
         }
-        List results = new ArrayList();
-        for( MapData md: mds ) {
-            HashMap loc = new HashMap();
-            loc.put("end", md.getStopPos());
-            loc.put("has_assembly", assembly);
-            loc.put("internal", false);
-            loc.put("object", md.getChromosome());
-            loc.put("predicate", "RGD");
-            loc.put("start", md.getStartPos());
-            loc.put("subject", "RGD");
-            results.add(loc);
-        }
-        return results;
+        return name2;
     }
+
 
     List getGenomicLocations_DTO(int rgdId, int speciesTypeKey, Dao dao, String geneCurie) throws Exception {
 
