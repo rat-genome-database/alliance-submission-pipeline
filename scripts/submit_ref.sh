@@ -16,7 +16,7 @@ export WORK_DIR=/home/rgddata/pipelines/AgrPipeline
 cd $WORK_DIR
 export DATA_DIR=$WORK_DIR/data
 
-SOURCE_DIR=/home/rgddata/pipelines/ftpFileExtracts/data/agr
+SOURCE_DIR=/home/rgddata/pipelines/ftp-file-extracts-pipeline/data/agr
 
 
 
