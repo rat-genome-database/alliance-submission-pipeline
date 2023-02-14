@@ -267,7 +267,7 @@ public class CurationDaf {
         public String inferred_allele_curie; // not used
         public String inferred_gene_curie;   // not used
 
-        public String getCurie() {
+        String getCurie() {
             return agm_curie;
         }
     }
@@ -276,7 +276,7 @@ public class CurationDaf {
         public String allele_curie;
         public List<String> asserted_gene_curies;
 
-        public String getCurie() {
+        String getCurie() {
             return allele_curie;
         }
     }
@@ -284,14 +284,14 @@ public class CurationDaf {
     class GeneDiseaseAnnotation extends DiseaseAnnotation_DTO {
         public String gene_curie;
 
-        public String getCurie() {
+        String getCurie() {
             return gene_curie;
         }
     }
 
     abstract class DiseaseAnnotation_DTO extends CurationObject {
 
-        abstract public String getCurie();
+        abstract String getCurie();
 
         public String annotation_type_name; // not used
         public List condition_relation_dtos;
