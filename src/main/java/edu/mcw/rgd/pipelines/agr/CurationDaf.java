@@ -134,9 +134,13 @@ public class CurationDaf {
         boolean isNegated = r.negated==null ? false : r.negated;
         r.handleWithInfo_DTO(a, isNegated, dao, conditionRelationDtos, withGeneCuries);
 
-        r.condition_relation_dtos = conditionRelationDtos;
-        if( true ) {
-            r.with_gene_curies = withGeneCuries;
+        if( !conditionRelationDtos.isEmpty() ) {
+            r.condition_relation_dtos = conditionRelationDtos;
+        }
+        if( false ) {
+            if( !withGeneCuries.isEmpty() ) {
+                r.with_gene_curies = withGeneCuries;
+            }
         } else {
             // TODO: temporarily suppressed export of WITH field
             r.with_gene_curies = null;

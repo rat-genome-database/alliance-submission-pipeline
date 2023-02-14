@@ -2,6 +2,7 @@ package edu.mcw.rgd.pipelines.agr;
 
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
+import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.process.mapping.MapManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -144,19 +145,19 @@ public class CurationObject {
 
     List getNotes_DTO(int rgdId, Dao dao) throws Exception {
         List<Note> notes = dao.getNotes(rgdId);
-        if( notes.isEmpty() ) {
-            return null;
-        }
         List results = new ArrayList();
         for( Note n: notes ) {
-            HashMap note = new HashMap();
-            note.put("internal", !n.getPublicYN().equals("Y"));
+            if( Utils.isStringEmpty(n.getNotesTypeName()) || Utils.isStringEmpty(n.getNotes()) ) {
+                continue;
+            }
             HashMap noteDto = new HashMap();
-            note.put("note_dto", noteDto);
             noteDto.put("name_type_name", n.getNotesTypeName());
             noteDto.put("free_text", n.getNotes());
             noteDto.put("internal", !n.getPublicYN().equals("Y"));
-            results.add(note);
+            results.add(noteDto);
+        }
+        if( notes.isEmpty() ) {
+            return null;
         }
         return results;
     }
@@ -188,7 +189,6 @@ public class CurationObject {
 
         // remove all whitespace from WITH field to simplify parsing
         String withInfo = a.getWithInfo().replaceAll("\\s", "");
-        List conditionRelations = new ArrayList();
 
         // if the separator is '|', create separate conditionRelation object
         // if the separator is ',', combine conditions
@@ -246,10 +246,10 @@ public class CurationObject {
                     condRel.put("condition_dtos", conditions);
                     conditions.add(h);
 
-                    conditionRelations.add(condRel);
+                    conditionRelationDtos.add(condRel);
                 } else {
                     // 'and' operator: update last condition
-                    Map condRel = (Map) conditionRelations.get(conditionRelations.size() - 1);
+                    Map condRel = (Map) conditionRelationDtos.get(conditionRelationDtos.size() - 1);
                     List conditions = (List) condRel.get("condition_dtos");
                     conditions.add(h);
                 }
@@ -261,9 +261,6 @@ public class CurationObject {
             }
         }
 
-        if( !conditionRelations.isEmpty() ) {
-            conditionRelationDtos = conditionRelations;
-        }
         return true;
     }
 
