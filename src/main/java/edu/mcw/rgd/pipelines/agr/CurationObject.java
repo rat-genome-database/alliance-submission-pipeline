@@ -151,7 +151,7 @@ public class CurationObject {
                 continue;
             }
             HashMap noteDto = new HashMap();
-            noteDto.put("name_type_name", n.getNotesTypeName());
+            noteDto.put("note_type_name", n.getNotesTypeName());
             noteDto.put("free_text", n.getNotes());
             noteDto.put("internal", !n.getPublicYN().equals("Y"));
             results.add(noteDto);
