@@ -50,7 +50,7 @@ public class CurationAllele extends CurationObject {
         m.reference_curies = getReferences(a.getRgdId(), dao);
 
         m.allele_nomenclature_event_dtos = getNomenEvents(a.getRgdId(), dao);
-        m.allele_note_dtos = getNotes(a.getRgdId(), dao);
+        m.allele_note_dtos = getNotes_DTO(a.getRgdId(), dao);
         m.allele_synonym_dtos = getSynonyms(a.getRgdId(), dao);
 
         allele_ingest_set.add(m);
@@ -110,25 +110,6 @@ public class CurationAllele extends CurationObject {
                 synonym.put("name_type_name", "unspecified");
             }
             results.add(synonym);
-        }
-        return results;
-    }
-
-    List getNotes(int rgdId, Dao dao) throws Exception {
-        List<Note> notes = dao.getNotes(rgdId);
-        if( notes.isEmpty() ) {
-            return null;
-        }
-        List results = new ArrayList();
-        for( Note n: notes ) {
-            HashMap note = new HashMap();
-            note.put("internal", !n.getPublicYN().equals("Y"));
-            HashMap noteDto = new HashMap();
-            note.put("note_dto", noteDto);
-            noteDto.put("name_type_name", n.getNotesTypeName());
-            noteDto.put("free_text", n.getNotes());
-            noteDto.put("internal", !n.getPublicYN().equals("Y"));
-            results.add(note);
         }
         return results;
     }

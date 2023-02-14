@@ -13,90 +13,133 @@ public class CurationDaf {
     static SimpleDateFormat sdf_agr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
     public String linkml_version = "1.5.0";
-    public List<DiseaseAnnotation> disease_agm_ingest_set = new ArrayList<>();
-    public List<DiseaseAnnotation> disease_allele_ingest_set = new ArrayList<>();
-    public List<DiseaseAnnotation> disease_gene_ingest_set = new ArrayList<>();
+    public List<AgmDiseaseAnnotation> disease_agm_ingest_set = new ArrayList<>();
+    public List<AlleleDiseaseAnnotation> disease_allele_ingest_set = new ArrayList<>();
+    public List<GeneDiseaseAnnotation> disease_gene_ingest_set = new ArrayList<>();
 
     public void addDiseaseAnnotation(Annotation a, Dao dao, Map<Integer, String> geneRgdId2HgncIdMap, int speciesTypeKey, boolean isAllele) throws Exception {
 
-        DiseaseAnnotation r = new DiseaseAnnotation();
+        if( isAllele ) {
+            addAlleleDiseaseAnnotation(a, dao);
+        }
+        else if( a.getRgdObjectKey()==1 ) {
+            addGeneDiseaseAnnotation(a, dao, geneRgdId2HgncIdMap, speciesTypeKey);
+        } else {
+            addAGMDiseaseAnnotation(a, dao);
+        }
+    }
+
+    void addAGMDiseaseAnnotation(Annotation a, Dao dao) throws Exception {
+
+        boolean isAllele = false;
+
+        AgmDiseaseAnnotation r = new AgmDiseaseAnnotation();
+
+        r.agm_curie = "RGD:"+a.getAnnotatedObjectRgdId();
+
+        List<Integer> assertedAlleles = dao.getGeneAllelesForStrain(a.getAnnotatedObjectRgdId());
+        if( assertedAlleles.size()!=1 ) {
+            if( assertedAlleles.size()>1 ) {
+                System.out.println("ERROR: strain associated with " + assertedAlleles.size() + " alleles; STRAIN_RGD_ID=" + a.getAnnotatedObjectRgdId());
+            }
+        } else {
+            int alleleRgdId = assertedAlleles.get(0);
+            r.asserted_allele_curie = "RGD:"+alleleRgdId;
+
+            List<Gene> assertedGenes = dao.getGenesForAllele(alleleRgdId);
+            if( !assertedGenes.isEmpty() ) {
+                r.asserted_gene_curies = new ArrayList<>();
+                for( Gene g: assertedGenes ) {
+                    r.asserted_gene_curies.add("RGD:" + g.getRgdId());
+                }
+            }
+        }
+
+        // process common fields
+        processDTO(a, dao, isAllele, r);
+
+        disease_agm_ingest_set.add(r);
+    }
+
+    void addAlleleDiseaseAnnotation(Annotation a, Dao dao) throws Exception {
+
+        boolean isAllele = true;
+
+        AlleleDiseaseAnnotation r = new AlleleDiseaseAnnotation();
+
+        r.allele_curie = "RGD:"+a.getAnnotatedObjectRgdId();
+
+        List<Gene> assertedGenes = dao.getGenesForAllele(a.getAnnotatedObjectRgdId());
+        if( !assertedGenes.isEmpty() ) {
+            r.asserted_gene_curies = new ArrayList<>();
+            for( Gene g: assertedGenes ) {
+                r.asserted_gene_curies.add("RGD:" + g.getRgdId());
+            }
+        }
+
+        // process common fields
+        processDTO(a, dao, isAllele, r);
+
+        disease_allele_ingest_set.add(r);
+    }
+
+    void addGeneDiseaseAnnotation(Annotation a, Dao dao, Map<Integer, String> geneRgdId2HgncIdMap, int speciesTypeKey) throws Exception {
+
+        boolean isAllele = false;
+
+        GeneDiseaseAnnotation r = new GeneDiseaseAnnotation();
+
+        if( speciesTypeKey== SpeciesType.HUMAN ) {
+            r.gene_curie = geneRgdId2HgncIdMap.get(a.getAnnotatedObjectRgdId());
+        } else if( speciesTypeKey==SpeciesType.RAT ) {
+            r.gene_curie = "RGD:"+a.getAnnotatedObjectRgdId();
+        }
+
+        // process common fields
+        processDTO(a, dao, isAllele, r);
+
+        disease_gene_ingest_set.add(r);
+    }
+
+    void processDTO(Annotation a, Dao dao, boolean isAllele, DiseaseAnnotation_DTO r) throws Exception {
+
         r.date_created = sdf_agr.format(a.getCreatedDate());
         if( a.getLastModifiedDate()!=null ) {
             r.date_updated = sdf_agr.format(a.getLastModifiedDate());
         }
-        r.disease_qualifiers = getDiseaseQualifiers(a);
-        r.evidence_codes = getEvidenceCodes(a.getEvidence());
-        r.negated = getNegatedValue(a);
-        r.object = a.getTermAcc();
-        r.predicate = Utils2.getGeneAssocType(a.getEvidence(), a.getRgdObjectKey(), isAllele);
 
         if( a.getDataSrc().equals("OMIM") ) {
-            r.data_provider = "OMIM";
-            r.secondary_data_provider = "RGD";
+            r.data_provider_name = "OMIM";
+            r.secondary_data_provider_name = "RGD";
         } else {
-            r.data_provider = "RGD";
+            r.data_provider_name = "RGD";
         }
+
+        r.disease_qualifier_names = getDiseaseQualifiers(a);
+        r.disease_relation_name = Utils2.getGeneAssocType(a.getEvidence(), a.getRgdObjectKey(), isAllele);
+        r.do_term_curie = a.getTermAcc();
+        r.evidence_code_curies = getEvidenceCodes(a.getEvidence());
+        r.negated = getNegatedValue(a);
+        r.note_dtos = r.getNotes_DTO(a.getAnnotatedObjectRgdId(), dao);
 
         String pmid = dao.getPmid(a.getRefRgdId());
         if( pmid==null ) {
-            r.single_reference = "RGD:"+a.getRefRgdId();
+            r.reference_curie = "RGD:"+a.getRefRgdId();
         } else {
-            r.single_reference = "PMID:"+pmid;
+            r.reference_curie = "PMID:"+pmid;
         }
 
-        if( speciesTypeKey== SpeciesType.HUMAN ) {
-            r.subject = geneRgdId2HgncIdMap.get(a.getAnnotatedObjectRgdId());
-        } else if( speciesTypeKey==SpeciesType.RAT ) {
-            r.subject = "RGD:"+a.getAnnotatedObjectRgdId();
-        }
+        List conditionRelationDtos = new ArrayList();
+        List withGeneCuries = new ArrayList();
+        boolean isNegated = r.negated==null ? false : r.negated;
+        r.handleWithInfo_DTO(a, isNegated, dao, conditionRelationDtos, withGeneCuries);
 
-        handleWithInfo(a, r, dao);
-        // TODO: temporarily suppressed export of WITH field
-        r.with = null;
-
-        if( !Utils.isStringEmpty(a.getNotes()) ) {
-            r.related_notes = new ArrayList();
-            HashMap noteMap = new HashMap();
-            noteMap.put("internal", false);
-            noteMap.put("note_type", "disease_note");
-            noteMap.put("free_text", a.getNotes().trim());
-            r.related_notes.add(noteMap);
-        }
-
-        if( isAllele ) {
-            List<Gene> assertedGenes = dao.getGenesForAllele(a.getAnnotatedObjectRgdId());
-            if( assertedGenes.size()!=1 ) {
-                System.out.println("ERROR: allele associated with "+assertedGenes.size()+" genes; ALLELE_RGD_ID="+a.getAnnotatedObjectRgdId());
-            } else {
-                r.asserted_gene = "RGD:"+assertedGenes.get(0).getRgdId();
-            }
-
-            disease_allele_ingest_set.add(r);
-        }
-        else if( a.getRgdObjectKey()==1 ) {
-            disease_gene_ingest_set.add(r);
+        r.condition_relation_dtos = conditionRelationDtos;
+        if( true ) {
+            r.with_gene_curies = withGeneCuries;
         } else {
-            // AGM
-            List<Integer> assertedAlleles = dao.getGeneAllelesForStrain(a.getAnnotatedObjectRgdId());
-            if( assertedAlleles.size()!=1 ) {
-                if( assertedAlleles.size()>1 ) {
-                    System.out.println("ERROR: strain associated with " + assertedAlleles.size() + " alleles; STRAIN_RGD_ID=" + a.getAnnotatedObjectRgdId());
-                }
-            } else {
-                int alleleRgdId = assertedAlleles.get(0);
-                r.asserted_allele = "RGD:"+alleleRgdId;
-
-                List<Gene> assertedGenes = dao.getGenesForAllele(alleleRgdId);
-                if( assertedGenes.size()!=1 ) {
-                    if( assertedGenes.size()>1 ) {
-                        System.out.println("ERROR: AGM allele associated with " + assertedGenes.size() + " genes; ALLELE_RGD_ID=" + a.getAnnotatedObjectRgdId());
-                    }
-                } else {
-                    r.asserted_gene = "RGD:"+assertedGenes.get(0).getRgdId();
-                }
-            }
-
-            disease_agm_ingest_set.add(r);
+            // TODO: temporarily suppressed export of WITH field
+            r.with_gene_curies = null;
         }
     }
 
@@ -213,250 +256,86 @@ public class CurationDaf {
         }
     }
 
-    boolean handleWithInfo(Annotation a, DiseaseAnnotation r, Dao dao) throws Exception {
+    class AgmDiseaseAnnotation extends DiseaseAnnotation_DTO {
+        public String agm_curie;
+        public String asserted_allele_curie;
+        public List<String> asserted_gene_curies;
+        public String inferred_allele_curie; // not used
+        public String inferred_gene_curie;   // not used
 
-        if( a.getWithInfo()==null ) {
-            return true;
-        }
-
-        // only a subset of qualifiers is allowed
-        String condRelType = null;
-        if( a.getQualifier() == null ) {
-            condRelType = "has_condition";
-        } else if( a.getQualifier().contains("induced") || a.getQualifier().contains("induces") ) {
-            condRelType = "induced_by";
-        } else if( a.getQualifier().contains("treatment") || a.getQualifier().contains("ameliorates") ) {
-            condRelType = "ameliorated_by";
-        } else if( a.getQualifier().contains("exacerbates") ) {
-            condRelType = "exacerbated_by";
-        } else {
-            System.out.println("UNMAPPED QUALIFIER: "+a.getQualifier());
-            condRelType = "has_condition";
-        }
-        if( !condRelType.equals("has_condition") && (r.negated!=null && r.negated==true) ) {
-            condRelType = "not_"+condRelType;
-        }
-
-
-        // remove all whitespace from WITH field to simplify parsing
-        String withInfo = a.getWithInfo().replaceAll("\\s", "");
-        List conditionRelations = new ArrayList();
-
-        // if the separator is '|', create separate conditionRelation object
-        // if the separator is ',', combine conditions
-        boolean or;
-
-        // out[0]: token;  out[1]: separator before token
-        String[] out = new String[2];
-        String str = withInfo;
-        for( ;; ) {
-            str = getNextToken(str, out);
-            if( out[0]==null ) {
-                break;
-            }
-
-            String withValue = out[0];
-            if( out[1]!=null && out[1].equals(",") ) {
-                or = false;
-            } else {
-                or = true;
-            }
-
-            withValue = transformRgdId(withValue, dao);
-            if( withValue==null ) {
-                return false;
-            }
-
-            if( withValue.startsWith("XCO:") ) {
-                AgrExperimentalConditionMapper.Info info = AgrExperimentalConditionMapper.getInstance().getInfo(withValue);
-                if (info == null) {
-                    System.out.println("UNEXPECTED WITH VALUE: " + withValue);
-                    return false;
-                }
-
-
-                HashMap h = new HashMap();
-                h.put("condition_class", info.zecoAcc);
-                if (info.xcoAcc != null && info.xcoAcc.startsWith("CHEBI:")) {
-                    h.put("condition_chemical", info.xcoAcc);
-                } else if( info.xcoAcc != null && info.xcoAcc.startsWith("UBERON:")) {
-                    h.put("condition_anatomy", info.xcoAcc);
-                } else if( info.xcoAcc != null && info.xcoAcc.startsWith("GO:")) {
-                    h.put("condition_gene_ontology", info.xcoAcc);
-                } else {
-                    h.put("condition_id", info.xcoAcc);
-                }
-                h.put("condition_statement", info.conditionStatement);
-                h.put("internal", false);
-
-                if (or) {
-                    Map condRel = new HashMap();
-                    condRel.put("condition_relation_type", condRelType);
-                    condRel.put("internal", false);
-
-                    List conditions = new ArrayList();
-                    condRel.put("conditions", conditions);
-                    conditions.add(h);
-
-                    conditionRelations.add(condRel);
-                } else {
-                    // 'and' operator: update last condition
-                    Map condRel = (Map) conditionRelations.get(conditionRelations.size() - 1);
-                    List conditions = (List) condRel.get("conditions");
-                    conditions.add(h);
-                }
-            } else {
-                // NOTE: per Alliance request, we suppress export of any WITH fields
-                //
-                // non-XCO with value
-                if( r.with==null ) {
-                    r.with = new ArrayList<>();
-                }
-                r.with.add(withValue);
-            }
-        }
-
-        if( !conditionRelations.isEmpty() ) {
-            r.condition_relations = conditionRelations;
-
-            if( conditionRelations.size()>2 ) {
-                System.out.println("MULTI CONDRELS "+r.object+" "+r.subject);
-            }
-        }
-        return true;
-    }
-
-    // convert human rgd ids to HGNC ids, and mouse rgd ids to MGI ids
-    String transformRgdId(String with, Dao dao) throws Exception {
-
-        if (with.startsWith("RGD:")) {
-            Integer rgdId = Integer.parseInt(with.substring(4));
-            RgdId id = dao.getRgdId(rgdId);
-            if (id == null) {
-                System.out.println("ERROR: invalid RGD ID " + with + "; skipping annotation");
-                return null;
-            }
-
-            if (id.getSpeciesTypeKey() == SpeciesType.HUMAN) {
-                List<XdbId> xdbIds = dao.getXdbIds(rgdId, XdbId.XDB_KEY_HGNC);
-                if (xdbIds.isEmpty()) {
-                    System.out.println("ERROR: cannot map " + with + " to human HGNC ID");
-                    return null;
-                }
-                if (xdbIds.size() > 1) {
-                    System.out.println("WARNING: multiple HGNC ids for " + with);
-                }
-                String hgncId = xdbIds.get(0).getAccId();
-                return hgncId;
-            } else if (id.getSpeciesTypeKey() == SpeciesType.MOUSE) {
-                List<XdbId> xdbIds = dao.getXdbIds(rgdId, XdbId.XDB_KEY_MGD);
-                if (xdbIds.isEmpty()) {
-                    System.out.println("ERROR: cannot map " + with + " to mouse MGI ID");
-                    return null;
-                }
-                if (xdbIds.size() > 1) {
-                    System.out.println("WARNING: multiple MGI ids for " + with);
-                }
-                String mgiId = xdbIds.get(0).getAccId();
-                return mgiId;
-            } else if (id.getSpeciesTypeKey() == SpeciesType.RAT) {
-                return with;
-            } else {
-                System.out.println("ERROR: RGD id for species other than rat,mouse,human in WITH field");
-                return null;
-            }
-        }
-
-        return with;
-    }
-
-    // str: string to be parsed
-    // out: out[0]-extracted term; out[1]-separator before term
-    // return rest of string 'str' after extracting the token
-    String getNextToken(String str, String[] out) {
-
-        if( str==null ) {
-            out[0] = null;
-            out[1] = null;
-            return null;
-        }
-
-        int startPos = 0;
-        if( str.startsWith("|") ) {
-            out[1] = "|";
-            startPos = 1;
-        } else if( str.startsWith(",") ) {
-            out[1] = ",";
-            startPos = 1;
-        } else {
-            out[1] = null;
-        }
-
-        int endPos = str.length();
-
-        int barPos = str.indexOf('|', startPos);
-        if( barPos>=0 && barPos < endPos ) {
-            endPos = barPos;
-        }
-        int commaPos = str.indexOf(',', startPos);
-        if( commaPos>=0 && commaPos < endPos ) {
-            endPos = commaPos;
-        }
-
-        out[0] = str.substring(startPos, endPos);
-
-        if( endPos < str.length() ) {
-            return str.substring(endPos);
-        } else {
-            return null;
+        public String getCurie() {
+            return agm_curie;
         }
     }
 
-    class DiseaseAnnotation {
-        public String annotation_type = "manually_curated";
-        public String asserted_allele; // for AGMs
-        public String asserted_gene; // for AGMs and alleles
-        public List condition_relations;
-        public String created_by = "RGD:curator";
+    class AlleleDiseaseAnnotation extends DiseaseAnnotation_DTO {
+        public String allele_curie;
+        public List<String> asserted_gene_curies;
+
+        public String getCurie() {
+            return allele_curie;
+        }
+    }
+
+    class GeneDiseaseAnnotation extends DiseaseAnnotation_DTO {
+        public String gene_curie;
+
+        public String getCurie() {
+            return gene_curie;
+        }
+    }
+
+    abstract class DiseaseAnnotation_DTO extends CurationObject {
+
+        abstract public String getCurie();
+
+        public String annotation_type_name; // not used
+        public List condition_relation_dtos;
+        public String created_by_curie = "RGD:curator";
+        public String data_provider_name = "RGD";
         public String date_created;
-        public String data_provider;
         public String date_updated;
-        public List<String> disease_qualifiers;
-        public List<String> evidence;
-        public List<String> evidence_codes;
-        public String inferred_gene;
+        public String disease_genetic_modifier_curie; // not used
+        public String disease_genetic_modifier_relation_name; // not used
+        public List<String> disease_qualifier_names;
+        public String disease_relation_name; // assoc_type, one of (is_implicated_in, is_marker_for)
+        public String do_term_curie;
+        public List<String> evidence_code_curies;
+        public List<String> evidence_curies; // not used
+        public String genetic_sex_name;      // not used
+        public String inferred_gene_curie;   // not used
         public Boolean internal = false;
+        public String mod_entity_id;         // not used
         public Boolean negated = null;
-        public String object; // DOID
-        public String predicate; // assoc_type, one of (is_implicated_in, is_marker_for)
-        public List related_notes;
-        public String secondary_data_provider;
-        public String single_reference;
-        public String subject; // HGNC ID
-        public String updated_by = "RGD:curator";
-        public List<String> with;
+        public List note_dtos;
+        public String reference_curie;
+        public String secondary_data_provider_name; // not used
+        public String updated_by_curie = "RGD:curator";
+        public List<String> with_gene_curies;
     }
-
 
     public void sort() {
 
-        sort(disease_agm_ingest_set);
-        sort(disease_allele_ingest_set);
-        sort(disease_gene_ingest_set);
+        Comparator_DTO dto = new Comparator_DTO();
+
+        Collections.sort(disease_agm_ingest_set, dto);
+        Collections.sort(disease_allele_ingest_set, dto);
+        Collections.sort(disease_gene_ingest_set, dto);
     }
 
-    void sort(List<DiseaseAnnotation> list) {
-
-        Collections.sort(list, new Comparator<DiseaseAnnotation>() {
-            @Override
-            public int compare(DiseaseAnnotation a1, DiseaseAnnotation a2) {
-                int r = a1.object.compareTo(a2.object);
-                if( r!=0 ) {
-                    return r;
-                }
-                return a1.subject.compareTo(a2.subject);
+    class Comparator_DTO implements Comparator<DiseaseAnnotation_DTO> {
+        @Override
+        public int compare(DiseaseAnnotation_DTO a1, DiseaseAnnotation_DTO a2) {
+            int r = a1.getCurie().compareTo(a2.getCurie());
+            if( r!=0 ) {
+                return r;
             }
-        });
+            r = a1.do_term_curie.compareTo(a2.do_term_curie);
+            if( r!=0 ) {
+                return r;
+            }
+            return a1.reference_curie.compareTo(a2.reference_curie);
+        }
     }
 
     public void removeDiseaseAnnotsSameAsAlleleAnnots() {
@@ -467,11 +346,11 @@ public class CurationDaf {
 
             Map<String, Integer> diseaseGeneMap = new HashMap<>();
             for (int i = 0; i < disease_gene_ingest_set.size(); i++) {
-                DiseaseAnnotation ga = disease_gene_ingest_set.get(i);
-                String key = createKey(ga, ga.subject);
+                GeneDiseaseAnnotation ga = disease_gene_ingest_set.get(i);
+                String key = createKey(ga, ga.gene_curie);
                 Integer old = diseaseGeneMap.put(key, i);
                 if (old != null) {
-                    DiseaseAnnotation gaOld = disease_gene_ingest_set.get(old);
+                    GeneDiseaseAnnotation gaOld = disease_gene_ingest_set.get(old);
                     System.out.println("ERROR: problem in removeDiseaseAnnotsSameAsAlleleAnnots");
                 }
             }
@@ -480,14 +359,16 @@ public class CurationDaf {
 
             System.out.println(" disease alleles annots to process: " + disease_allele_ingest_set.size());
 
-            for (DiseaseAnnotation aa : disease_allele_ingest_set) {
-                if (aa.asserted_gene != null) {
-                    String alleleKey = createKey(aa, aa.asserted_gene);
-                    Integer geneAnnotIndex = diseaseGeneMap.get(alleleKey);
-                    if (geneAnnotIndex != null) {
-                        geneAnnotIndexesForDelete.add(-geneAnnotIndex); // store negative indexes to enforce descending order
-                    } else {
-                        System.out.println(" unexpected 1");
+            for (AlleleDiseaseAnnotation aa : disease_allele_ingest_set) {
+                if (aa.asserted_gene_curies != null) {
+                    for( String assertedGeneCurie: aa.asserted_gene_curies ) {
+                        String alleleKey = createKey(aa, assertedGeneCurie);
+                        Integer geneAnnotIndex = diseaseGeneMap.get(alleleKey);
+                        if (geneAnnotIndex != null) {
+                            geneAnnotIndexesForDelete.add(-geneAnnotIndex); // store negative indexes to enforce descending order
+                        } else {
+                            System.out.println(" unexpected 1");
+                        }
                     }
                 }
             }
@@ -510,23 +391,25 @@ public class CurationDaf {
         {
             Map<String, Integer> diseaseGeneMap = new HashMap<>();
             for (int i = 0; i < disease_gene_ingest_set.size(); i++) {
-                DiseaseAnnotation ga = disease_gene_ingest_set.get(i);
-                String key = createKey2(ga, ga.subject);
+                GeneDiseaseAnnotation ga = disease_gene_ingest_set.get(i);
+                String key = createKey2(ga, ga.getCurie());
                 Integer old = diseaseGeneMap.put(key, i);
                 if (old != null) {
-                    DiseaseAnnotation gaOld = disease_gene_ingest_set.get(old);
+                    GeneDiseaseAnnotation gaOld = disease_gene_ingest_set.get(old);
                     System.out.println("ERROR: problem 1 in removeDiseaseAnnotsSameAsAGMAnnots");
                 }
             }
 
             Set<Integer> geneAnnotIndexesForDelete = new TreeSet<>(); // use TreeSet to store indexes in numeric order
 
-            for (DiseaseAnnotation aa : disease_agm_ingest_set) {
-                if( aa.asserted_gene!=null ) {
-                    String alleleKey = createKey2(aa, aa.asserted_gene);
-                    Integer geneAnnotIndex = diseaseGeneMap.get(alleleKey);
-                    if (geneAnnotIndex != null) {
-                        geneAnnotIndexesForDelete.add(-geneAnnotIndex); // store negative indexes to enforce descending order
+            for (AgmDiseaseAnnotation aa : disease_agm_ingest_set) {
+                if( aa.asserted_gene_curies!=null ) {
+                    for( String assertedGeneCurie: aa.asserted_gene_curies ) {
+                        String alleleKey = createKey2(aa, assertedGeneCurie);
+                        Integer geneAnnotIndex = diseaseGeneMap.get(alleleKey);
+                        if (geneAnnotIndex != null) {
+                            geneAnnotIndexesForDelete.add(-geneAnnotIndex); // store negative indexes to enforce descending order
+                        }
                     }
                 }
             }
@@ -544,20 +427,20 @@ public class CurationDaf {
         {
             Map<String, Integer> diseaseAlleleMap = new HashMap<>();
             for (int i = 0; i < disease_allele_ingest_set.size(); i++) {
-                DiseaseAnnotation ga = disease_allele_ingest_set.get(i);
-                String key = createKey2(ga, ga.subject);
+                AlleleDiseaseAnnotation ga = disease_allele_ingest_set.get(i);
+                String key = createKey2(ga, ga.getCurie());
                 Integer old = diseaseAlleleMap.put(key, i);
                 if (old != null) {
-                    DiseaseAnnotation gaOld = disease_allele_ingest_set.get(old);
+                    AlleleDiseaseAnnotation gaOld = disease_allele_ingest_set.get(old);
                     System.out.println("ERROR: problem 2 in removeDiseaseAnnotsSameAsAGMAnnots");
                 }
             }
 
             TreeSet<Integer> alleleAnnotIndexesForDelete = new TreeSet<>(); // use TreeSet to store indexes in numeric order
 
-            for (DiseaseAnnotation aa : disease_agm_ingest_set) {
-                if( aa.asserted_allele!=null ) {
-                    String alleleKey = createKey2(aa, aa.asserted_allele);
+            for (AgmDiseaseAnnotation aa : disease_agm_ingest_set) {
+                if( aa.asserted_allele_curie!=null ) {
+                    String alleleKey = createKey2(aa, aa.asserted_allele_curie);
                     Integer alleleAnnotIndex = diseaseAlleleMap.get(alleleKey);
                     if (alleleAnnotIndex != null) {
                         alleleAnnotIndexesForDelete.add(-alleleAnnotIndex); // store negative indexes to enforce descending order
@@ -573,20 +456,20 @@ public class CurationDaf {
         }
     }
 
-    String createKey(DiseaseAnnotation ga, String id) {
-        String key = id+"|"+ga.object+"|"+ga.predicate+"|"+ga.data_provider+"|"+ga.single_reference+"|"+ga.negated
-                +"|"+Utils.concatenate(ga.disease_qualifiers,",")
-                +"|"+Utils.concatenate(ga.evidence_codes,",")
-                +"|"+(ga.related_notes==null ? 0 : ga.related_notes.size())
-                +"|"+(ga.condition_relations==null ? 0 : ga.condition_relations.size());
+    String createKey(DiseaseAnnotation_DTO ga, String id) {
+        String key = id+"|"+ga.getCurie()+"|"+ga.do_term_curie+"|"+ga.data_provider_name+"|"+ga.reference_curie+"|"+ga.negated
+                +"|"+Utils.concatenate(ga.disease_qualifier_names,",")
+                +"|"+Utils.concatenate(ga.evidence_code_curies,",")
+                +"|"+(ga.note_dtos==null ? 0 : ga.note_dtos.size())
+                +"|"+(ga.condition_relation_dtos==null ? 0 : ga.condition_relation_dtos.size());
         return key;
     }
 
-    String createKey2(DiseaseAnnotation ga, String id) {
-        String key = id+"|"+ga.object+"|"+ga.data_provider+"|"+ga.single_reference+"|"+ga.negated
-                +"|"+Utils.concatenate(ga.disease_qualifiers,",")
-                +"|"+Utils.concatenate(ga.evidence_codes,",")
-                +"|"+(ga.condition_relations==null ? 0 : ga.condition_relations.size());
+    String createKey2(DiseaseAnnotation_DTO ga, String id) {
+        String key = id+"|"+ga.getCurie()+"|"+ga.do_term_curie+"|"+ga.reference_curie+"|"+ga.negated
+                +"|"+Utils.concatenate(ga.disease_qualifier_names,",")
+                +"|"+Utils.concatenate(ga.evidence_code_curies,",")
+                +"|"+(ga.condition_relation_dtos==null ? 0 : ga.condition_relation_dtos.size());
         return key;
     }
 }
