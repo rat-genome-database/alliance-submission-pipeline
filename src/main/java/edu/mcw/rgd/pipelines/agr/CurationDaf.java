@@ -137,7 +137,7 @@ public class CurationDaf {
         if( !conditionRelationDtos.isEmpty() ) {
             r.condition_relation_dtos = conditionRelationDtos;
         }
-        if( false ) {
+        if( true ) {
             if( !withGeneCuries.isEmpty() ) {
                 r.with_gene_curies = withGeneCuries;
             }

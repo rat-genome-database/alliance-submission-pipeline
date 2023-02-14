@@ -21,6 +21,7 @@ public class CurationDafGenerator {
     private Dao dao;
     private Map<Integer, String> rgdId2HgncIdMap;
     private Set<Integer> alleleRgdIds;
+    private Set<Integer> spliceRgdIds;
 
     Logger log = LogManager.getLogger("status");
 
@@ -42,6 +43,7 @@ public class CurationDafGenerator {
         log.info("START "+speciesName+" DAF file");
 
         loadAlleleRgdIds(speciesTypeKey);
+        loadSpliceRgdIds(speciesTypeKey);
 
         CurationDaf daf = new CurationDaf();
 
@@ -101,6 +103,14 @@ public class CurationDafGenerator {
         }
     }
 
+    void loadSpliceRgdIds(int speciesTypeKey) throws Exception {
+        spliceRgdIds = new HashSet<>();
+        List<Gene> splices = getDao().getGeneSplices(speciesTypeKey);
+        for( Gene g: splices ) {
+            spliceRgdIds.add(g.getRgdId());
+        }
+    }
+
 
     Collection<Annotation> getAnnotations(int speciesTypeKey) throws Exception {
         List<Annotation> annots = getDao().getAnnotationsBySpecies(speciesTypeKey, "D", "RGD");
@@ -121,6 +131,7 @@ public class CurationDafGenerator {
     Collection<Annotation> applyFilters(Collection<Annotation> annots, int speciesTypeKey) throws Exception {
 
         int omimPsReplacements = 0;
+        int excludedSpliceAnnotations = 0;
         List<Annotation> annots2 = new ArrayList<>(annots.size());
 
         for( Annotation a: annots ) {
@@ -136,6 +147,12 @@ public class CurationDafGenerator {
             // for genes evidence code must be a manual evidence code
             String assocType = Utils2.getGeneAssocType(a.getEvidence(), a.getRgdObjectKey(), alleleRgdIds.contains(a.getAnnotatedObjectRgdId()));
             if( assocType==null ) {
+                continue;
+            }
+
+            // exclude splice annotations
+            if( spliceRgdIds.contains(a.getAnnotatedObjectRgdId()) ) {
+                excludedSpliceAnnotations++;
                 continue;
             }
 
@@ -160,8 +177,9 @@ public class CurationDafGenerator {
             annots2.add(a);
         }
 
-        log.info(annots.size()+";  excluded DO+ terms;  annotations left: "+annots2.size());
+        log.info(annots.size()+";  excluded DO+ terms; excluded splice annots;  annotations left: "+annots2.size());
         log.info("    OMIM:PS replacements: "+omimPsReplacements);
+        log.info("    splice annotations excluded: "+excludedSpliceAnnotations);
         return annots2;
     }
 
