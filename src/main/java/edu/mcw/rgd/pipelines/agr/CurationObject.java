@@ -216,7 +216,15 @@ public class CurationObject {
                 return false;
             }
 
-            if( withValue.startsWith("XCO:") ) {
+            String[] conditionOntologies = {"XCO:", "CHEBI:", "UBERON:", "GO:"};
+            boolean generateConditionData = false;
+            for( String condOnt: conditionOntologies ) {
+                if( withValue.startsWith(condOnt) ) {
+                    generateConditionData = true;
+                    break;
+                }
+            }
+            if( generateConditionData ) {
                 AgrExperimentalConditionMapper.Info info = AgrExperimentalConditionMapper.getInstance().getInfo(withValue);
                 if (info == null) {
                     System.out.println("UNEXPECTED WITH VALUE: " + withValue);
