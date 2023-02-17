@@ -132,6 +132,7 @@ public class CurationDafGenerator {
 
         int omimPsReplacements = 0;
         int excludedSpliceAnnotations = 0;
+        int IGIsplits = 0;
         List<Annotation> annots2 = new ArrayList<>(annots.size());
 
         for( Annotation a: annots ) {
@@ -174,12 +175,30 @@ public class CurationDafGenerator {
                     omimPsReplacements++;
                 }
             }
-            annots2.add(a);
+
+            // split for IGI annotations having multiple values in WITH field
+            if( a.getEvidence().equals("IGI") && a.getWithInfo()!=null ) {
+
+                String[] withFields = a.getWithInfo().split("[|,]");
+                if( withFields.length==1 ) {
+                    annots2.add(a);
+                } else {
+                    IGIsplits++;
+                    for( String with: withFields ) {
+                        Annotation aa = (Annotation) a.clone();
+                        aa.setWithInfo(with);
+                        annots2.add(aa);
+                    }
+                }
+            } else {
+                annots2.add(a);
+            }
         }
 
         log.info(annots.size()+";  excluded DO+ terms; excluded splice annots;  annotations left: "+annots2.size());
         log.info("    OMIM:PS replacements: "+omimPsReplacements);
         log.info("    splice annotations excluded: "+excludedSpliceAnnotations);
+        log.info("    IGI splits: "+IGIsplits);
         return annots2;
     }
 
