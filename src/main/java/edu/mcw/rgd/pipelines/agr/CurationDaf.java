@@ -56,9 +56,9 @@ public class CurationDaf {
         }
 
         // process common fields
-        processDTO(a, dao, isAllele, r);
-
-        disease_agm_ingest_set.add(r);
+        if( processDTO(a, dao, isAllele, r) ) {
+            disease_agm_ingest_set.add(r);
+        }
     }
 
     void addAlleleDiseaseAnnotation(Annotation a, Dao dao) throws Exception {
@@ -78,9 +78,9 @@ public class CurationDaf {
         }
 
         // process common fields
-        processDTO(a, dao, isAllele, r);
-
-        disease_allele_ingest_set.add(r);
+        if( processDTO(a, dao, isAllele, r) ) {
+            disease_allele_ingest_set.add(r);
+        }
     }
 
     void addGeneDiseaseAnnotation(Annotation a, Dao dao, Map<Integer, String> geneRgdId2HgncIdMap, int speciesTypeKey) throws Exception {
@@ -96,12 +96,12 @@ public class CurationDaf {
         }
 
         // process common fields
-        processDTO(a, dao, isAllele, r);
-
-        disease_gene_ingest_set.add(r);
+        if( processDTO(a, dao, isAllele, r) ) {
+            disease_gene_ingest_set.add(r);
+        }
     }
 
-    void processDTO(Annotation a, Dao dao, boolean isAllele, DiseaseAnnotation_DTO r) throws Exception {
+    boolean processDTO(Annotation a, Dao dao, boolean isAllele, DiseaseAnnotation_DTO r) throws Exception {
 
         r.date_created = sdf_agr.format(a.getCreatedDate());
         if( a.getLastModifiedDate()!=null ) {
@@ -137,14 +137,35 @@ public class CurationDaf {
         if( !conditionRelationDtos.isEmpty() ) {
             r.condition_relation_dtos = conditionRelationDtos;
         }
-        if( true ) {
-            if( !withGeneCuries.isEmpty() ) {
-                r.with_gene_curies = withGeneCuries;
-            }
-        } else {
-            // TODO: temporarily suppressed export of WITH field
-            r.with_gene_curies = null;
+        if( !withGeneCuries.isEmpty() ) {
+            r.with_gene_curies = withGeneCuries;
         }
+
+        // special rules for processing IGI annotations
+        if( Utils.stringsAreEqual(a.getEvidence(), "IGI") ) {
+            if( r.with_gene_curies!=null && !r.with_gene_curies.isEmpty() ) {
+                if( r.with_gene_curies.size()>1 ) {
+                    throw new Exception("multiple ids in WITH field for IGI annotations");
+                }
+
+                // qualifier='ameliorates' => disease_genetic_modifier_relation_name='ameliorated_by'
+                // qualifier='treatment' => skip annotation
+                // qualifier=null or other => disease_genetic_modifier_relation_name='exacerbated_by'
+                String qualifier = Utils.NVL(a.getQualifier(), "").trim();
+                if( qualifier.equals("treatment") ) {
+                    return false;
+                }
+
+                r.disease_genetic_modifier_curie = r.with_gene_curies.get(0);
+                r.with_gene_curies = null;
+                if( qualifier.equals("ameliorates") ) {
+                    r.disease_genetic_modifier_relation_name = "ameliorated_by";
+                } else {
+                    r.disease_genetic_modifier_relation_name = "exacerbated_by";
+                }
+            }
+        }
+        return true;
     }
 
     List<String> getDiseaseQualifiers(Annotation a) {
@@ -299,8 +320,8 @@ public class CurationDaf {
         public String data_provider_name = "RGD";
         public String date_created;
         public String date_updated;
-        public String disease_genetic_modifier_curie; // not used
-        public String disease_genetic_modifier_relation_name; // not used
+        public String disease_genetic_modifier_curie;
+        public String disease_genetic_modifier_relation_name;
         public List<String> disease_qualifier_names;
         public String disease_relation_name; // assoc_type, one of (is_implicated_in, is_marker_for)
         public String do_term_curie;

@@ -1,3 +1,6 @@
+Feb 17, 2023
+  CurationDafGenerator -- added special rules for handling IGI annotations
+
 Feb 14, 2023
   CurationDafGenerator -- upgraded to linkml_model 1.5.0
 
