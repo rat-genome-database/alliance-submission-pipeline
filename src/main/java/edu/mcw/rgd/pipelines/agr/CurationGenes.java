@@ -1,6 +1,7 @@
 package edu.mcw.rgd.pipelines.agr;
 
 import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.process.Utils;
 
 import java.util.*;
 import java.util.Map;
@@ -35,12 +36,14 @@ public class CurationGenes extends CurationObject {
         systematicNameDTO.put("name_type_name", "systematic_name");
         m.gene_systematic_name_dto = systematicNameDTO;
 
-        Map nameDTO = new HashMap<>();
-        nameDTO.put("display_text", g.getName());
-        nameDTO.put("format_text", g.getName());
-        nameDTO.put("internal", false);
-        nameDTO.put("name_type_name", "full_name");
-        m.gene_full_name_dto = nameDTO;
+        if( !Utils.isStringEmpty( g.getName()) ) {
+            Map nameDTO = new HashMap<>();
+            nameDTO.put("display_text", g.getName());
+            nameDTO.put("format_text", g.getName());
+            nameDTO.put("internal", false);
+            nameDTO.put("name_type_name", "full_name");
+            m.gene_full_name_dto = nameDTO;
+        }
 
         RgdId id = dao.getRgdId(g.getRgdId());
         if( !id.getObjectStatus().equals("ACTIVE") ) {

@@ -1,3 +1,6 @@
+Feb 23, 2023
+  CurationGeneGenerator -- fixed an issue with gene_full_name_dto fields
+
 Feb 17, 2023
   CurationDafGenerator -- added special rules for handling IGI annotations
 

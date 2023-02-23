@@ -183,11 +183,13 @@ public class CurationDafGenerator {
                 if( withFields.length==1 ) {
                     annots2.add(a);
                 } else {
+                    log.info("FOR SPLIT "+a.dump("|"));
                     IGIsplits++;
                     for( String with: withFields ) {
                         Annotation aa = (Annotation) a.clone();
                         aa.setWithInfo(with);
                         annots2.add(aa);
+                        log.info("    SPLIT "+aa.dump("|"));
                     }
                 }
             } else {
