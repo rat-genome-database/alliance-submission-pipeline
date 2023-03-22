@@ -1,3 +1,7 @@
+Mar 22, 2023
+  CurationDafGenerator -- suppressed generation of 'condition_free_text' fields to avoid having
+    duplicate text in summaries on the Alliance website
+
 Feb 23, 2023
   CurationGeneGenerator -- fixed an issue with gene_full_name_dto fields
 

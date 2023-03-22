@@ -51,11 +51,17 @@ public class AgrExperimentalConditionMapper {
             info.xcoTerm = cols[1];
             info.zecoAcc = cols[2];
             info.zecoTerm = cols[3];
+
+            // in March 2023, The Alliance will autogenerate 'condition_summary';
+            // thus to avoid duplicate summaries, generation of 'condition_free_text' must be suppressed
+            /*
             if( cols.length>4 && !Utils.isStringEmpty(cols[4]) ) {
                 info.conditionStatement = cols[4].replace("\"", "");
             } else {
                 info.conditionStatement = info.zecoTerm+":"+info.xcoTerm.replace("\"", "");
             }
+            */
+
             data.put(info.xcoAcc, info);
         }
         in.close();
