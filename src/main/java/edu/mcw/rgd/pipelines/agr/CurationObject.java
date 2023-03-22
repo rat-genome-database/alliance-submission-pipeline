@@ -263,10 +263,10 @@ public class CurationObject {
                     conditions.add(h);
                 }
             } else {
-                // NOTE: per Alliance request, we suppress export of any WITH fields
-                //
-                // non-XCO with value
-                withGeneCuries.add(withValue);
+                // suppress generation of 'with_info' having RGD ids
+                if( !withValue.startsWith("RGD:") ) {
+                    withGeneCuries.add(withValue);
+                }
             }
         }
 
