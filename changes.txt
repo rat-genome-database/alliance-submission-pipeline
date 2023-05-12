@@ -1,5 +1,6 @@
 May 12, 2023
   CurationDafGenerator -- fixed generation of notes field
+  CurationDafGenerator -- added support for DataProviderDTO
 
 Mar 22, 2023
   CurationDafGenerator -- suppressed generation of 'condition_free_text' fields to avoid having

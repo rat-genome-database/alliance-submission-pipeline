@@ -12,7 +12,7 @@ public class CurationDaf {
 
     static SimpleDateFormat sdf_agr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
-    public String linkml_version = "1.6.0";
+    public String linkml_version = "1.7.0";
     public List<AgmDiseaseAnnotation> disease_agm_ingest_set = new ArrayList<>();
     public List<AlleleDiseaseAnnotation> disease_allele_ingest_set = new ArrayList<>();
     public List<GeneDiseaseAnnotation> disease_gene_ingest_set = new ArrayList<>();
@@ -109,10 +109,12 @@ public class CurationDaf {
         }
 
         if( a.getDataSrc().equals("OMIM") ) {
-            r.data_provider_name = "OMIM";
-            r.secondary_data_provider_name = "RGD";
+            // OMIM via RGD
+            r.data_provider_dto = new DataProviderDTO();
+            r.data_provider_dto.source_organization_abbreviation = "OMIM";
+            r.secondary_data_provider_dto = new DataProviderDTO(); // "RGD"
         } else {
-            r.data_provider_name = "RGD";
+            r.data_provider_dto = new DataProviderDTO(); // "RGD"
         }
 
         r.disease_qualifier_names = getDiseaseQualifiers(a);
@@ -327,7 +329,9 @@ public class CurationDaf {
         public String annotation_type_name; // not used
         public List condition_relation_dtos;
         public String created_by_curie = "RGD:curator";
-        public String data_provider_name = "RGD";
+
+        public DataProviderDTO data_provider_dto;
+
         public String date_created;
         public String date_updated;
         public String disease_genetic_modifier_curie;
@@ -344,7 +348,9 @@ public class CurationDaf {
         public Boolean negated = null;
         public List note_dtos;
         public String reference_curie;
-        public String secondary_data_provider_name; // not used
+
+        public DataProviderDTO secondary_data_provider_dto;
+
         public String updated_by_curie = "RGD:curator";
         public List<String> with_gene_curies;
     }
@@ -492,7 +498,7 @@ public class CurationDaf {
     }
 
     String createKey(DiseaseAnnotation_DTO ga, String id) {
-        String key = id+"|"+ga.getCurie()+"|"+ga.do_term_curie+"|"+ga.data_provider_name+"|"+ga.reference_curie+"|"+ga.negated
+        String key = id+"|"+ga.getCurie()+"|"+ga.do_term_curie+"|"+ga.data_provider_dto.source_organization_abbreviation+"|"+ga.reference_curie+"|"+ga.negated
                 +"|"+Utils.concatenate(ga.disease_qualifier_names,",")
                 +"|"+Utils.concatenate(ga.evidence_code_curies,",")
                 +"|"+(ga.note_dtos==null ? 0 : ga.note_dtos.size())
