@@ -8,9 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.Map;
 
 public class CurationObject {
@@ -143,7 +141,7 @@ public class CurationObject {
         return secondaryIds.isEmpty() ? null : secondaryIds;
     }
 
-    List getNotes_DTO(int rgdId, Dao dao) throws Exception {
+    List getNotes_DTO_old(int rgdId, Dao dao) throws Exception {
         List<Note> notes = dao.getNotes(rgdId);
         List results = new ArrayList();
         for( Note n: notes ) {
@@ -161,6 +159,87 @@ public class CurationObject {
             return null;
         }
         return results;
+    }
+
+    List getNotes_DTO(int rgdId, Dao dao) throws Exception {
+        List<Note> notes = dao.getNotes(rgdId);
+        Map<String, Set<Integer>> map = mergeNotes(notes);
+
+        List results = new ArrayList();
+        for( Map.Entry<String, Set<Integer>> entry: map.entrySet() ) {
+
+            String internal = entry.getKey().substring(0, 1);
+            boolean isInternal = internal.equals("1");
+            String freeText = entry.getKey().substring(1);
+
+            HashMap noteDto = new HashMap();
+            //noteDto.put("note_type_name", n.getNotesTypeName());
+            noteDto.put("note_type_name", "disease_note");
+            noteDto.put("free_text", freeText);
+            noteDto.put("internal", isInternal);
+
+            Set<Integer> refs = entry.getValue();
+            if( !refs.isEmpty() ) {
+
+                List evidenceCuries = new ArrayList();
+
+                for( int refRgdId: refs ) {
+                    HashMap refMap = new HashMap();
+                    refMap.put("internal", false);
+                    refMap.put("curie", "RGD:"+refRgdId);
+                    evidenceCuries.add(refMap);
+
+                    // optional PMID
+                    String pmid = dao.getPmid(refRgdId);
+                    if( !Utils.isStringEmpty(pmid) ) {
+                        refMap = new HashMap();
+                        refMap.put("internal", false);
+                        refMap.put("curie", "PMID:"+pmid);
+                        evidenceCuries.add(refMap);
+                    }
+                }
+
+                noteDto.put("evidence_curies", evidenceCuries);
+            }
+
+            results.add(noteDto);
+        }
+        if( notes.isEmpty() ) {
+            return null;
+        }
+        return results;
+    }
+
+    /**
+     * merge notes: 'internal flag|note-text' -> Set of ref rgd ids
+     * 'internal flag: 1 if internal (private), 0 if public
+     * @param notes
+     * @return
+     */
+    Map<String, Set<Integer>> mergeNotes(List<Note> notes) {
+
+        Map<String, Set<Integer>> result = new HashMap<>();
+
+        for( Note note: notes ) {
+
+            if( Utils.isStringEmpty(note.getNotesTypeName()) || Utils.isStringEmpty(note.getNotes()) ) {
+                continue;
+            }
+
+            String key = note.getPublicYN().equals("Y") ? "0" : "1";
+            key += note.getNotes();
+
+            Set<Integer> refs = result.get(key);
+            if (refs == null) {
+                refs = new HashSet<>();
+                result.put(key, refs);
+            }
+
+            if( note.getRefId()!=null ) {
+                refs.add(note.getRefId());
+            }
+        }
+        return result;
     }
 
     boolean handleWithInfo_DTO(Annotation a, boolean isNegated, Dao dao, List conditionRelationDtos, List withGeneCuries) throws Exception {

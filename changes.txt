@@ -1,3 +1,6 @@
+May 12, 2023
+  CurationDafGenerator -- fixed generation of notes field
+
 Mar 22, 2023
   CurationDafGenerator -- suppressed generation of 'condition_free_text' fields to avoid having
     duplicate text in summaries on the Alliance website

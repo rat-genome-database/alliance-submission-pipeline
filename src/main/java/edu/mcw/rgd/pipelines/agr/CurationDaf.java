@@ -12,7 +12,7 @@ public class CurationDaf {
 
     static SimpleDateFormat sdf_agr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
-    public String linkml_version = "1.5.0";
+    public String linkml_version = "1.6.0";
     public List<AgmDiseaseAnnotation> disease_agm_ingest_set = new ArrayList<>();
     public List<AlleleDiseaseAnnotation> disease_allele_ingest_set = new ArrayList<>();
     public List<GeneDiseaseAnnotation> disease_gene_ingest_set = new ArrayList<>();
@@ -120,7 +120,17 @@ public class CurationDaf {
         r.do_term_curie = a.getTermAcc();
         r.evidence_code_curies = getEvidenceCodes(a.getEvidence());
         r.negated = getNegatedValue(a);
-        r.note_dtos = r.getNotes_DTO(a.getAnnotatedObjectRgdId(), dao);
+
+        if( !Utils.isStringEmpty(a.getNotes()) ) {
+            HashMap noteDto = new HashMap();
+            noteDto.put("note_type_name", "disease_note");
+            noteDto.put("free_text", a.getNotes());
+            noteDto.put("internal", false);
+
+            List notes = new ArrayList();
+            notes.add(noteDto);
+            r.note_dtos = notes;
+        }
 
         String pmid = dao.getPmid(a.getRefRgdId());
         if( pmid==null ) {
