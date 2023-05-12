@@ -141,26 +141,6 @@ public class CurationObject {
         return secondaryIds.isEmpty() ? null : secondaryIds;
     }
 
-    List getNotes_DTO_old(int rgdId, Dao dao) throws Exception {
-        List<Note> notes = dao.getNotes(rgdId);
-        List results = new ArrayList();
-        for( Note n: notes ) {
-            if( Utils.isStringEmpty(n.getNotesTypeName()) || Utils.isStringEmpty(n.getNotes()) ) {
-                continue;
-            }
-            HashMap noteDto = new HashMap();
-            //noteDto.put("note_type_name", n.getNotesTypeName());
-            noteDto.put("note_type_name", "disease_note");
-            noteDto.put("free_text", n.getNotes());
-            noteDto.put("internal", !n.getPublicYN().equals("Y"));
-            results.add(noteDto);
-        }
-        if( notes.isEmpty() ) {
-            return null;
-        }
-        return results;
-    }
-
     List getNotes_DTO(int rgdId, Dao dao) throws Exception {
         List<Note> notes = dao.getNotes(rgdId);
         Map<String, Set<Integer>> map = mergeNotes(notes);

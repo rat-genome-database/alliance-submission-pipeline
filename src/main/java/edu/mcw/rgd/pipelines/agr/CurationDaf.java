@@ -123,10 +123,11 @@ public class CurationDaf {
         r.evidence_code_curies = getEvidenceCodes(a.getEvidence());
         r.negated = getNegatedValue(a);
 
-        if( !Utils.isStringEmpty(a.getNotes()) ) {
+        String notes = Utils.defaultString(a.getNotes()).trim();
+        if( notes.length()>0 ) {
             HashMap noteDto = new HashMap();
             noteDto.put("note_type_name", "disease_note");
-            noteDto.put("free_text", a.getNotes());
+            noteDto.put("free_text", notes);
             noteDto.put("internal", false);
 
             List notes = new ArrayList();
