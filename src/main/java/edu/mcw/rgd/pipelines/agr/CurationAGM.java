@@ -6,7 +6,7 @@ import java.util.*;
 
 public class CurationAGM extends CurationObject {
 
-    public String linkml_version = "1.5.0"; // 1.5.0-revised
+    public String linkml_version = "v1.7.0";
 
     public List<AgmModel> agm_ingest_set = new ArrayList<>();
 
@@ -15,6 +15,11 @@ public class CurationAGM extends CurationObject {
         AgmModel m = new AgmModel();
         m.curie = curie;
         m.name = s.getSymbol();
+
+        // we call this to find malformed strain symbols
+        String friendlyName = getHumanFriendlyName(m.name, s.getRgdId());
+
+        m.data_provider_dto.setCrossReferenceDTO(curie, "strain", "RGD");
 
         RgdId id = dao.getRgdId(s.getRgdId());
         if( !id.getObjectStatus().equals("ACTIVE") ) {
@@ -28,7 +33,7 @@ public class CurationAGM extends CurationObject {
 
         m.secondary_identifiers = getSecondaryIdentifiers(curie, s.getRgdId(), dao);
         //m.synonyms = getSynonyms(s.getRgdId(), dao);
-        m.genomic_location_dtos = getGenomicLocations_DTO(s.getRgdId(), SpeciesType.RAT, dao, curie);
+        m.genomic_location_association_dtos = getGenomicLocationAssociation_DTOs(s.getRgdId(), SpeciesType.RAT, dao, curie);
 
         agm_ingest_set.add(m);
 
@@ -54,10 +59,10 @@ public class CurationAGM extends CurationObject {
         public List component_dtos = null;
         public List cross_reference_dtos = null;
         public String curie;
-        public String data_provider_name = "RGD";
+        public DataProviderDTO data_provider_dto = new DataProviderDTO();
         public String date_created;
         public String date_updated;
-        public List genomic_location_dtos = null;
+        public List genomic_location_association_dtos = null;
         public boolean internal = false;
         public String name;
         public Boolean obsolete = null;

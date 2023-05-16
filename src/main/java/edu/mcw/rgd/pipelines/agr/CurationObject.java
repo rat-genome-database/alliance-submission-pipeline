@@ -36,8 +36,12 @@ public class CurationObject {
         String name2 = name
             .replace("<i>", "")
             .replace("</i>", "")
+            .replace("<I>", "")
+            .replace("</I>", "")
             .replace("<sup>", "[")
-            .replace("</sup>", "]");
+            .replace("</sup>", "]")
+            .replace("<SUP>", "[")
+            .replace("</SUP>", "]");
 
         if( name2.contains("<") ) {
             System.out.println("unhandled conversion in getHumanFriendlyName("+name+") RGD:"+rgdId);
