@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CurationGeneGenerator {
 
@@ -49,31 +50,34 @@ public class CurationGeneGenerator {
         // do not export fields with NULL values
         json.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-        int obsoleteGeneCount = 0;
+        AtomicInteger obsoleteGeneCount = new AtomicInteger(0);
 
         Set<String> canonicalProteins = dao.getCanonicalProteins(speciesTypeKey);
 
         List<Gene> genes = dao.getAllGenes(speciesTypeKey);
         log.info("  genes: "+genes.size());
-        for( Gene g: genes ) {
-
+        genes.parallelStream().forEach( g -> {
             String curie = null;
-            if( speciesTypeKey==SpeciesType.RAT ) {
-                curie = "RGD:"+g.getRgdId();
-            } else if( speciesTypeKey==SpeciesType.HUMAN ) {
+            if (speciesTypeKey == SpeciesType.RAT) {
+                curie = "RGD:" + g.getRgdId();
+            } else if (speciesTypeKey == SpeciesType.HUMAN) {
                 String hgncId = rgdId2HgncIdMap.get(g.getRgdId());
-                if( hgncId==null ) {
-                    continue;
+                if (hgncId == null) {
+                    return;
                 }
                 curie = hgncId;
             }
 
-            CurationGenes.GeneModel m = curationGenes.add(g, dao, curie, canonicalProteins);
+            try {
+                CurationGenes.GeneModel m = curationGenes.add(g, dao, curie, canonicalProteins);
 
-            if( m.obsolete!=null && m.obsolete==true ) {
-                obsoleteGeneCount++;
+                if (m.obsolete != null && m.obsolete == true) {
+                    obsoleteGeneCount.incrementAndGet();
+                }
+            } catch(Exception e) {
+                throw new RuntimeException(e);
             }
-        }
+        });
 
         // sort data, alphabetically by object symbols
         curationGenes.sort();
@@ -90,7 +94,7 @@ public class CurationGeneGenerator {
         }
 
         log.info("END "+speciesName+" gene file:  genes="+curationGenes.gene_ingest_set.size());
-        log.info("   obsolete gene count: "+obsoleteGeneCount);
+        log.info("   obsolete gene count: "+obsoleteGeneCount.get());
         log.info("");
     }
 

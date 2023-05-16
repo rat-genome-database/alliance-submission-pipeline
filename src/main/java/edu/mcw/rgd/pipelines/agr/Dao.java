@@ -3,7 +3,6 @@ package edu.mcw.rgd.pipelines.agr;
 import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.impl.variants.VariantDAO;
-import edu.mcw.rgd.dao.spring.IntListQuery;
 import edu.mcw.rgd.dao.spring.IntStringMapQuery;
 import edu.mcw.rgd.dao.spring.StringListQuery;
 import edu.mcw.rgd.dao.spring.variants.VariantMapQuery;
@@ -132,7 +131,7 @@ public class Dao {
     }
 
 
-    public String getPmid(int refRgdId) throws Exception {
+    synchronized public String getPmid(int refRgdId) throws Exception {
         if( _pmidMap==null ) {
             List<IntStringMapQuery.MapPair> pmidList = refDAO.getPubmedIdsAndRefRgdIds();
             _pmidMap = new HashMap<>(pmidList.size());

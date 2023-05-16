@@ -21,7 +21,7 @@ public class CurationGenes extends CurationObject {
         m.data_provider_dto.setCrossReferenceDTO("RGD:"+g.getRgdId(), "gene", "RGD");
 
         if( g.getSymbol().contains("<") || g.getSymbol().contains("'") || g.getSymbol().contains("\"")) {
-            System.out.println("aha");
+            System.out.println(" ### punctuation RGD:"+g.getRgdId());
         }
         Map symbolDTO = new HashMap<>();
         symbolDTO.put("display_text", g.getSymbol());
@@ -63,7 +63,9 @@ public class CurationGenes extends CurationObject {
         m.genomic_location_association_dtos = getGenomicLocationAssociation_DTOs(g.getRgdId(), g.getSpeciesTypeKey(), dao, curie);
         m.cross_reference_dtos = getCrossReferences(g, dao, canonicalProteins);
 
-        gene_ingest_set.add(m);
+        synchronized(gene_ingest_set) {
+            gene_ingest_set.add(m);
+        }
 
         return m;
     }
