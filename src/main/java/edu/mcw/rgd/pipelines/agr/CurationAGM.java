@@ -21,9 +21,9 @@ public class CurationAGM extends CurationObject {
             m.obsolete = true;
         }
 
-        m.date_created = sdf_agr.format(id.getCreatedDate());
+        m.date_created = Utils2.formatDate(id.getCreatedDate());
         if( id.getLastModifiedDate()!=null ) {
-            m.date_updated = sdf_agr.format(id.getLastModifiedDate());
+            m.date_updated = Utils2.formatDate(id.getLastModifiedDate());
         }
 
         m.secondary_identifiers = getSecondaryIdentifiers(curie, s.getRgdId(), dao);

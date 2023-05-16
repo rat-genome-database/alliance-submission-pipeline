@@ -40,9 +40,9 @@ public class CurationAllele extends CurationObject {
             m.obsolete = true;
         }
 
-        m.date_created = sdf_agr.format(id.getCreatedDate());
+        m.date_created = Utils2.formatDate(id.getCreatedDate());
         if( id.getLastModifiedDate()!=null ) {
-            m.date_updated = sdf_agr.format(id.getLastModifiedDate());
+            m.date_updated = Utils2.formatDate(id.getLastModifiedDate());
         }
 
         m.allele_secondary_id_dtos = getSecondaryIdentifiers(curie, a.getRgdId(), dao);
@@ -76,7 +76,7 @@ public class CurationAllele extends CurationObject {
             eventMap.put("internal", false);
             eventMap.put("nomenclature_event_name", info);
             eventMap.put("created_by_curie", "RGD");
-            eventMap.put("date_created", sdf_agr.format(event.getEventDate()));
+            eventMap.put("date_created", Utils2.formatDate(event.getEventDate()));
             int refRgdId = dao.getRefRgdId(Integer.parseInt(event.getRefKey()));
             if( refRgdId!=0 ) {
                 List<String> refRgdIds = new ArrayList<>();
@@ -148,10 +148,10 @@ public class CurationAllele extends CurationObject {
                     map.put("created_by_curie", "RGD");
                     map.put("secondary_id", secRgdId);
                     if( id.getCreatedDate()!=null ) {
-                        map.put("date_created", sdf_agr.format(id.getCreatedDate()));
+                        map.put("date_created", Utils2.formatDate(id.getCreatedDate()));
                     }
                     if( id.getLastModifiedDate()!=null ) {
-                        map.put("date_updated", sdf_agr.format(id.getLastModifiedDate()));
+                        map.put("date_updated", Utils2.formatDate(id.getLastModifiedDate()));
                     }
                     secondaryIds.add(map);
                 }
