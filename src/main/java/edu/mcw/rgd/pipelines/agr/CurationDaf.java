@@ -53,7 +53,7 @@ public class CurationDaf {
         }
 
         // process common fields
-        if( processDTO(a, dao, isAllele, r) ) {
+        if( processDTO(a, dao, isAllele, r, SpeciesType.RAT) ) {
             disease_agm_ingest_set.add(r);
         }
     }
@@ -75,7 +75,7 @@ public class CurationDaf {
         }
 
         // process common fields
-        if( processDTO(a, dao, isAllele, r) ) {
+        if( processDTO(a, dao, isAllele, r, SpeciesType.RAT) ) {
             disease_allele_ingest_set.add(r);
         }
     }
@@ -93,27 +93,28 @@ public class CurationDaf {
         }
 
         // process common fields
-        if( processDTO(a, dao, isAllele, r) ) {
+        if( processDTO(a, dao, isAllele, r, speciesTypeKey) ) {
             disease_gene_ingest_set.add(r);
         }
     }
 
-    boolean processDTO(Annotation a, Dao dao, boolean isAllele, DiseaseAnnotation_DTO r) throws Exception {
+    boolean processDTO(Annotation a, Dao dao, boolean isAllele, DiseaseAnnotation_DTO r, int speciesTypeKey) throws Exception {
 
         r.date_created = Utils2.formatDate(a.getCreatedDate());
         if( a.getLastModifiedDate()!=null ) {
             r.date_updated = Utils2.formatDate(a.getLastModifiedDate());
         }
 
+        String alliancePage = speciesTypeKey==SpeciesType.RAT ? "disease/rat" : speciesTypeKey==SpeciesType.HUMAN ? "disease/human" : "disease/all";
         if( a.getDataSrc().equals("OMIM") ) {
             // OMIM via RGD
             r.data_provider_dto = new DataProviderDTO();
             r.data_provider_dto.source_organization_abbreviation = "OMIM";
             r.secondary_data_provider_dto = new DataProviderDTO(); // "RGD"
-            r.secondary_data_provider_dto.setCrossReferenceDTO( "RGD:"+a.getAnnotatedObjectRgdId(), "gene", "RGD");
+            r.secondary_data_provider_dto.setCrossReferenceDTO( a.getTermAcc(), alliancePage, "RGD");
         } else {
             r.data_provider_dto = new DataProviderDTO(); // "RGD"
-            r.data_provider_dto.setCrossReferenceDTO( "RGD:"+a.getAnnotatedObjectRgdId(), "gene", "RGD");
+            r.data_provider_dto.setCrossReferenceDTO( a.getTermAcc(), alliancePage, "RGD");
         }
 
         r.disease_qualifier_names = getDiseaseQualifiers(a);
