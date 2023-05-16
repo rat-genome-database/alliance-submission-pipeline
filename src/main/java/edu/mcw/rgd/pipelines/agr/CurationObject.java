@@ -49,38 +49,6 @@ public class CurationObject {
         return name2;
     }
 
-
-    List getGenomicLocations_DTO(int rgdId, int speciesTypeKey, Dao dao, String geneCurie) throws Exception {
-
-        int mapKey1 = 0, mapKey2 = 0; // NCBI/Ensembl assemblies
-        if( speciesTypeKey== SpeciesType.HUMAN ) {
-            mapKey1 = 38;
-            mapKey2 = 40;
-        } else {
-            mapKey1 = 372;
-            mapKey2 = 373;
-        }
-        String assembly = MapManager.getInstance().getMap(mapKey1).getName();
-
-        List<MapData> mds = getLoci(rgdId, mapKey1, mapKey2, dao);
-        if( mds.isEmpty() ) {
-            return null;
-        }
-        List results = new ArrayList();
-        for( MapData md: mds ) {
-            HashMap loc = new HashMap();
-            loc.put("end", md.getStopPos());
-            loc.put("start", md.getStartPos());
-            loc.put("internal", false);
-            loc.put("assembly_curie", assembly);
-            loc.put("chromosome_curie", md.getChromosome());
-            loc.put("predicate", "localizes_to");
-            loc.put("genomic_entity_curie", geneCurie);
-            results.add(loc);
-        }
-        return results;
-    }
-
     List getGenomicLocationAssociation_DTOs(int rgdId, int speciesTypeKey, Dao dao, String geneCurie) throws Exception {
 
         int mapKey1 = 0, mapKey2 = 0; // NCBI/Ensembl assemblies

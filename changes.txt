@@ -1,7 +1,8 @@
 May 16, 2023
   CurationDafGenerator -- now providing DataProviderDTO.cross_reference_dto data for RGD (OMIM xref data still missing)
-  CurationAlleleGenerator -- now providing DataProviderDTO.cross_reference_dto data
-  CurationAGMGenerator -- now providing DataProviderDTO.cross_reference_dto data
+  CurationAlleleGenerator -- added DataProviderDTO
+  CurationAGMGenerator -- added DataProviderDTO
+  CurationGeneGenerator -- added DataProviderDTO -- discontinued 'gene_systematic_name_dto'
 
 May 12, 2023
   CurationDafGenerator -- fixed generation of notes field

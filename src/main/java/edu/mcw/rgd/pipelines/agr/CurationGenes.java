@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class CurationGenes extends CurationObject {
 
-    public String linkml_version = "1.5.0";
+    public String linkml_version = "v1.7.0";
 
     public List<GeneModel> gene_ingest_set = new ArrayList<>();
 
@@ -18,6 +18,7 @@ public class CurationGenes extends CurationObject {
         m.curie = curie;
         m.taxon_curie = "NCBITaxon:" + SpeciesType.getTaxonomicId(g.getSpeciesTypeKey());
         m.gene_type_curie = g.getSoAccId();
+        m.data_provider_dto.setCrossReferenceDTO("RGD:"+g.getRgdId(), "gene", "RGD");
 
         if( g.getSymbol().contains("<") || g.getSymbol().contains("'") || g.getSymbol().contains("\"")) {
             System.out.println("aha");
@@ -29,12 +30,14 @@ public class CurationGenes extends CurationObject {
         symbolDTO.put("name_type_name", "nomenclature_symbol");
         m.gene_symbol_dto = symbolDTO;
 
+        /* not used in RGD
         Map systematicNameDTO = new HashMap<>();
         systematicNameDTO.put("display_text", g.getSymbol());
         systematicNameDTO.put("format_text", g.getSymbol());
         systematicNameDTO.put("internal", false);
         systematicNameDTO.put("name_type_name", "systematic_name");
         m.gene_systematic_name_dto = systematicNameDTO;
+        */
 
         if( !Utils.isStringEmpty( g.getName()) ) {
             Map nameDTO = new HashMap<>();
@@ -57,7 +60,7 @@ public class CurationGenes extends CurationObject {
 
         m.secondary_identifiers = getSecondaryIdentifiers(curie, g.getRgdId(), dao);
         m.gene_synonym_dtos = getSynonyms(g.getRgdId(), dao);
-        m.genomic_location_dtos = getGenomicLocations_DTO(g.getRgdId(), g.getSpeciesTypeKey(), dao, curie);
+        m.genomic_location_association_dtos = getGenomicLocationAssociation_DTOs(g.getRgdId(), g.getSpeciesTypeKey(), dao, curie);
         m.cross_reference_dtos = getCrossReferences(g, dao, canonicalProteins);
 
         gene_ingest_set.add(m);
@@ -115,6 +118,7 @@ public class CurationGenes extends CurationObject {
         public String created_by_curie = "RGD";
         public List cross_reference_dtos = null;
         public String curie;
+        public DataProviderDTO data_provider_dto = new DataProviderDTO();
         public String date_created;
         public String date_updated;
         public Map gene_full_name_dto;
@@ -122,7 +126,7 @@ public class CurationGenes extends CurationObject {
         public List gene_synonym_dtos = null;
         public Map gene_systematic_name_dto;
         public String gene_type_curie;
-        public List genomic_location_dtos = null;
+        public List genomic_location_association_dtos = null;
 
         public boolean internal = false;
         public Boolean obsolete = null;
