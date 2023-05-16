@@ -7,13 +7,10 @@ import edu.mcw.rgd.process.mapping.MapManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map;
 
 public class CurationObject {
-
-    static SimpleDateFormat sdf_agr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
     static public Map<Integer, String> loadHgncIdMap(Dao dao) throws Exception {
         Map<Integer, String> rgdId2HgncIdMap = new HashMap<>();

@@ -1,3 +1,6 @@
+May 16, 2023
+  CurationDafGenerator -- now providing DataProviderDTO.cross_reference_dto data for RGD (OMIM xref data still missing)
+
 May 12, 2023
   CurationDafGenerator -- fixed generation of notes field
   CurationDafGenerator -- added support for DataProviderDTO

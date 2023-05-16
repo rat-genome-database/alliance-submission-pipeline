@@ -4,15 +4,12 @@ import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.process.Utils;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map;
 
 public class CurationDaf {
 
-    static SimpleDateFormat sdf_agr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-
-    public String linkml_version = "1.7.0";
+    public String linkml_version = "v1.7.0";
     public List<AgmDiseaseAnnotation> disease_agm_ingest_set = new ArrayList<>();
     public List<AlleleDiseaseAnnotation> disease_allele_ingest_set = new ArrayList<>();
     public List<GeneDiseaseAnnotation> disease_gene_ingest_set = new ArrayList<>();
@@ -103,9 +100,9 @@ public class CurationDaf {
 
     boolean processDTO(Annotation a, Dao dao, boolean isAllele, DiseaseAnnotation_DTO r) throws Exception {
 
-        r.date_created = sdf_agr.format(a.getCreatedDate());
+        r.date_created = Utils2.formatDate(a.getCreatedDate());
         if( a.getLastModifiedDate()!=null ) {
-            r.date_updated = sdf_agr.format(a.getLastModifiedDate());
+            r.date_updated = Utils2.formatDate(a.getLastModifiedDate());
         }
 
         if( a.getDataSrc().equals("OMIM") ) {
@@ -113,8 +110,10 @@ public class CurationDaf {
             r.data_provider_dto = new DataProviderDTO();
             r.data_provider_dto.source_organization_abbreviation = "OMIM";
             r.secondary_data_provider_dto = new DataProviderDTO(); // "RGD"
+            r.secondary_data_provider_dto.setCrossReferenceDTO( "RGD:"+a.getAnnotatedObjectRgdId(), "gene", "RGD");
         } else {
             r.data_provider_dto = new DataProviderDTO(); // "RGD"
+            r.data_provider_dto.setCrossReferenceDTO( "RGD:"+a.getAnnotatedObjectRgdId(), "gene", "RGD");
         }
 
         r.disease_qualifier_names = getDiseaseQualifiers(a);

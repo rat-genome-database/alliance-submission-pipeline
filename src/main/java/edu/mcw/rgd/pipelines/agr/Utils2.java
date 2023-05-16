@@ -1,6 +1,16 @@
 package edu.mcw.rgd.pipelines.agr;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Utils2 {
+
+    static SimpleDateFormat sdf_agr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+
+    synchronized public static String formatDate(Date dt) {
+        String result = sdf_agr.format(dt);
+        return result;
+    }
 
     public static String getGeneAssocType(String evidence, int rgdObjectKey, boolean isAllele) {
 
