@@ -27,7 +27,7 @@ public class CurationObject {
     }
 
     // human friendly name: we replace all html tags with square brackets
-    String getHumanFriendlyName(String name) {
+    String getHumanFriendlyName(String name, int rgdId) {
 
         if( name==null || !name.contains("<") ) {
             return name;
@@ -40,7 +40,7 @@ public class CurationObject {
             .replace("</sup>", "]");
 
         if( name2.contains("<") ) {
-            System.out.println("unhandled conversion in getHumanFriendlyName("+name+")");
+            System.out.println("unhandled conversion in getHumanFriendlyName("+name+") RGD:"+rgdId);
         }
         return name2;
     }
@@ -71,6 +71,37 @@ public class CurationObject {
             loc.put("assembly_curie", assembly);
             loc.put("chromosome_curie", md.getChromosome());
             loc.put("predicate", "localizes_to");
+            loc.put("genomic_entity_curie", geneCurie);
+            results.add(loc);
+        }
+        return results;
+    }
+
+    List getGenomicLocationAssociation_DTOs(int rgdId, int speciesTypeKey, Dao dao, String geneCurie) throws Exception {
+
+        int mapKey1 = 0, mapKey2 = 0; // NCBI/Ensembl assemblies
+        if( speciesTypeKey== SpeciesType.HUMAN ) {
+            mapKey1 = 38;
+            mapKey2 = 40;
+        } else {
+            mapKey1 = 372;
+            mapKey2 = 373;
+        }
+        String assembly = MapManager.getInstance().getMap(mapKey1).getName();
+
+        List<MapData> mds = getLoci(rgdId, mapKey1, mapKey2, dao);
+        if( mds.isEmpty() ) {
+            return null;
+        }
+        List results = new ArrayList();
+        for( MapData md: mds ) {
+            HashMap loc = new HashMap();
+            loc.put("end", md.getStopPos());
+            loc.put("start", md.getStartPos());
+            loc.put("internal", false);
+            loc.put("assembly_curie", assembly);
+            loc.put("chromosome_curie", md.getChromosome());
+            loc.put("predicate_name", "has_genomic_location");
             loc.put("genomic_entity_curie", geneCurie);
             results.add(loc);
         }

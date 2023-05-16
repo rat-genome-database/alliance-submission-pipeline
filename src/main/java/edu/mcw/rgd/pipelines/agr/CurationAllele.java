@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class CurationAllele extends CurationObject {
 
-    public String linkml_version = "1.5.0";
+    public String linkml_version = "v1.7.0";
     public List<AlleleModel> allele_ingest_set = new ArrayList<>();
 
     public AlleleModel add(Gene a, Dao dao, String curie) throws Exception {
@@ -23,14 +23,14 @@ public class CurationAllele extends CurationObject {
 
         Map nameMap = new HashMap();
         nameMap.put("display_text", alleleName);
-        nameMap.put("format_text", getHumanFriendlyName(alleleName));
+        nameMap.put("format_text", getHumanFriendlyName(alleleName, a.getRgdId()));
         nameMap.put("name_type_name", "full_name");
         nameMap.put("internal", false);
         m.allele_full_name_dto = nameMap;
 
         Map symbolMap = new HashMap();
         symbolMap.put("display_text", a.getSymbol());
-        symbolMap.put("format_text", getHumanFriendlyName(a.getSymbol()));
+        symbolMap.put("format_text", getHumanFriendlyName(a.getSymbol(), a.getRgdId()));
         symbolMap.put("name_type_name", "nomenclature_symbol");
         symbolMap.put("internal", false);
         m.allele_symbol_dto = symbolMap;
@@ -46,12 +46,15 @@ public class CurationAllele extends CurationObject {
         }
 
         m.allele_secondary_id_dtos = getSecondaryIdentifiers(curie, a.getRgdId(), dao);
-        m.genomic_location_dtos = getGenomicLocations_DTO(a.getRgdId(), SpeciesType.RAT, dao, curie);
+        m.genomic_location_association_dtos = getGenomicLocationAssociation_DTOs(a.getRgdId(), SpeciesType.RAT, dao, curie);
         m.reference_curies = getReferences(a.getRgdId(), dao);
 
         m.allele_nomenclature_event_dtos = getNomenEvents(a.getRgdId(), dao);
         m.allele_note_dtos = getNotes_DTO(a.getRgdId(), dao);
         m.allele_synonym_dtos = getSynonyms(a.getRgdId(), dao);
+
+        m.data_provider_dto = new DataProviderDTO();
+        m.data_provider_dto.setCrossReferenceDTO("RGD:"+a.getRgdId(), "allele", "RGD");
 
         allele_ingest_set.add(m);
 
@@ -99,7 +102,7 @@ public class CurationAllele extends CurationObject {
             HashMap synonym = new HashMap();
             synonym.put("internal", false);
             synonym.put("display_text", a.getValue());
-            synonym.put("format_text", getHumanFriendlyName(a.getValue()));
+            synonym.put("format_text", getHumanFriendlyName(a.getValue(), rgdId));
             if( a.getTypeName().equals("old_gene_symbol") ) {
                 synonym.put("name_type_name", "nomenclature_symbol");
             }
@@ -176,9 +179,10 @@ public class CurationAllele extends CurationObject {
 
         public String created_by_curie = "RGD";
         public String curie;
+        public DataProviderDTO data_provider_dto;
         public String date_created;
         public String date_updated;
-        public List genomic_location_dtos = null;
+        public List genomic_location_association_dtos = null;
         public boolean internal = false;
         public Boolean obsolete = null;
         public List<String> reference_curies = null;
