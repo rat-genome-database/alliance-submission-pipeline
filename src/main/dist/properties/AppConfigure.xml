@@ -12,25 +12,25 @@
         -->
         <property name="diseaseQualifierMappings">
             <map>
-                <entry key="susceptibility" value="susceptibility to"/>
+                <entry key="susceptibility" value="susceptibility_to"/>
 
-                <entry key="penetrance" value="penetrance of"/>
+                <entry key="penetrance" value="penetrance_of"/>
 
-                <entry key="ameliorates" value="severity of"/>
-                <entry key="exacerbates" value="severity of"/>
-                <entry key="severity" value="severity of"/>
+                <entry key="ameliorates" value="severity_of"/>
+                <entry key="exacerbates" value="severity_of"/>
+                <entry key="severity" value="severity_of"/>
 
-                <entry key="onset" value="onset of"/>
-                <entry key="MODEL: onset" value="onset of"/>
+                <entry key="onset" value="onset_of"/>
+                <entry key="MODEL: onset" value="onset_of"/>
 
-                <entry key="resistance" value="resistance to"/>
-                <entry key="resistant" value="resistance to"/>
+                <entry key="resistance" value="resistance_to"/>
+                <entry key="resistant" value="resistance_to"/>
 
-                <entry key="sexual_dimorphism" value="sexual dimorphism in"/>
-                <entry key="sexual dimorphism" value="sexual dimorphism in"/>
+                <entry key="sexual_dimorphism" value="sexual_dimorphism_in"/>
+                <entry key="sexual dimorphism" value="sexual_dimorphism_in"/>
 
-                <entry key="disease_progression" value="disease progression of"/>
-                <entry key="disease progression" value="disease progression of"/>
+                <entry key="disease_progression" value="disease_progression_of"/>
+                <entry key="disease progression" value="disease_progression_of"/>
             </map>
         </property>
     </bean>
