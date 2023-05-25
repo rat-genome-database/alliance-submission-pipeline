@@ -42,6 +42,8 @@ public class Dao {
     private XdbIdDAO xdbIdDAO = new XdbIdDAO();
     private edu.mcw.rgd.dao.impl.variants.VariantDAO variantDAO = new VariantDAO();
 
+    private Map<String, String> diseaseQualifierMappings;
+
     public String getConnectionInfo() {
         return variantDAO.getConnectionInfo();
     }
@@ -243,5 +245,13 @@ public class Dao {
             return 0;
         }
         return ref.getRgdId();
+    }
+
+    public Map<String, String> getDiseaseQualifierMappings() {
+        return diseaseQualifierMappings;
+    }
+
+    public void setDiseaseQualifierMappings(Map<String, String> diseaseQualifierMappings) {
+        this.diseaseQualifierMappings = diseaseQualifierMappings;
     }
 }

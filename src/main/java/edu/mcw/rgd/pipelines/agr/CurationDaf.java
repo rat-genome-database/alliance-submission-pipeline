@@ -117,7 +117,7 @@ public class CurationDaf {
             r.data_provider_dto.setCrossReferenceDTO( a.getTermAcc(), alliancePage, "RGD");
         }
 
-        r.disease_qualifier_names = getDiseaseQualifiers(a);
+        r.disease_qualifier_names = getDiseaseQualifiers(a, dao);
         r.disease_relation_name = Utils2.getGeneAssocType(a.getEvidence(), a.getRgdObjectKey(), isAllele);
         r.do_term_curie = a.getTermAcc();
         r.evidence_code_curies = getEvidenceCodes(a.getEvidence());
@@ -181,79 +181,20 @@ public class CurationDaf {
         return true;
     }
 
-    List<String> getDiseaseQualifiers(Annotation a) {
+    List<String> getDiseaseQualifiers(Annotation a, Dao dao) {
 
         if( a.getQualifier()==null ) {
             return null;
         }
+
         List<String> qualifiers = null;
 
-        String qualifier = a.getQualifier().trim();
-
-        switch( qualifier ) {
-            case "susceptibility":
-            case "penetrance":
-                qualifiers = new ArrayList<>();
-                qualifiers.add(qualifier);
-                break;
-
-            case "ameliorates":
-            case "exacerbates":
-            case "severity":
-                qualifiers = new ArrayList<>();
-                qualifiers.add("severity");
-                break;
-
-            case "onset":
-            case "MODEL: onset":
-                qualifiers = new ArrayList<>();
-                qualifiers.add("onset");
-                break;
-
-            case "resistance":
-            case "resistant":
-                qualifiers = new ArrayList<>();
-                qualifiers.add("resistance");
-                break;
-
-            case "sexual_dimorphism":
-            case "sexual dimorphism":
-                qualifiers = new ArrayList<>();
-                qualifiers.add("sexual_dimorphism");
-                break;
-
-            case "disease_progression":
-            case "disease progression":
-            case "MODEL: disease progression":
-                qualifiers = new ArrayList<>();
-                qualifiers.add("disease_progression");
-                break;
-
-
-            case "no_association":
-            case "NOT":
-
-            case "induced":
-            case "induces":
-            case "spontaneous":
-            case "treatment":
-            case "Treatment":
-                break; // ignore
-
-            // ignored for rat gene annotations
-            case "MODEL":
-            case "MODEL: control":
-            case "MODEL:spontaneous":
-            case "MODEL: spontaneous":
-            case "MODEL: treatment":
-            case "MODEL:induced":
-            case "MODEL: induced":
-                break; // ignore
-
-            default:
-                System.out.println("q "+a.getQualifier());
+        String rgdQualifier = a.getQualifier().trim();
+        String allianceQualifier = dao.getDiseaseQualifierMappings().get(rgdQualifier);
+        if( allianceQualifier!=null ) {
+            qualifiers = new ArrayList<>();
+            qualifiers.add(allianceQualifier);
         }
-
         return qualifiers;
     }
 

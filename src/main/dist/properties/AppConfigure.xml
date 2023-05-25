@@ -2,11 +2,36 @@
 
 <beans>
     <bean id="main" class="edu.mcw.rgd.pipelines.agr.Main" >
-        <property name="version" value="Alliance Submission Pipeline  -- build May 16, 2023" />
+        <property name="version" value="Alliance Submission Pipeline  -- build May 25, 2023" />
         <property name="dao" ref="dao"/>
     </bean>
 
     <bean id="dao" class="edu.mcw.rgd.pipelines.agr.Dao" >
+        <!-- mappings of RGD disease qualifiers into Alliance qualifiers;
+             any RGD qualifiers not listed here are ignored, i.e. not transferred into Alliance annotation
+        -->
+        <property name="diseaseQualifierMappings">
+            <map>
+                <entry key="susceptibility" value="susceptibility"/>
+                <entry key="penetrance" value="penetrance"/>
+
+                <entry key="ameliorates" value="severity"/>
+                <entry key="exacerbates" value="severity"/>
+                <entry key="severity" value="severity"/>
+
+                <entry key="onset" value="onset"/>
+                <entry key="MODEL: onset" value="onset"/>
+
+                <entry key="resistance" value="resistance"/>
+                <entry key="resistant" value="resistance"/>
+
+                <entry key="sexual_dimorphism" value="sexual_dimorphism"/>
+                <entry key="sexual dimorphism" value="sexual_dimorphism"/>
+
+                <entry key="disease_progression" value="disease_progression"/>
+                <entry key="disease progression" value="disease_progression"/>
+            </map>
+        </property>
     </bean>
 
     <bean id="variantVcfGenerator" class="edu.mcw.rgd.pipelines.agr.VariantVcfGenerator" >
