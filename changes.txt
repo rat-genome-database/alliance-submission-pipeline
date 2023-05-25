@@ -1,5 +1,13 @@
 May 25, 2023
   CurationDafGenerator -- moved hard-coded qualifier mappings into properties file
+    changed the qualifiers as follows (per SCRUM-2824):
+      onset               ==> onset of
+      severity            ==> severity of
+      sexual_dimorphism   ==> sexual dimorphism in
+      susceptibility      ==> susceptibility to
+      penetrance          ==> penetrance of
+      disease_progression ==> disease progression of
+      resistance          ==> resistance to
 
 May 16, 2023
   CurationDafGenerator -- now providing DataProviderDTO.cross_reference_dto data for RGD (OMIM xref data still missing)
