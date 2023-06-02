@@ -137,6 +137,11 @@ public class CurationDafGenerator {
 
         for( Annotation a: annots ) {
 
+            // exclude non-DO term accessions -- that should *not* happen...
+            if( !a.getTermAcc().startsWith("DOID:") ) {
+                continue;
+            }
+
             // for human, annotated object rgd id must map to HGNC id
             if( speciesTypeKey==SpeciesType.HUMAN ) {
                 String hgncId = rgdId2HgncIdMap.get(a.getAnnotatedObjectRgdId());
