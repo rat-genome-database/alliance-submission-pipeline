@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class CurationAllele extends CurationObject {
 
-    public String linkml_version = "v1.7.0";
+    public String linkml_version = "v1.7.3";
     public List<AlleleModel> allele_ingest_set = new ArrayList<>();
 
     public AlleleModel add(Gene a, Dao dao, String curie) throws Exception {
@@ -137,37 +137,6 @@ public class CurationAllele extends CurationObject {
         return results;
     }
 
-    List getSecondaryIdentifiers(String curie, int rgdId, Dao dao) throws Exception {
-
-        List<Map> secondaryIds = null;
-        try {
-            List<Integer> secondaryRgdIds = dao.getOldRgdIds(rgdId);
-            if (!secondaryRgdIds.isEmpty()) {
-                secondaryIds = new ArrayList<>();
-                for (Integer secRgdId : secondaryRgdIds) {
-                    RgdId id = dao.getRgdId(secRgdId);
-                    Map map = new HashMap();
-                    map.put("internal", "false");
-                    map.put("created_by_curie", "RGD");
-                    map.put("secondary_id", secRgdId);
-                    if( id.getCreatedDate()!=null ) {
-                        map.put("date_created", Utils2.formatDate(id.getCreatedDate()));
-                    }
-                    if( id.getLastModifiedDate()!=null ) {
-                        map.put("date_updated", Utils2.formatDate(id.getLastModifiedDate()));
-                    }
-                    secondaryIds.add(map);
-                }
-            }
-        } catch(Exception e) {
-            String msg = "getOldRgdIds problem for "+curie+" RGD:"+rgdId;
-            System.out.println(msg);
-            Logger log = LogManager.getLogger("status");
-            log.error(msg);
-        }
-
-        return secondaryIds==null ? null : secondaryIds.isEmpty() ? null : secondaryIds;
-    }
 
     class AlleleModel {
         public Map allele_full_name_dto;

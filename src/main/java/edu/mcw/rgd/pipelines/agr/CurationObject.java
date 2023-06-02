@@ -120,15 +120,15 @@ public class CurationObject {
 
     List getSecondaryIdentifiers(String curie, int rgdId, Dao dao) throws Exception {
 
-        List<String> secondaryIds = new ArrayList<>();
+        List<Map> secondaryIds = new ArrayList<>();
         try {
             if (curie.startsWith("HGNC")) {
-                secondaryIds.add("RGD:" + rgdId);
+                secondaryIds.add(getSecondaryIdData(rgdId, dao));
             }
             List<Integer> secondaryRgdIds = dao.getOldRgdIds(rgdId);
             if (!secondaryRgdIds.isEmpty()) {
                 for (Integer secRgdId : secondaryRgdIds) {
-                    secondaryIds.add("RGD:" + secRgdId);
+                    secondaryIds.add(getSecondaryIdData(secRgdId, dao));
                 }
             }
         } catch(Exception e) {
@@ -139,6 +139,23 @@ public class CurationObject {
         }
 
         return secondaryIds.isEmpty() ? null : secondaryIds;
+    }
+
+    private Map getSecondaryIdData(int rgdId, Dao dao) throws Exception {
+        RgdId id = dao.getRgdId(rgdId);
+        Map map = new HashMap();
+        map.put("secondary_id", "RGD:"+rgdId);
+        map.put("internal", false);
+        if( !id.getObjectStatus().equals("ACTIVE") ) {
+            map.put("obsolete", true);
+        }
+        if( id.getCreatedDate()!=null ) {
+            map.put("date_created", Utils2.formatDate(id.getCreatedDate()));
+        }
+        if( id.getLastModifiedDate()!=null ) {
+            map.put("date_updated", Utils2.formatDate(id.getLastModifiedDate()));
+        }
+        return map;
     }
 
     List getNotes_DTO(int rgdId, Dao dao) throws Exception {

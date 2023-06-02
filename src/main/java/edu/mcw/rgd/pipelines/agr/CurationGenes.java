@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class CurationGenes extends CurationObject {
 
-    public String linkml_version = "v1.7.0";
+    public String linkml_version = "v1.7.3";
 
     public List<GeneModel> gene_ingest_set = new ArrayList<>();
 
@@ -58,7 +58,7 @@ public class CurationGenes extends CurationObject {
             m.date_updated = Utils2.formatDate(id.getLastModifiedDate());
         }
 
-        m.secondary_identifiers = getSecondaryIdentifiers(curie, g.getRgdId(), dao);
+        m.gene_secondary_id_dtos = getSecondaryIdentifiers(curie, g.getRgdId(), dao);
         m.gene_synonym_dtos = getSynonyms(g.getRgdId(), dao);
         m.genomic_location_association_dtos = getGenomicLocationAssociation_DTOs(g.getRgdId(), g.getSpeciesTypeKey(), dao, curie);
         m.cross_reference_dtos = getCrossReferences(g, dao, canonicalProteins);
@@ -124,6 +124,7 @@ public class CurationGenes extends CurationObject {
         public String date_created;
         public String date_updated;
         public Map gene_full_name_dto;
+        public List gene_secondary_id_dtos = null;
         public Map gene_symbol_dto;
         public List gene_synonym_dtos = null;
         public Map gene_systematic_name_dto;
@@ -132,7 +133,6 @@ public class CurationGenes extends CurationObject {
 
         public boolean internal = false;
         public Boolean obsolete = null;
-        public List<String> secondary_identifiers = null;
         public String taxon_curie;
     }
 

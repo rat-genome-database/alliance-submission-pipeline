@@ -6,7 +6,7 @@ import java.util.*;
 
 public class CurationAGM extends CurationObject {
 
-    public String linkml_version = "v1.7.0";
+    public String linkml_version = "v1.7.3";
 
     public List<AgmModel> agm_ingest_set = new ArrayList<>();
 
@@ -18,6 +18,8 @@ public class CurationAGM extends CurationObject {
 
         // we call this to find malformed strain symbols
         String friendlyName = getHumanFriendlyName(m.name, s.getRgdId());
+
+        m.agm_secondary_id_dtos = getSecondaryIdentifiers(curie, s.getRgdId(), dao);
 
         m.data_provider_dto.setCrossReferenceDTO(curie, "strain", "RGD");
 
@@ -31,8 +33,6 @@ public class CurationAGM extends CurationObject {
             m.date_updated = Utils2.formatDate(id.getLastModifiedDate());
         }
 
-        m.secondary_identifiers = getSecondaryIdentifiers(curie, s.getRgdId(), dao);
-        //m.synonyms = getSynonyms(s.getRgdId(), dao);
         m.genomic_location_association_dtos = getGenomicLocationAssociation_DTOs(s.getRgdId(), SpeciesType.RAT, dao, curie);
 
         agm_ingest_set.add(m);
@@ -56,6 +56,7 @@ public class CurationAGM extends CurationObject {
     }
 
     class AgmModel {
+        public List agm_secondary_id_dtos = null;
         public List component_dtos = null;
         public List cross_reference_dtos = null;
         public String curie;
@@ -67,7 +68,6 @@ public class CurationAGM extends CurationObject {
         public String name;
         public Boolean obsolete = null;
         public List references_curies = null;
-        public List<String> secondary_identifiers = null;
         public String subtype_name = "strain";
         //public List synonyms = null;
         public String taxon_curie = "NCBITaxon:10116";

@@ -1,6 +1,12 @@
 Jun 02, 2023
   CurationDafGenerator -- updated to schema 1.7.3
     disease_genetic_modifier_curie ==> disease_genetic_modifier_curies
+  CurationAlleleGenerator -- updated to schema 1.7.3
+    new format for allele_secondary_id_dtos
+  CurationAGMGenerator -- updated to schema 1.7.3
+    secondary_identifiers ==> agm_secondary_id_dtos
+  CurationGeneGenerator -- updated to schema 1.7.3
+    secondary_identifiers ==> gene_secondary_id_dtos
 
 May 25, 2023
   CurationDafGenerator -- moved hard-coded qualifier mappings into properties file
