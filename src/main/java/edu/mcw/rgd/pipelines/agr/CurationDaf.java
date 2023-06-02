@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class CurationDaf {
 
-    public String linkml_version = "v1.7.0";
+    public String linkml_version = "v1.7.3";
     public List<AgmDiseaseAnnotation> disease_agm_ingest_set = new ArrayList<>();
     public List<AlleleDiseaseAnnotation> disease_allele_ingest_set = new ArrayList<>();
     public List<GeneDiseaseAnnotation> disease_gene_ingest_set = new ArrayList<>();
