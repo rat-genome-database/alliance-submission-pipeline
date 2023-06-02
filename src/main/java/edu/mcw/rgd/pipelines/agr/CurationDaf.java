@@ -169,7 +169,7 @@ public class CurationDaf {
                     return false;
                 }
 
-                r.disease_genetic_modifier_curie = r.with_gene_curies.get(0);
+                r.disease_genetic_modifier_curies = r.with_gene_curies;
                 r.with_gene_curies = null;
                 if( qualifier.equals("ameliorates") ) {
                     r.disease_genetic_modifier_relation_name = "ameliorated_by";
@@ -276,7 +276,7 @@ public class CurationDaf {
 
         public String date_created;
         public String date_updated;
-        public String disease_genetic_modifier_curie;
+        public List<String> disease_genetic_modifier_curies;
         public String disease_genetic_modifier_relation_name;
         public List<String> disease_qualifier_names;
         public String disease_relation_name; // assoc_type, one of (is_implicated_in, is_marker_for)
