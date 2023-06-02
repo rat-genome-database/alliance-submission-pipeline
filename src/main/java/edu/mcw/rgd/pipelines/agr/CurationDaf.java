@@ -119,7 +119,13 @@ public class CurationDaf {
 
         r.disease_qualifier_names = getDiseaseQualifiers(a, dao);
         r.disease_relation_name = Utils2.getGeneAssocType(a.getEvidence(), a.getRgdObjectKey(), isAllele);
+
         r.do_term_curie = a.getTermAcc();
+        // exclude non-DO term accessions
+        if( !r.do_term_curie.startsWith("DOID:") ) {
+            return false;
+        }
+
         r.evidence_code_curies = getEvidenceCodes(a.getEvidence());
         r.negated = getNegatedValue(a);
 
