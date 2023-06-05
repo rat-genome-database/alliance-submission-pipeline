@@ -1,3 +1,6 @@
+Jun 05, 2023
+  updated script to submit GFF files to 5.4.0 S3 bucket
+
 Jun 02, 2023
   CurationDafGenerator -- updated to schema 1.7.3
     disease_genetic_modifier_curie ==> disease_genetic_modifier_curies
