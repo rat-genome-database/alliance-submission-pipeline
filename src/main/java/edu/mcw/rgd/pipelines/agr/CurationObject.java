@@ -201,7 +201,7 @@ public class CurationObject {
 
             results.add(noteDto);
         }
-        if( notes.isEmpty() ) {
+        if( results.isEmpty() ) {
             return null;
         }
         return results;
