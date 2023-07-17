@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class CurationAllele extends CurationObject {
 
-    public String linkml_version = "v1.7.3";
+    public String linkml_version = "v1.7.4";
     public List<AlleleModel> allele_ingest_set = new ArrayList<>();
 
     public AlleleModel add(Gene a, Dao dao, String curie) throws Exception {
@@ -50,7 +50,7 @@ public class CurationAllele extends CurationObject {
         m.reference_curies = getReferences(a.getRgdId(), dao);
 
         m.allele_nomenclature_event_dtos = getNomenEvents(a.getRgdId(), dao);
-        m.allele_note_dtos = getNotes_DTO(a.getRgdId(), dao);
+        m.note_dtos = getAlleleNotes_DTO(a, dao);
         m.allele_synonym_dtos = getSynonyms(a.getRgdId(), dao);
 
         m.data_provider_dto = new DataProviderDTO();
@@ -59,6 +59,58 @@ public class CurationAllele extends CurationObject {
         allele_ingest_set.add(m);
 
         return m;
+    }
+
+    List getAlleleNotes_DTO(Gene g, Dao dao) throws Exception {
+        List<Note> notes = dao.getNotes(g.getRgdId());
+        Map<String, Set<Integer>> map = mergeNotes(notes);
+
+        List results = new ArrayList();
+        for( Map.Entry<String, Set<Integer>> entry: map.entrySet() ) {
+
+            String internal = entry.getKey().substring(0, 1);
+            boolean isInternal = internal.equals("1");
+            String freeText = entry.getKey().substring(1);
+
+            HashMap noteDto = new HashMap();
+            //noteDto.put("note_type_name", n.getNotesTypeName());
+            noteDto.put("note_type_name", "comment");
+            noteDto.put("free_text", freeText);
+            noteDto.put("internal", isInternal);
+
+            Set<Integer> refs = entry.getValue();
+            if( !refs.isEmpty() ) {
+
+                List<String> evidenceCuries = new ArrayList<>();
+
+                for( int refRgdId: refs ) {
+                    evidenceCuries.add("RGD:"+refRgdId);
+
+                    // optional PMID
+                    String pmid = dao.getPmid(refRgdId);
+                    if( !Utils.isStringEmpty(pmid) ) {
+                        evidenceCuries.add("PMID:"+pmid);
+                    }
+                }
+
+                noteDto.put("evidence_curies", evidenceCuries);
+            }
+
+            results.add(noteDto);
+        }
+
+        if( !Utils.isStringEmpty(g.getDescription()) ) {
+            HashMap noteDto = new HashMap();
+            noteDto.put("note_type_name", g.getDescription().contains("mutation")?"mutation_description":"comment");
+            noteDto.put("free_text", g.getDescription());
+            noteDto.put("internal", false);
+            results.add(noteDto);
+        }
+
+        if( results.isEmpty() ) {
+            return null;
+        }
+        return results;
     }
 
     List getNomenEvents(int rgdId, Dao dao) throws Exception {
@@ -141,7 +193,6 @@ public class CurationAllele extends CurationObject {
     class AlleleModel {
         public Map allele_full_name_dto;
         public List allele_nomenclature_event_dtos;
-        public List allele_note_dtos;
         public List allele_secondary_id_dtos = null;
         public Map allele_symbol_dto;
         public List allele_synonym_dtos = null;
@@ -153,6 +204,7 @@ public class CurationAllele extends CurationObject {
         public String date_updated;
         public List genomic_location_association_dtos = null;
         public boolean internal = false;
+        public List note_dtos;
         public Boolean obsolete = null;
         public List<String> reference_curies = null;
         public String taxon_curie = "NCBITaxon:10116";

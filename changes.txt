@@ -1,3 +1,8 @@
+Jul 17, 2023
+  CurationAlleleGenerator -- updated to schema 1.7.4
+    new format for notes: allele_notes_dto --> notes_dto
+    also exporting allele descriptions (GENES.GENE_DESC) as notes of type 'comment' or 'mutation_description'
+
 Jun 05, 2023
   updated script to submit GFF files to 5.4.0 S3 bucket
 
