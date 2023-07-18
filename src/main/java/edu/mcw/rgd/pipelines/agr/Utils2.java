@@ -1,5 +1,9 @@
 package edu.mcw.rgd.pipelines.agr;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -49,5 +53,16 @@ public class Utils2 {
             }
         }
         return assocType;
+    }
+
+    public static String toJson( Object o ) throws IOException {
+
+        ObjectMapper json = new ObjectMapper();
+        // do not export fields with NULL values
+        json.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+        String out = json.writerWithDefaultPrettyPrinter().writeValueAsString(o);
+
+        return out;
     }
 }

@@ -67,6 +67,8 @@ public class CurationDafGenerator {
         // sort data, alphabetically by object symbols
         daf.sort();
 
+        daf.removeDuplicatesFromDiseaseGenes();
+
         // dump DafAnnotation records to a file in JSON format
         try {
             String jsonFileName = "CURATION-"+speciesName+".daf";

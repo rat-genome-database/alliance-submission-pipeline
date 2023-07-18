@@ -4,12 +4,13 @@ import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.process.Utils;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.Map;
 
 public class CurationDaf {
 
-    public String linkml_version = "v1.7.3";
+    public String linkml_version = "v1.7.4";
     public List<AgmDiseaseAnnotation> disease_agm_ingest_set = new ArrayList<>();
     public List<AlleleDiseaseAnnotation> disease_allele_ingest_set = new ArrayList<>();
     public List<GeneDiseaseAnnotation> disease_gene_ingest_set = new ArrayList<>();
@@ -301,6 +302,43 @@ public class CurationDaf {
 
         public String updated_by_curie = "RGD:curator";
         public List<String> with_gene_curies;
+    }
+
+    void removeDuplicatesFromDiseaseGenes() throws IOException {
+
+        System.out.println(" start removeDuplicatesFromDiseaseGenes ...");
+
+        int duplicatesRemoved = 0;
+
+        // the objects should be already sorted by calling sort()
+        for( int i=0; i<disease_gene_ingest_set.size()-1; i++ ) {
+
+            GeneDiseaseAnnotation a1 = disease_gene_ingest_set.get(i);
+            GeneDiseaseAnnotation a2 = disease_gene_ingest_set.get(i+1);
+
+            String dtCreated = a1.date_created;
+            String dtUpdated = a1.date_updated;
+            a1.date_created = null;
+            a1.date_updated = null;
+            String json1 = Utils2.toJson(a1);
+            a1.date_created = dtCreated;
+            a1.date_updated = dtUpdated;
+
+            dtCreated = a2.date_created;
+            dtUpdated = a2.date_updated;
+            a2.date_created = null;
+            a2.date_updated = null;
+            String json2 = Utils2.toJson(a2);
+            a2.date_created = dtCreated;
+            a2.date_updated = dtUpdated;
+
+            if( json1.equals(json2) ) {
+                System.out.println(" xxx duplicate annotation via json equality");
+                disease_gene_ingest_set.set(i, null);
+                duplicatesRemoved++;
+            }
+        }
+        System.out.println(" total duplicate annotations via json equality removed: "+duplicatesRemoved);
     }
 
     public void sort() {

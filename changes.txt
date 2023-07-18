@@ -1,3 +1,6 @@
+Jun 02, 2023
+  CurationDafGenerator -- implemented removal of duplicate annotations (human daf)
+
 Jul 17, 2023
   CurationAlleleGenerator -- updated to schema 1.7.4
     new format for notes: allele_notes_dto --> notes_dto
