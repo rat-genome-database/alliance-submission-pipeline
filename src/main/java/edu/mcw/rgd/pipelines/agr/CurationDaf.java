@@ -338,12 +338,22 @@ public class CurationDaf {
             a2.date_updated = dtUpdated;
 
             if( json1.equals(json2) ) {
-                System.out.println(" xxx duplicate annotation via json equality");
+                //System.out.println(" xxx duplicate annotation via json equality");
                 disease_gene_ingest_set.set(i, null);
                 duplicatesRemoved++;
             }
         }
+
+        if( duplicatesRemoved>0 ) {
+            for( int i=disease_gene_ingest_set.size()-1; i>=0; i-- ) {
+                if( disease_gene_ingest_set.get(i)==null ) {
+                    disease_gene_ingest_set.remove(i);
+                }
+            }
+        }
+
         System.out.println(" total duplicate annotations via json equality removed: "+duplicatesRemoved);
+        System.out.println(" disease_gene_ingest_set size: "+disease_gene_ingest_set.size());
     }
 
     public void sort() {
