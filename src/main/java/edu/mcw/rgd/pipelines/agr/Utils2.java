@@ -2,10 +2,15 @@ package edu.mcw.rgd.pipelines.agr;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.mcw.rgd.datamodel.Omim;
+import edu.mcw.rgd.datamodel.XdbId;
+import edu.mcw.rgd.process.Utils;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 public class Utils2 {
 
@@ -65,4 +70,48 @@ public class Utils2 {
 
         return out;
     }
+
+    public static String getGeneOmimId(int geneRgdId, String doId, Dao dao) {
+
+        try {
+            List<XdbId> omimIds = dao.getXdbIds(geneRgdId, XdbId.XDB_KEY_OMIM);
+
+            // remove phenotype OMIM ids
+            if( omimIds.size()>1 ) {
+                //logDaf.info("  MULTIS: remove phenotype OMIM ids for "+phenotypeOmimId);
+                Iterator<XdbId> it = omimIds.iterator();
+                while (it.hasNext()) {
+                    XdbId id = it.next();
+                    Omim omim = dao.getOmimByNr(id.getAccId());
+                    if( omim==null ) {
+                        System.out.println("NULL OMIM table entry for OMIM:"+id.getAccId());
+                    }
+                    else if (omim.getMimType().equals("phenotype") || omim.getMimType().equals("moved/removed")) {
+                        it.remove();
+                    }
+                }
+            }
+
+            if( omimIds.size()==0 ) {
+                System.out.println("NO GENE OMIM for "+doId+ ", RGD:"+geneRgdId);
+                return null;
+            }
+
+            String omimId = "OMIM:"+omimIds.get(0).getAccId();
+
+            if( omimIds.size()==1 ) {
+                //logDaf.info("SINGLE GENE OMIM "+omimIds.get(0).getAccId()+" for "+phenotypeOmimId);
+                return omimId;
+            }
+
+            System.out.println("MULTIPLE GENE OMIMs for "+doId + ", RGD:"+geneRgdId+" {"+ Utils.concatenate(",", omimIds, "getAccId")+"}");
+            // just pick an OMIM id by random
+            return omimId;
+
+        } catch(Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
 }

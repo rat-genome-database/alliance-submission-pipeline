@@ -111,6 +111,11 @@ public class CurationDaf {
             // OMIM via RGD
             r.data_provider_dto = new DataProviderDTO();
             r.data_provider_dto.source_organization_abbreviation = "OMIM";
+            String omimGeneId = Utils2.getGeneOmimId(a.getAnnotatedObjectRgdId(), a.getTermAcc(), dao);
+            if( omimGeneId!=null ) {
+                r.data_provider_dto.setCrossReferenceDTO( omimGeneId, "gene", "OMIM");
+            }
+
             r.secondary_data_provider_dto = new DataProviderDTO(); // "RGD"
             r.secondary_data_provider_dto.setCrossReferenceDTO( a.getTermAcc(), alliancePage, "RGD");
         } else {

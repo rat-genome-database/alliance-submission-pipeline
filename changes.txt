@@ -1,4 +1,7 @@
-Jun 02, 2023
+Jun 19, 2023
+  CurationDafGenerator -- added generation of cross references to OMIM genes
+
+Jun 18, 2023
   CurationDafGenerator -- implemented removal of duplicate annotations (human daf)
 
 Jul 17, 2023

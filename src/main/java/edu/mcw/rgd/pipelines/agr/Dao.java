@@ -35,6 +35,7 @@ public class Dao {
     private MapDAO mapDAO = new MapDAO();
     private NomenclatureDAO nomenclatureDAO = new NomenclatureDAO();
     private NotesDAO notesDAO = new NotesDAO();
+    private OmimDAO omimDAO = new OmimDAO();
     private ProteinDAO proteinDAO = new ProteinDAO();
     private ReferenceDAO refDAO = associationDAO.getReferenceDAO();
     private RGDManagementDAO rgdIdDAO = new RGDManagementDAO();
@@ -253,5 +254,9 @@ public class Dao {
 
     public void setDiseaseQualifierMappings(Map<String, String> diseaseQualifierMappings) {
         this.diseaseQualifierMappings = diseaseQualifierMappings;
+    }
+
+    public Omim getOmimByNr(String mimNr) throws Exception {
+        return omimDAO.getOmimByNr(mimNr);
     }
 }
