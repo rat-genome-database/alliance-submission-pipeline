@@ -1,3 +1,6 @@
+Oct 06, 2023
+  updated submit_gff3.sh to submit to 6.0.0 bucket
+
 Jun 19, 2023
   CurationDafGenerator -- added generation of cross references to OMIM genes
   CurationDafGenerator -- removal of duplicate annotations (human daf) -- fix

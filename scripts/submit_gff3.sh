@@ -4,7 +4,7 @@ APITOKEN=`cat api.token`
 
 set -e
 
-GFF_SPEC="5.4.0_GFF_RGD"
+GFF_SPEC="6.0.0_GFF_RGD"
 GFF_LOC="data/genes_10116.gff3.gz"
 GFF_FILE="${GFF_SPEC}=@${GFF_LOC}"
 echo "$GFF_FILE"
@@ -16,7 +16,7 @@ curl -k \
  | tee gff_submission_rat.log
 
 
-GFF_SPEC="5.4.0_GFF_HUMAN"
+GFF_SPEC="6.0.0_GFF_HUMAN"
 GFF_LOC="data/genes_9606.gff3.gz"
 GFF_FILE="${GFF_SPEC}=@${GFF_LOC}"
 echo "$GFF_FILE"
