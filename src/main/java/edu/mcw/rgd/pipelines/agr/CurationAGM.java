@@ -6,7 +6,7 @@ import java.util.*;
 
 public class CurationAGM extends CurationObject {
 
-    public String linkml_version = "v1.7.3";
+    public String linkml_version = "v1.11.0";
 
     public List<AgmModel> agm_ingest_set = new ArrayList<>();
 
@@ -33,44 +33,30 @@ public class CurationAGM extends CurationObject {
             m.date_updated = Utils2.formatDate(id.getLastModifiedDate());
         }
 
-        m.genomic_location_association_dtos = getGenomicLocationAssociation_DTOs(s.getRgdId(), SpeciesType.RAT, dao, curie);
+        //m.genomic_location_association_dtos = getGenomicLocationAssociation_DTOs(s.getRgdId(), SpeciesType.RAT, dao, curie);
 
         agm_ingest_set.add(m);
 
         return m;
     }
 
-    List getSynonyms(int rgdId, Dao dao) throws Exception {
-        List<Alias> aliases = dao.getAliases(rgdId);
-        if( aliases.isEmpty() ) {
-            return null;
-        }
-        List results = new ArrayList();
-        for( Alias a: aliases ) {
-            HashMap synonym = new HashMap();
-            synonym.put("internal", false);
-            synonym.put("synonym", a.getValue());
-            results.add(synonym);
-        }
-        return results;
-    }
-
     class AgmModel {
         public List agm_secondary_id_dtos = null;
         public List component_dtos = null;
+        public String created_by_curie = null;
         public List cross_reference_dtos = null;
         public String curie;
         public DataProviderDTO data_provider_dto = new DataProviderDTO();
         public String date_created;
         public String date_updated;
-        public List genomic_location_association_dtos = null;
+        //public List genomic_location_association_dtos = null;
         public boolean internal = false;
         public String name;
         public Boolean obsolete = null;
         public List references_curies = null;
         public String subtype_name = "strain";
-        //public List synonyms = null;
         public String taxon_curie = "NCBITaxon:10116";
+        public String updated_by_curie = null;
     }
 
 
