@@ -1,5 +1,6 @@
 Nov 09, 2023
   CurationAgmGenerator - updated to schema 1.11.0
+  CurationAlleleGenerator - updated to schema 1.11.0
 
 Oct 06, 2023
   updated submit_gff3.sh to submit to 6.0.0 bucket

@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class CurationAllele extends CurationObject {
 
-    public String linkml_version = "v1.7.4";
+    public String linkml_version = "v1.11.0";
     public List<AlleleModel> allele_ingest_set = new ArrayList<>();
 
     public AlleleModel add(Gene a, Dao dao, String curie) throws Exception {
@@ -46,7 +46,7 @@ public class CurationAllele extends CurationObject {
         }
 
         m.allele_secondary_id_dtos = getSecondaryIdentifiers(curie, a.getRgdId(), dao);
-        m.genomic_location_association_dtos = getGenomicLocationAssociation_DTOs(a.getRgdId(), SpeciesType.RAT, dao, curie);
+        //m.genomic_location_association_dtos = getGenomicLocationAssociation_DTOs(a.getRgdId(), SpeciesType.RAT, dao, curie);
         m.reference_curies = getReferences(a.getRgdId(), dao);
 
         m.allele_nomenclature_event_dtos = getNomenEvents(a.getRgdId(), dao);
@@ -191,19 +191,26 @@ public class CurationAllele extends CurationObject {
 
 
     class AlleleModel {
+        public Object allele_database_status_dto = null;
         public Map allele_full_name_dto;
+        public List allele_functional_impact_dtos;
+        public Object allele_germline_transmission_status_dto;
+        public List allele_inheritance_mode_dtos;
+        public List allele_mutation_type_dtos;
         public List allele_nomenclature_event_dtos;
         public List allele_secondary_id_dtos = null;
         public Map allele_symbol_dto;
         public List allele_synonym_dtos = null;
 
         public String created_by_curie = "RGD";
+        public List cross_reference_dtos = null;
         public String curie;
         public DataProviderDTO data_provider_dto;
         public String date_created;
         public String date_updated;
-        public List genomic_location_association_dtos = null;
+        public String in_collection_name = null;
         public boolean internal = false;
+        public Boolean is_extinct = null;
         public List note_dtos;
         public Boolean obsolete = null;
         public List<String> reference_curies = null;
