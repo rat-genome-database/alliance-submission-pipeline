@@ -11,6 +11,8 @@ import java.util.Map;
 public class CurationAllele extends CurationObject {
 
     public String linkml_version = "v1.11.0";
+    public String alliance_member_release_version = null;
+
     public List<AlleleModel> allele_ingest_set = new ArrayList<>();
 
     public AlleleModel add(Gene a, Dao dao, String curie) throws Exception {

@@ -106,4 +106,8 @@
     <bean id="curationAlleleGenerator" class="edu.mcw.rgd.pipelines.agr.CurationAlleleGenerator" >
         <property name="dao" ref="dao"/>
     </bean>
+
+    <bean id="curationVariantGenerator" class="edu.mcw.rgd.pipelines.agr.CurationVariantGenerator" >
+        <property name="dao" ref="dao"/>
+    </bean>
 </beans>

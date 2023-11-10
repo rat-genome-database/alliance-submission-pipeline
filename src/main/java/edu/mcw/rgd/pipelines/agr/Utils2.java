@@ -15,9 +15,15 @@ import java.util.List;
 public class Utils2 {
 
     static SimpleDateFormat sdf_agr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+    static SimpleDateFormat sdf_agr2 = new SimpleDateFormat("yyyy-MM-dd");
 
     synchronized public static String formatDate(Date dt) {
         String result = sdf_agr.format(dt);
+        return result;
+    }
+
+    synchronized public static String formatDate2(Date dt) {
+        String result = sdf_agr2.format(dt);
         return result;
     }
 

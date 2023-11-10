@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 public class CurationAlleleGenerator {
@@ -40,6 +41,7 @@ public class CurationAlleleGenerator {
         log.info("START "+speciesName+" allele file");
 
         CurationAllele curationAlleles = new CurationAllele();
+        curationAlleles.alliance_member_release_version = "v"+Utils2.formatDate2(new Date());
 
         // setup a JSON object array to collect all CurationAllele objects
         ObjectMapper json = new ObjectMapper();

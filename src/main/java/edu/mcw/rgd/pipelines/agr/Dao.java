@@ -39,6 +39,7 @@ public class Dao {
     private ProteinDAO proteinDAO = new ProteinDAO();
     private ReferenceDAO refDAO = associationDAO.getReferenceDAO();
     private RGDManagementDAO rgdIdDAO = new RGDManagementDAO();
+    private RgdVariantDAO rgdVariantDAO = new RgdVariantDAO();
     private StrainDAO strainDAO = associationDAO.getStrainDAO();
     private XdbIdDAO xdbIdDAO = new XdbIdDAO();
     private edu.mcw.rgd.dao.impl.variants.VariantDAO variantDAO = new VariantDAO();
@@ -258,5 +259,9 @@ public class Dao {
 
     public Omim getOmimByNr(String mimNr) throws Exception {
         return omimDAO.getOmimByNr(mimNr);
+    }
+
+    public List<RgdVariant> getVariantsForSpecies(int speciesTypeKey) throws Exception {
+        return rgdVariantDAO.getVariantsForSpecies(speciesTypeKey);
     }
 }

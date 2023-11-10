@@ -9,6 +9,7 @@ import java.util.Map;
 public class CurationGenes extends CurationObject {
 
     public String linkml_version = "v1.11.0";
+    public String alliance_member_release_version = null;
 
     public List<GeneModel> gene_ingest_set = new ArrayList<>();
 

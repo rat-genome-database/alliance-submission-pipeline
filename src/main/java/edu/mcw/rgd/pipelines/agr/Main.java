@@ -73,6 +73,11 @@ public class Main {
                     d.run();
                     break;
                 }
+                case "--curation-variant-generator": {
+                    CurationVariantGenerator g = (CurationVariantGenerator) (bf.getBean("curationVariantGenerator"));
+                    g.run();
+                    break;
+                }
             }
         }
 
