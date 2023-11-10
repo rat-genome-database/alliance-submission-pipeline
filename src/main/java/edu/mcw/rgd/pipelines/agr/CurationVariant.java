@@ -22,38 +22,38 @@ public class CurationVariant extends CurationObject {
         m.curie = curie;
         m.taxon_curie = "NCBITaxon:" + SpeciesType.getTaxonomicId(v.getSpeciesTypeKey());
         m.variant_type_curie = v.getType();
-        m.data_provider_dto.setCrossReferenceDTO("RGD:"+v.getRgdId(), "variant", "RGD");
+        m.data_provider_dto.setCrossReferenceDTO("RGD:"+v.getRgdId(), "allele", "RGD");
 
         List noteDtos = new ArrayList();
 
         if( !Utils.isStringEmpty(v.getName()) ) {
 
-            Map nameDTO = new HashMap<>();
-            nameDTO.put("free_text", "Name: " + v.getName());
-            nameDTO.put("internal", false);
-            nameDTO.put("name_type_name", "comment");
+            Map dto = new HashMap<>();
+            dto.put("free_text", "Name: " + v.getName());
+            dto.put("internal", false);
+            dto.put("note_type_name", "comment");
 
-            noteDtos.add(nameDTO);
+            noteDtos.add(dto);
         }
 
         if( !Utils.isStringEmpty(v.getDescription()) ) {
 
-            Map nameDTO = new HashMap<>();
-            nameDTO.put("free_text", "Description: "+v.getDescription());
-            nameDTO.put("internal", false);
-            nameDTO.put("name_type_name", "comment");
+            Map dto = new HashMap<>();
+            dto.put("free_text", "Description: "+v.getDescription());
+            dto.put("internal", false);
+            dto.put("note_type_name", "comment");
 
-            noteDtos.add(nameDTO);
+            noteDtos.add(dto);
         }
 
         if( !Utils.isStringEmpty(v.getNotes()) ) {
 
-            Map nameDTO = new HashMap<>();
-            nameDTO.put("free_text", "Note: "+v.getNotes());
-            nameDTO.put("internal", false);
-            nameDTO.put("name_type_name", "comment");
+            Map dto = new HashMap<>();
+            dto.put("free_text", "Note: "+v.getNotes());
+            dto.put("internal", false);
+            dto.put("note_type_name", "comment");
 
-            noteDtos.add(nameDTO);
+            noteDtos.add(dto);
         }
         m.note_dtos = noteDtos;
 
