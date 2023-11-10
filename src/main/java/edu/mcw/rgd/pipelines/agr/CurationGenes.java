@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class CurationGenes extends CurationObject {
 
-    public String linkml_version = "v1.7.3";
+    public String linkml_version = "v1.11.0";
 
     public List<GeneModel> gene_ingest_set = new ArrayList<>();
 
@@ -60,7 +60,7 @@ public class CurationGenes extends CurationObject {
 
         m.gene_secondary_id_dtos = getSecondaryIdentifiers(curie, g.getRgdId(), dao);
         m.gene_synonym_dtos = getSynonyms(g.getRgdId(), dao);
-        m.genomic_location_association_dtos = getGenomicLocationAssociation_DTOs(g.getRgdId(), g.getSpeciesTypeKey(), dao, curie);
+        //m.genomic_location_association_dtos = getGenomicLocationAssociation_DTOs(g.getRgdId(), g.getSpeciesTypeKey(), dao, curie);
         m.cross_reference_dtos = getCrossReferences(g, dao, canonicalProteins);
 
         synchronized(gene_ingest_set) {
@@ -127,13 +127,14 @@ public class CurationGenes extends CurationObject {
         public List gene_secondary_id_dtos = null;
         public Map gene_symbol_dto;
         public List gene_synonym_dtos = null;
-        public Map gene_systematic_name_dto;
+        public Map gene_systematic_name_dto; // not used in RGD
         public String gene_type_curie;
-        public List genomic_location_association_dtos = null;
+        //public List genomic_location_association_dtos = null;
 
         public boolean internal = false;
         public Boolean obsolete = null;
         public String taxon_curie;
+        public String updated_by_curie = null;
     }
 
 
