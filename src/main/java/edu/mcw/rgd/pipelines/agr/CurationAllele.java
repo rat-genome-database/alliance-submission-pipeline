@@ -140,7 +140,7 @@ public class CurationAllele extends CurationObject {
                 case "Symbol and Name status set to approved"
                         -> nomenEventName = "symbol_and_name_status_set_to_approved";
                 case "Symbol and name updated at request of researcher"
-                        -> nomenEventName = "Symbol_and_name_updated_at_request_of_researcher";
+                        -> nomenEventName = "symbol_and_name_updated_at_request_of_researcher";
                 case "Data Merged", "Type changed (type changed from [gene] to [allele])"
                         -> nomenEventName = "data_merged";
             }
