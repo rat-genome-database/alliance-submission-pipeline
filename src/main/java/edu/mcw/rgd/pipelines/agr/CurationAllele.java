@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CurationAllele extends CurationObject {
 
@@ -75,7 +76,6 @@ public class CurationAllele extends CurationObject {
             String freeText = entry.getKey().substring(1);
 
             HashMap noteDto = new HashMap();
-            //noteDto.put("note_type_name", n.getNotesTypeName());
             noteDto.put("note_type_name", "comment");
             noteDto.put("free_text", freeText);
             noteDto.put("internal", isInternal);
@@ -115,6 +115,8 @@ public class CurationAllele extends CurationObject {
         return results;
     }
 
+    static Map<String, Integer> _hitCount = new ConcurrentHashMap<>();
+
     List getNomenEvents(int rgdId, Dao dao) throws Exception {
         List<NomenclatureEvent> events = dao.getNomenEvents(rgdId);
         if( events.isEmpty() ) {
@@ -123,15 +125,62 @@ public class CurationAllele extends CurationObject {
         List results = new ArrayList();
         for( NomenclatureEvent event: events ) {
 
-            String info = event.getDesc()
-                    +"; original curie = RGD:"+event.getOriginalRGDId()
-                    +"; old symbol = ["+event.getPreviousSymbol()+"]"
-                    +"; new symbol = ["+event.getSymbol()+"]"
-                    +"; old name = ["+event.getPreviousName()+"]"
-                    +"; new name = ["+event.getName()+"]";
+            String nomenEventName = null;
+            switch( event.getDesc() ) {
+                case "gene nomenclature is perpetuated to the allele symbol"
+                        -> nomenEventName = "gene_nomenclature_extended_to_allele";
+                case "Name changed", "Name and Type changed (type changed from [gene] to [allele])"
+                        -> nomenEventName = "name_updated";
+                case "Symbol changed", "Symbol updated", "Symbol and Type changed (type changed from [allele] to [gene])"
+                        -> nomenEventName = "symbol_updated";
+                case "'predicted' is removed", "Name and Symbol changed"
+                        -> nomenEventName = "symbol_and_name_updated";
+                case "Symbol and Name status set to provisional"
+                        -> nomenEventName = "symbol_and_name_status_set_to_provisional";
+                case "Symbol and Name status set to approved"
+                        -> nomenEventName = "symbol_and_name_status_set_to_approved";
+                case "Symbol and name updated at request of researcher"
+                        -> nomenEventName = "Symbol_and_name_updated_at_request_of_researcher";
+                case "Data Merged", "Type changed (type changed from [gene] to [allele])"
+                        -> nomenEventName = "data_merged";
+            }
+
+            if( event.getDesc().equals("changed") || event.getDesc().equals("Nomenclature updated to reflect human and mouse nomenclature") ) {
+                String oldName = Utils.NVL(event.getPreviousName(), event.getName());
+                String oldSymbol = Utils.NVL(event.getPreviousSymbol(), event.getSymbol());
+                boolean nameChanged = !oldName.equalsIgnoreCase(event.getName());
+                boolean symbolChanged = !oldSymbol.equalsIgnoreCase(event.getSymbol());
+                if( nameChanged && symbolChanged ) {
+                    nomenEventName = "symbol_and_name_updated";
+                } else {
+                    if( nameChanged ) {
+                        nomenEventName = "name_updated";
+                    }
+                    if( symbolChanged ) {
+                        nomenEventName = "symbol_updated";
+                    }
+
+                    if( !nameChanged && !symbolChanged ) {
+                        System.out.println("nomen event conflict");
+                    }
+                }
+            }
+
+            if( nomenEventName==null ) {
+                System.out.println("*** *** nomen event skipped *** ****");
+                continue;
+            }
+            synchronized(_hitCount) {
+                Integer cnt = _hitCount.get(nomenEventName);
+                if (cnt == null) {
+                    cnt = 0;
+                }
+                _hitCount.put(nomenEventName, cnt+1);
+            }
+
             Map eventMap = new HashMap();
             eventMap.put("internal", false);
-            eventMap.put("nomenclature_event_name", info);
+            eventMap.put("nomenclature_event_name", nomenEventName);
             eventMap.put("created_by_curie", "RGD");
             eventMap.put("date_created", Utils2.formatDate(event.getEventDate()));
             int refRgdId = dao.getRefRgdId(Integer.parseInt(event.getRefKey()));
@@ -223,6 +272,12 @@ public class CurationAllele extends CurationObject {
     public void sort() {
 
         sort(allele_ingest_set);
+
+        System.out.println("NOMEN EVENT TYPES:");
+        System.out.println("=====");
+        for( Map.Entry<String,Integer> entry: _hitCount.entrySet() ) {
+            System.out.println(entry.getKey()+" : "+entry.getValue());
+        }
     }
 
     void sort(List<AlleleModel> list) {

@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -51,6 +52,7 @@ public class CurationAlleleGenerator {
 
 
         List<Gene> alleles = dao.getGeneAlleles(speciesTypeKey);
+        Collections.shuffle(alleles);
 
         log.info("  alleles: "+alleles.size());
         for( Gene a: alleles ) {

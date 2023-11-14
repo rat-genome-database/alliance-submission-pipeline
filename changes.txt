@@ -1,3 +1,6 @@
+Nov 14, 2023
+  CurationAlleleGenerator - updated to schema 1.11.0
+
 Nov 10, 2023
   CurationGeneGenerator - updated to schema 1.11.0
   CurationVariantGenerator - created for schema 1.11.0
