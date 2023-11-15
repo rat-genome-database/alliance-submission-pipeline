@@ -46,6 +46,7 @@ public class CurationDafGenerator {
         loadSpliceRgdIds(speciesTypeKey);
 
         CurationDaf daf = new CurationDaf();
+        daf.alliance_member_release_version = "v"+Utils2.formatDate2(new Date());
 
         // setup a JSON object array to collect all DafAnnotation objects
         ObjectMapper json = new ObjectMapper();
