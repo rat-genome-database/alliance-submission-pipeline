@@ -108,7 +108,7 @@ public class CurationGenes extends CurationObject {
 
             HashMap xref = new HashMap();
             xref.put("internal", false);
-            xref.put("curie", curie);
+            xref.put("referenced_curie", curie);
             xref.put("display_name", id.getAccId());
             xref.put("prefix", "UniProtKB");
             xref.put("page_areas", pageAreas);
