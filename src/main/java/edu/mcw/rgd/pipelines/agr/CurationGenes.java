@@ -110,7 +110,7 @@ public class CurationGenes extends CurationObject {
             xref.put("referenced_curie", curie);
             xref.put("display_name", id.getAccId());
             xref.put("prefix", "UniProtKB");
-            xref.put("page_areas", pageArea);
+            xref.put("page_area", pageArea);
             results.add(xref);
         }
         return results;
