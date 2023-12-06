@@ -61,7 +61,6 @@ public class CurationGenes extends CurationObject {
 
         m.gene_secondary_id_dtos = getSecondaryIdentifiers(curie, g.getRgdId(), dao);
         m.gene_synonym_dtos = getSynonyms(g.getRgdId(), dao);
-        //m.genomic_location_association_dtos = getGenomicLocationAssociation_DTOs(g.getRgdId(), g.getSpeciesTypeKey(), dao, curie);
         m.cross_reference_dtos = getCrossReferences(g, dao, canonicalProteins);
 
         synchronized(gene_ingest_set) {
@@ -101,9 +100,9 @@ public class CurationGenes extends CurationObject {
         for( XdbId id: ids ) {
 
             String curie = "UniProtKB:"+id.getAccId();
-            List pageAreas = new ArrayList();
+            String pageArea = "protein";
             if( canonicalProteins.contains(id.getAccId()) ) {
-                pageAreas.add("canonical_protein");
+                pageArea = "canonical_protein";
             }
 
             HashMap xref = new HashMap();
@@ -111,7 +110,7 @@ public class CurationGenes extends CurationObject {
             xref.put("referenced_curie", curie);
             xref.put("display_name", id.getAccId());
             xref.put("prefix", "UniProtKB");
-            xref.put("page_areas", pageAreas);
+            xref.put("page_areas", pageArea);
             results.add(xref);
         }
         return results;
@@ -130,7 +129,6 @@ public class CurationGenes extends CurationObject {
         public List gene_synonym_dtos = null;
         public Map gene_systematic_name_dto; // not used in RGD
         public String gene_type_curie;
-        //public List genomic_location_association_dtos = null;
 
         public boolean internal = false;
         public Boolean obsolete = null;
