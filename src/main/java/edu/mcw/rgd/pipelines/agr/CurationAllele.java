@@ -49,10 +49,11 @@ public class CurationAllele extends CurationObject {
         }
 
         m.allele_secondary_id_dtos = getSecondaryIdentifiers(curie, a.getRgdId(), dao);
-        //m.genomic_location_association_dtos = getGenomicLocationAssociation_DTOs(a.getRgdId(), SpeciesType.RAT, dao, curie);
         m.reference_curies = getReferences(a.getRgdId(), dao);
 
-        m.allele_nomenclature_event_dtos = getNomenEvents(a.getRgdId(), dao);
+        // HACK: suppress nomen events -- per AGR request 1/16/2024
+        //m.allele_nomenclature_event_dtos = getNomenEvents(a.getRgdId(), dao);
+
         m.note_dtos = getAlleleNotes_DTO(a, dao);
         m.allele_synonym_dtos = getSynonyms(a.getRgdId(), dao);
 
