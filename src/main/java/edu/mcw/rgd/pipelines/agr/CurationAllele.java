@@ -52,7 +52,8 @@ public class CurationAllele extends CurationObject {
         m.reference_curies = getReferences(a.getRgdId(), dao);
 
         // HACK: suppress nomen events -- per AGR request 1/16/2024
-        //m.allele_nomenclature_event_dtos = getNomenEvents(a.getRgdId(), dao);
+        //     nomen events can be submitted next month, during next submission
+        m.allele_nomenclature_event_dtos = getNomenEvents(a.getRgdId(), dao);
 
         m.note_dtos = getAlleleNotes_DTO(a, dao);
         m.allele_synonym_dtos = getSynonyms(a.getRgdId(), dao);
