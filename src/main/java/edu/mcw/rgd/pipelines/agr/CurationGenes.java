@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class CurationGenes extends CurationObject {
 
-    public String linkml_version = "v1.11.0";
+    public String linkml_version = "v2.0.0";
     public String alliance_member_release_version = null;
 
     public List<GeneModel> gene_ingest_set = new ArrayList<>();
@@ -93,25 +93,71 @@ public class CurationGenes extends CurationObject {
     List getCrossReferences(Gene g, Dao dao, Set<String> canonicalProteins) throws Exception {
 
         List<XdbId> ids = dao.getXdbIds(g.getRgdId(), XdbId.XDB_KEY_UNIPROT);
+        ids.addAll( dao.getXdbIds(g.getRgdId(), XdbId.XDB_KEY_OMIM) );
+        ids.addAll( dao.getXdbIds(g.getRgdId(), XdbId.XDB_KEY_ENSEMBL_GENES) );
+        ids.addAll( dao.getXdbIds(g.getRgdId(), XdbId.XDB_KEY_NCBI_GENE) );
+        ids.addAll( dao.getXdbIds(g.getRgdId(), XdbId.XDB_KEY_HGNC) );
+        ids.addAll( dao.getXdbIds(g.getRgdId(), 68) ); // RNACentral
+
         if( ids.isEmpty() ) {
             return null;
         }
         List results = new ArrayList();
         for( XdbId id: ids ) {
 
-            String curie = "UniProtKB:"+id.getAccId();
-            String pageArea = "protein";
-            if( canonicalProteins.contains(id.getAccId()) ) {
-                pageArea = "canonical_protein";
+            String curie = null;
+            String pageArea = null;
+            String prefix = null;
+
+            if( id.getXdbKey()==XdbId.XDB_KEY_UNIPROT ) {
+                curie = "UniProtKB:" + id.getAccId();
+                prefix = "UniProtKB";
+                pageArea = "protein";
+                if (canonicalProteins.contains(id.getAccId())) {
+                    pageArea = "canonical_protein";
+                }
+            }
+            else if( id.getXdbKey()==XdbId.XDB_KEY_OMIM ) {
+                curie = "OMIM:" + id.getAccId();
+                prefix = "OMIM";
+                pageArea = "gene";
+            }
+            else if( id.getXdbKey()==XdbId.XDB_KEY_ENSEMBL_GENES ) {
+                curie = "ENSEMBL:" + id.getAccId();
+                prefix = "ENSEMBL";
+                pageArea = "gene";
+            }
+            else if( id.getXdbKey()==XdbId.XDB_KEY_NCBI_GENE ) {
+                curie = "NCBI_Gene:" + id.getAccId();
+                prefix = "NCBI_Gene";
+                pageArea = "gene";
+            }
+            else if( id.getXdbKey()==XdbId.XDB_KEY_HGNC ) {
+                if( id.getAccId().startsWith("HGNC:") ) {
+                    curie = id.getAccId();
+                    prefix = "HGNC";
+                    pageArea = "gene";
+                } else {
+                    curie = "HGNC:" + id.getAccId();
+                    prefix = "HGNC";
+                    pageArea = "gene";
+                }
+            }
+            else if( id.getXdbKey()==63 ) {
+                curie = "RNAcentral:" + id.getAccId();
+                prefix = "RNAcentral";
+                pageArea = "gene";
             }
 
-            HashMap xref = new HashMap();
-            xref.put("internal", false);
-            xref.put("referenced_curie", curie);
-            xref.put("display_name", id.getAccId());
-            xref.put("prefix", "UniProtKB");
-            xref.put("page_area", pageArea);
-            results.add(xref);
+            if( curie!=null ) {
+                HashMap xref = new HashMap();
+                xref.put("internal", false);
+                xref.put("referenced_curie", curie);
+                xref.put("display_name", id.getAccId());
+                xref.put("prefix", prefix);
+                xref.put("page_area", pageArea);
+                results.add(xref);
+            }
         }
         return results;
     }
