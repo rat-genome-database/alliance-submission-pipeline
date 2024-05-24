@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class CurationGenes extends CurationObject {
 
-    public String linkml_version = "v2.0.0";
+    public String linkml_version = "v2.2.3";
     public String alliance_member_release_version = null;
 
     public List<GeneModel> gene_ingest_set = new ArrayList<>();
@@ -16,9 +16,10 @@ public class CurationGenes extends CurationObject {
     public GeneModel add(Gene g, Dao dao, String curie, Set<String> canonicalProteins) throws Exception {
 
         GeneModel m = new GeneModel();
-        m.curie = curie;
+        m.mod_entity_id = curie;
+        m.mod_internal_id = "RGD:"+g.getRgdId();
         m.taxon_curie = "NCBITaxon:" + SpeciesType.getTaxonomicId(g.getSpeciesTypeKey());
-        m.gene_type_curie = g.getSoAccId();
+        m.gene_type_curie = Utils.NVL(g.getSoAccId(), "SO:0000704");  // if SO acc id not provided, use 'gene' SO:0000704
         m.data_provider_dto.setCrossReferenceDTO("RGD:"+g.getRgdId(), "gene", "RGD");
 
         if( g.getSymbol().contains("<") || g.getSymbol().contains("'") || g.getSymbol().contains("\"")) {
@@ -112,7 +113,8 @@ public class CurationGenes extends CurationObject {
             if( id.getXdbKey()==XdbId.XDB_KEY_UNIPROT ) {
                 curie = "UniProtKB:" + id.getAccId();
                 prefix = "UniProtKB";
-                pageArea = "protein";
+                //pageArea = "protein";
+                pageArea = "gene";
                 if (canonicalProteins.contains(id.getAccId())) {
                     pageArea = "canonical_protein";
                 }
@@ -165,7 +167,6 @@ public class CurationGenes extends CurationObject {
     class GeneModel {
         public String created_by_curie = "RGD";
         public List cross_reference_dtos = null;
-        public String curie;
         public DataProviderDTO data_provider_dto = new DataProviderDTO();
         public String date_created;
         public String date_updated;
@@ -177,6 +178,8 @@ public class CurationGenes extends CurationObject {
         public String gene_type_curie;
 
         public boolean internal = false;
+        public String mod_entity_id;
+        public String mod_internal_id;
         public Boolean obsolete = null;
         public String taxon_curie;
         public String updated_by_curie = null;
@@ -193,7 +196,7 @@ public class CurationGenes extends CurationObject {
         Collections.sort(list, new Comparator<GeneModel>() {
             @Override
             public int compare(GeneModel a1, GeneModel a2) {
-                return a1.curie.compareToIgnoreCase(a2.curie);
+                return a1.mod_entity_id.compareToIgnoreCase(a2.mod_entity_id);
             }
         });
     }

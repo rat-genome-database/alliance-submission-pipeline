@@ -6,11 +6,12 @@ import edu.mcw.rgd.datamodel.Omim;
 import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.process.Utils;
 
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 public class Utils2 {
 
@@ -120,4 +121,16 @@ public class Utils2 {
         }
     }
 
+    public static BufferedWriter openWriterUTF8(String fileName) throws IOException {
+
+        Object os;
+        if (!fileName.endsWith(".gz") && !fileName.contains(".gz_")) {
+            os = new FileOutputStream(fileName);
+        } else {
+            os = new GZIPOutputStream(new FileOutputStream(fileName));
+        }
+
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter((OutputStream)os, "UTF-8"));
+        return writer;
+    }
 }

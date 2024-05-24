@@ -8,10 +8,11 @@ import edu.mcw.rgd.process.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class CurationGeneGenerator {
 
@@ -86,7 +87,7 @@ public class CurationGeneGenerator {
         // dump DafAnnotation records to a file in JSON format
         try {
             String jsonFileName = "CURATION_GENES-"+speciesName+".json";
-            BufferedWriter jsonWriter = Utils.openWriter(jsonFileName);
+            BufferedWriter jsonWriter = Utils2.openWriterUTF8(jsonFileName);
 
             jsonWriter.write(json.writerWithDefaultPrettyPrinter().writeValueAsString(curationGenes));
 
