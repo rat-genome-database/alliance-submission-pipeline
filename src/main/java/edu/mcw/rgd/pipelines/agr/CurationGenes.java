@@ -113,8 +113,7 @@ public class CurationGenes extends CurationObject {
             if( id.getXdbKey()==XdbId.XDB_KEY_UNIPROT ) {
                 curie = "UniProtKB:" + id.getAccId();
                 prefix = "UniProtKB";
-                //pageArea = "protein";
-                pageArea = "gene";
+                pageArea = "protein";
                 if (canonicalProteins.contains(id.getAccId())) {
                     pageArea = "canonical_protein";
                 }
@@ -150,6 +149,9 @@ public class CurationGenes extends CurationObject {
                 prefix = "RNAcentral";
                 pageArea = "gene";
             }
+
+            // not sure why other values did not work
+            pageArea = "default";
 
             if( curie!=null ) {
                 HashMap xref = new HashMap();
