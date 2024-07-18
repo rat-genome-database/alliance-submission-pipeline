@@ -8,9 +8,6 @@ import java.util.Map;
 
 public class CurationGenes extends CurationObject {
 
-    public String linkml_version = "v2.2.3";
-    public String alliance_member_release_version = null;
-
     public List<GeneModel> gene_ingest_set = new ArrayList<>();
 
     public GeneModel add(Gene g, Dao dao, String curie, Set<String> canonicalProteins) throws Exception {
@@ -144,7 +141,7 @@ public class CurationGenes extends CurationObject {
                     pageArea = "gene";
                 }
             }
-            else if( id.getXdbKey()==63 ) {
+            else if( id.getXdbKey()==68 ) {
                 curie = "RNAcentral:" + id.getAccId();
                 prefix = "RNAcentral";
                 pageArea = "gene";

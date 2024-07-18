@@ -8,10 +8,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.Map;
 
-public class CurationDaf {
+public class CurationDaf extends CurationObject {
 
-    public String linkml_version = "v1.11.0";
-    public String alliance_member_release_version = null;
     public List<AgmDiseaseAnnotation> disease_agm_ingest_set = new ArrayList<>();
     public List<AlleleDiseaseAnnotation> disease_allele_ingest_set = new ArrayList<>();
     public List<GeneDiseaseAnnotation> disease_gene_ingest_set = new ArrayList<>();

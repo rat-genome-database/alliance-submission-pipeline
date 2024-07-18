@@ -11,8 +11,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+
 
 public class CurationGeneGenerator {
 
@@ -45,7 +44,6 @@ public class CurationGeneGenerator {
         log.info("START "+speciesName+" GENE file");
 
         CurationGenes curationGenes = new CurationGenes();
-        curationGenes.alliance_member_release_version = "v"+Utils2.formatDate2(new Date());
 
         // setup a JSON object array to collect all CurationGene objects
         ObjectMapper json = new ObjectMapper();

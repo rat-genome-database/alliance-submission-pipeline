@@ -2,7 +2,7 @@
 
 <beans>
     <bean id="main" class="edu.mcw.rgd.pipelines.agr.Main" >
-        <property name="version" value="Alliance Submission Pipeline  -- build Jan 17, 2024" />
+        <property name="version" value="Alliance Submission Pipeline  -- build Jul 18, 2024" />
         <property name="dao" ref="dao"/>
     </bean>
 
@@ -104,6 +104,10 @@
     </bean>
 
     <bean id="curationAlleleGenerator" class="edu.mcw.rgd.pipelines.agr.CurationAlleleGenerator" >
+        <property name="dao" ref="dao"/>
+    </bean>
+
+    <bean id="curationAlleleAssociationGenerator" class="edu.mcw.rgd.pipelines.agr.CurationAlleleAssociationGenerator" >
         <property name="dao" ref="dao"/>
     </bean>
 

@@ -2,7 +2,6 @@ package edu.mcw.rgd.pipelines.agr;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.RgdVariant;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.process.Utils;
@@ -11,7 +10,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -41,7 +39,6 @@ public class CurationVariantGenerator {
         log.info("START "+speciesName+" GENE file");
 
         CurationVariant curationVariants = new CurationVariant();
-        curationVariants.alliance_member_release_version = "v"+Utils2.formatDate2(new Date());
 
         // setup a JSON object array to collect all CurationVariant objects
         ObjectMapper json = new ObjectMapper();

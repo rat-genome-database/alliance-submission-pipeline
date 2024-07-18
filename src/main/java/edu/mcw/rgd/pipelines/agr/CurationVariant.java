@@ -11,9 +11,6 @@ import java.util.*;
 
 public class CurationVariant extends CurationObject {
 
-    public String linkml_version = "v1.11.0";
-    public String alliance_member_release_version = null;
-
     public List<VariantModel> variant_ingest_set = new ArrayList<>();
 
     public VariantModel add(RgdVariant v, Dao dao, String curie) throws Exception {

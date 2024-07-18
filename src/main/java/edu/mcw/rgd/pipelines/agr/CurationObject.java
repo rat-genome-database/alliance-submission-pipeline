@@ -12,6 +12,10 @@ import java.util.Map;
 
 public class CurationObject {
 
+    public String linkml_version = "v2.2.3";
+    public String alliance_member_release_version = "v"+Utils2.formatDate2(new Date());
+
+
     static public Map<Integer, String> loadHgncIdMap(Dao dao) throws Exception {
         Map<Integer, String> rgdId2HgncIdMap = new HashMap<>();
         List<XdbId> xdbIds = dao.getActiveXdbIds(XdbId.XDB_KEY_HGNC, RgdId.OBJECT_KEY_GENES);

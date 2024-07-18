@@ -9,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 
 public class CurationAGMGenerator {
@@ -39,7 +38,6 @@ public class CurationAGMGenerator {
         log.info("START "+speciesName+" AGM file");
 
         CurationAGM curationAGM = new CurationAGM();
-        curationAGM.alliance_member_release_version = "v"+Utils2.formatDate2(new Date());
 
         // setup a JSON object array to collect all CurationAGM objects
         ObjectMapper json = new ObjectMapper();

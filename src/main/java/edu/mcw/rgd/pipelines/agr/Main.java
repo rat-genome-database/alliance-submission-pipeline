@@ -47,36 +47,34 @@ public class Main {
         log.info("===");
 
         for( String arg: args ) {
-            switch (arg){
-                case "--variant-vcf-generator": {
+            switch (arg) {
+                case "--variant-vcf-generator" -> {
                     VariantVcfGenerator g = (VariantVcfGenerator) (bf.getBean("variantVcfGenerator"));
                     g.run();
-                    break;
                 }
-                case "--curation-daf-generator": {
+                case "--curation-daf-generator" -> {
                     CurationDafGenerator d = (CurationDafGenerator) (bf.getBean("curationDafGenerator"));
                     d.run();
-                    break;
                 }
-                case "--curation-gene-generator": {
+                case "--curation-gene-generator" -> {
                     CurationGeneGenerator d = (CurationGeneGenerator) (bf.getBean("curationGeneGenerator"));
                     d.run();
-                    break;
                 }
-                case "--curation-agm-generator": {
+                case "--curation-agm-generator" -> {
                     CurationAGMGenerator d = (CurationAGMGenerator) (bf.getBean("curationAGMGenerator"));
                     d.run();
-                    break;
                 }
-                case "--curation-allele-generator": {
+                case "--curation-allele-generator" -> {
                     CurationAlleleGenerator d = (CurationAlleleGenerator) (bf.getBean("curationAlleleGenerator"));
                     d.run();
-                    break;
                 }
-                case "--curation-variant-generator": {
+                case "--curation-allele-association-generator" -> {
+                    CurationAlleleAssociationGenerator d = (CurationAlleleAssociationGenerator) (bf.getBean("curationAlleleAssociationGenerator"));
+                    d.run();
+                }
+                case "--curation-variant-generator" -> {
                     CurationVariantGenerator g = (CurationVariantGenerator) (bf.getBean("curationVariantGenerator"));
                     g.run();
-                    break;
                 }
             }
         }

@@ -1,3 +1,7 @@
+Jul 18, 2024
+  curation: added generation of allele association file
+  curation: updated to schema 2.2.3
+
 Jan 17, 2024
   updated scripts for regular submission: 7.0.0, schema 1.0.2.4
 

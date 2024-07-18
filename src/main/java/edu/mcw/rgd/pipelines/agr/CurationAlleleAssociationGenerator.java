@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-public class CurationAlleleGenerator {
+public class CurationAlleleAssociationGenerator {
 
     private Dao dao;
 
@@ -22,7 +22,7 @@ public class CurationAlleleGenerator {
     public void run() throws Exception {
 
         try {
-            createAlleleFile(SpeciesType.RAT);
+            createAlleleAssociationFile(SpeciesType.RAT);
 
         } catch( Exception e ) {
             Utils.printStackTrace(e, log);
@@ -33,13 +33,13 @@ public class CurationAlleleGenerator {
         log.info("");
     }
 
-    void createAlleleFile(int speciesTypeKey) throws Exception {
+    void createAlleleAssociationFile(int speciesTypeKey) throws Exception {
 
         String speciesName = SpeciesType.getCommonName(speciesTypeKey).toUpperCase();
 
-        log.info("START "+speciesName+" allele file");
+        log.info("START "+speciesName+" allele association file");
 
-        CurationAllele curationAlleles = new CurationAllele();
+        CurationAlleleAssociation curationAlleleAssociations = new CurationAlleleAssociation();
 
         // setup a JSON object array to collect all CurationAllele objects
         ObjectMapper json = new ObjectMapper();
@@ -54,31 +54,24 @@ public class CurationAlleleGenerator {
         log.info("  alleles: "+alleles.size());
         for( Gene a: alleles ) {
 
-            String curie = null;
-            if( speciesTypeKey==SpeciesType.RAT ) {
-                curie = "RGD:"+a.getRgdId();
-            } else {
-                continue;
-            }
-
-            CurationAllele.AlleleModel m = curationAlleles.add(a, dao, curie);
+            int count = curationAlleleAssociations.add(a, dao);
         }
 
         // sort data, alphabetically by object symbols
-        curationAlleles.sort();
+        curationAlleleAssociations.sort();
 
         // dump records to a file in JSON format
         try {
-            String jsonFileName = "CURATION_ALLELES-"+speciesName+".json";
+            String jsonFileName = "CURATION_ALLELE_ASSOCIATIONS-"+speciesName+".json";
             BufferedWriter jsonWriter = Utils.openWriter(jsonFileName);
 
-            jsonWriter.write(json.writerWithDefaultPrettyPrinter().writeValueAsString(curationAlleles));
+            jsonWriter.write(json.writerWithDefaultPrettyPrinter().writeValueAsString(curationAlleleAssociations));
 
             jsonWriter.close();
         } catch(IOException ignore) {
         }
 
-        log.info("END "+speciesName+" allele file:  alleles="+curationAlleles.allele_ingest_set.size());
+        log.info("END "+speciesName+" allele associations file:  count="+curationAlleleAssociations.allele_gene_association_ingest_set.size());
         log.info("");
     }
 

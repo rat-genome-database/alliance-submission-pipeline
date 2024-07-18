@@ -6,9 +6,6 @@ import java.util.*;
 
 public class CurationAGM extends CurationObject {
 
-    public String linkml_version = "v1.11.0";
-    public String alliance_member_release_version = null;
-
     public List<AgmModel> agm_ingest_set = new ArrayList<>();
 
     public AgmModel add(Strain s, Dao dao, String curie) throws Exception {
