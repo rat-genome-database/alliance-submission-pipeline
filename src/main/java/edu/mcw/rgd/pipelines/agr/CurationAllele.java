@@ -2,8 +2,6 @@ package edu.mcw.rgd.pipelines.agr;
 
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.process.Utils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.Map;
@@ -16,7 +14,8 @@ public class CurationAllele extends CurationObject {
     public AlleleModel add(Gene a, Dao dao, String curie) throws Exception {
 
         AlleleModel m = new AlleleModel();
-        m.curie = curie;
+        m.mod_entity_id = curie;
+        m.mod_internal_id = curie;
 
         // if allele name is not available, we use allele symbol instead
         String alleleName = Utils.NVL(a.getName(), a.getSymbol());
@@ -254,13 +253,15 @@ public class CurationAllele extends CurationObject {
 
         public String created_by_curie = "RGD";
         public List cross_reference_dtos = null;
-        public String curie;
         public DataProviderDTO data_provider_dto;
         public String date_created;
         public String date_updated;
         public String in_collection_name = null;
         public boolean internal = false;
         public Boolean is_extinct = null;
+        public String laboratory_of_origin_curie = null;
+        public String mod_entity_id = null;
+        public String mod_internal_id = null;
         public List note_dtos;
         public Boolean obsolete = null;
         public List<String> reference_curies = null;
@@ -284,7 +285,7 @@ public class CurationAllele extends CurationObject {
         Collections.sort(list, new Comparator<AlleleModel>() {
             @Override
             public int compare(AlleleModel a1, AlleleModel a2) {
-                return a1.curie.compareToIgnoreCase(a2.curie);
+                return a1.mod_internal_id.compareToIgnoreCase(a2.mod_internal_id);
             }
         });
     }

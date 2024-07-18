@@ -11,7 +11,8 @@ public class CurationAGM extends CurationObject {
     public AgmModel add(Strain s, Dao dao, String curie) throws Exception {
 
         AgmModel m = new AgmModel();
-        m.curie = curie;
+        m.mod_entity_id = curie;
+        m.mod_internal_id = curie;
         m.name = s.getSymbol();
 
         // we call this to find malformed strain symbols
@@ -43,12 +44,12 @@ public class CurationAGM extends CurationObject {
         public List component_dtos = null;
         public String created_by_curie = null;
         public List cross_reference_dtos = null;
-        public String curie;
         public DataProviderDTO data_provider_dto = new DataProviderDTO();
         public String date_created;
         public String date_updated;
-        //public List genomic_location_association_dtos = null;
         public boolean internal = false;
+        public String mod_entity_id = null;
+        public String mod_internal_id = null;
         public String name;
         public Boolean obsolete = null;
         public List references_curies = null;

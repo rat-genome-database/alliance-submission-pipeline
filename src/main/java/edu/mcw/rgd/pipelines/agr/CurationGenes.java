@@ -179,6 +179,7 @@ public class CurationGenes extends CurationObject {
         public boolean internal = false;
         public String mod_entity_id;
         public String mod_internal_id;
+        public List note_dtos = null;
         public Boolean obsolete = null;
         public String taxon_curie;
         public String updated_by_curie = null;

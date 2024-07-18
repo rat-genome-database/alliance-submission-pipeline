@@ -32,7 +32,9 @@ public class CurationDaf extends CurationObject {
 
         AgmDiseaseAnnotation r = new AgmDiseaseAnnotation();
 
-        r.agm_curie = "RGD:"+a.getAnnotatedObjectRgdId();
+        r.agm_identifier = "RGD:"+a.getAnnotatedObjectRgdId();
+        r.mod_entity_id = r.agm_identifier;
+        r.mod_internal_id = r.agm_identifier;
 
         List<Integer> assertedAlleles = dao.getGeneAllelesForStrain(a.getAnnotatedObjectRgdId());
         if( assertedAlleles.size()!=1 ) {
@@ -41,13 +43,13 @@ public class CurationDaf extends CurationObject {
             }
         } else {
             int alleleRgdId = assertedAlleles.get(0);
-            r.asserted_allele_curie = "RGD:"+alleleRgdId;
+            r.asserted_allele_identifier = "RGD:"+alleleRgdId;
 
             List<Gene> assertedGenes = dao.getGenesForAllele(alleleRgdId);
             if( !assertedGenes.isEmpty() ) {
-                r.asserted_gene_curies = new ArrayList<>();
+                r.asserted_gene_identifiers = new ArrayList<>();
                 for( Gene g: assertedGenes ) {
-                    r.asserted_gene_curies.add("RGD:" + g.getRgdId());
+                    r.asserted_gene_identifiers.add("RGD:" + g.getRgdId());
                 }
             }
         }
@@ -64,13 +66,15 @@ public class CurationDaf extends CurationObject {
 
         AlleleDiseaseAnnotation r = new AlleleDiseaseAnnotation();
 
-        r.allele_curie = "RGD:"+a.getAnnotatedObjectRgdId();
+        r.allele_identifier = "RGD:"+a.getAnnotatedObjectRgdId();
+        r.mod_entity_id = r.allele_identifier;
+        r.mod_internal_id = r.allele_identifier;
 
         List<Gene> assertedGenes = dao.getGenesForAllele(a.getAnnotatedObjectRgdId());
         if( !assertedGenes.isEmpty() ) {
-            r.asserted_gene_curies = new ArrayList<>();
+            r.asserted_gene_identifiers = new ArrayList<>();
             for( Gene g: assertedGenes ) {
-                r.asserted_gene_curies.add("RGD:" + g.getRgdId());
+                r.asserted_gene_identifiers.add("RGD:" + g.getRgdId());
             }
         }
 
@@ -87,10 +91,12 @@ public class CurationDaf extends CurationObject {
         GeneDiseaseAnnotation r = new GeneDiseaseAnnotation();
 
         if( speciesTypeKey== SpeciesType.HUMAN ) {
-            r.gene_curie = geneRgdId2HgncIdMap.get(a.getAnnotatedObjectRgdId());
+            r.gene_identifier = geneRgdId2HgncIdMap.get(a.getAnnotatedObjectRgdId());
         } else if( speciesTypeKey==SpeciesType.RAT ) {
-            r.gene_curie = "RGD:"+a.getAnnotatedObjectRgdId();
+            r.gene_identifier = "RGD:"+a.getAnnotatedObjectRgdId();
         }
+        r.mod_entity_id = "RGD:"+a.getAnnotatedObjectRgdId();
+        r.mod_internal_id = "RGD:"+a.getAnnotatedObjectRgdId();
 
         // process common fields
         if( processDTO(a, dao, isAllele, r, speciesTypeKey) ) {
@@ -162,13 +168,13 @@ public class CurationDaf extends CurationObject {
             r.condition_relation_dtos = conditionRelationDtos;
         }
         if( !withGeneCuries.isEmpty() ) {
-            r.with_gene_curies = withGeneCuries;
+            r.with_gene_identifiers = withGeneCuries;
         }
 
         // special rules for processing IGI annotations
         if( Utils.stringsAreEqual(a.getEvidence(), "IGI") ) {
-            if( r.with_gene_curies!=null && !r.with_gene_curies.isEmpty() ) {
-                if( r.with_gene_curies.size()>1 ) {
+            if( r.with_gene_identifiers!=null && !r.with_gene_identifiers.isEmpty() ) {
+                if( r.with_gene_identifiers.size()>1 ) {
                     throw new Exception("multiple ids in WITH field for IGI annotations");
                 }
 
@@ -180,8 +186,8 @@ public class CurationDaf extends CurationObject {
                     return false;
                 }
 
-                r.disease_genetic_modifier_curies = r.with_gene_curies;
-                r.with_gene_curies = null;
+                r.disease_genetic_modifier_identifiers = r.with_gene_identifiers;
+                r.with_gene_identifiers = null;
                 if( qualifier.equals("ameliorates") ) {
                     r.disease_genetic_modifier_relation_name = "ameliorated_by";
                 } else {
@@ -247,37 +253,23 @@ public class CurationDaf extends CurationObject {
     }
 
     class AgmDiseaseAnnotation extends DiseaseAnnotation_DTO {
-        public String agm_curie;
-        public String asserted_allele_curie;
-        public List<String> asserted_gene_curies;
-        public String inferred_allele_curie; // not used
-        public String inferred_gene_curie;   // not used
-
-        String getCurie() {
-            return agm_curie;
-        }
+        public String agm_identifier;
+        public String asserted_allele_identifier;
+        public List<String> asserted_gene_identifiers;
+        public String inferred_allele_identifier; // not used
+        public String inferred_gene_identifier;   // not used
     }
 
     class AlleleDiseaseAnnotation extends DiseaseAnnotation_DTO {
-        public String allele_curie;
-        public List<String> asserted_gene_curies;
-
-        String getCurie() {
-            return allele_curie;
-        }
+        public String allele_identifier;
+        public List<String> asserted_gene_identifiers;
     }
 
     class GeneDiseaseAnnotation extends DiseaseAnnotation_DTO {
-        public String gene_curie;
-
-        String getCurie() {
-            return gene_curie;
-        }
+        public String gene_identifier;
     }
 
     abstract class DiseaseAnnotation_DTO extends CurationObject {
-
-        abstract String getCurie();
 
         public String annotation_type_name; // not used
         public List condition_relation_dtos;
@@ -287,7 +279,7 @@ public class CurationDaf extends CurationObject {
 
         public String date_created;
         public String date_updated;
-        public List<String> disease_genetic_modifier_curies;
+        public List<String> disease_genetic_modifier_identifiers;
         public String disease_genetic_modifier_relation_name;
         public List<String> disease_qualifier_names;
         public String disease_relation_name; // assoc_type, one of (is_implicated_in, is_marker_for)
@@ -295,9 +287,9 @@ public class CurationDaf extends CurationObject {
         public List<String> evidence_code_curies;
         public List<String> evidence_curies; // not used
         public String genetic_sex_name;      // not used
-        public String inferred_gene_curie;   // not used
         public Boolean internal = false;
-        public String mod_entity_id;         // not used
+        public String mod_entity_id;
+        public String mod_internal_id;
         public Boolean negated = null;
         public List note_dtos;
         public String reference_curie;
@@ -305,7 +297,7 @@ public class CurationDaf extends CurationObject {
         public DataProviderDTO secondary_data_provider_dto;
 
         public String updated_by_curie = "RGD:curator";
-        public List<String> with_gene_curies;
+        public List<String> with_gene_identifiers;
     }
 
     void removeDuplicatesFromDiseaseGenes() throws IOException {
@@ -367,7 +359,7 @@ public class CurationDaf extends CurationObject {
     class Comparator_DTO implements Comparator<DiseaseAnnotation_DTO> {
         @Override
         public int compare(DiseaseAnnotation_DTO a1, DiseaseAnnotation_DTO a2) {
-            int r = a1.getCurie().compareTo(a2.getCurie());
+            int r = a1.mod_internal_id.compareTo(a2.mod_internal_id);
             if( r!=0 ) {
                 return r;
             }
@@ -388,7 +380,7 @@ public class CurationDaf extends CurationObject {
             Map<String, Integer> diseaseGeneMap = new HashMap<>();
             for (int i = 0; i < disease_gene_ingest_set.size(); i++) {
                 GeneDiseaseAnnotation ga = disease_gene_ingest_set.get(i);
-                String key = createKey(ga, ga.gene_curie);
+                String key = createKey(ga, ga.gene_identifier);
                 Integer old = diseaseGeneMap.put(key, i);
                 if (old != null) {
                     GeneDiseaseAnnotation gaOld = disease_gene_ingest_set.get(old);
@@ -401,8 +393,8 @@ public class CurationDaf extends CurationObject {
             System.out.println(" disease alleles annots to process: " + disease_allele_ingest_set.size());
 
             for (AlleleDiseaseAnnotation aa : disease_allele_ingest_set) {
-                if (aa.asserted_gene_curies != null) {
-                    for( String assertedGeneCurie: aa.asserted_gene_curies ) {
+                if (aa.asserted_gene_identifiers != null) {
+                    for( String assertedGeneCurie: aa.asserted_gene_identifiers ) {
                         String alleleKey = createKey(aa, assertedGeneCurie);
                         Integer geneAnnotIndex = diseaseGeneMap.get(alleleKey);
                         if (geneAnnotIndex != null) {
@@ -433,7 +425,7 @@ public class CurationDaf extends CurationObject {
             Map<String, Integer> diseaseGeneMap = new HashMap<>();
             for (int i = 0; i < disease_gene_ingest_set.size(); i++) {
                 GeneDiseaseAnnotation ga = disease_gene_ingest_set.get(i);
-                String key = createKey2(ga, ga.getCurie());
+                String key = createKey2(ga, ga.mod_internal_id);
                 Integer old = diseaseGeneMap.put(key, i);
                 if (old != null) {
                     GeneDiseaseAnnotation gaOld = disease_gene_ingest_set.get(old);
@@ -444,8 +436,8 @@ public class CurationDaf extends CurationObject {
             Set<Integer> geneAnnotIndexesForDelete = new TreeSet<>(); // use TreeSet to store indexes in numeric order
 
             for (AgmDiseaseAnnotation aa : disease_agm_ingest_set) {
-                if( aa.asserted_gene_curies!=null ) {
-                    for( String assertedGeneCurie: aa.asserted_gene_curies ) {
+                if( aa.asserted_gene_identifiers!=null ) {
+                    for( String assertedGeneCurie: aa.asserted_gene_identifiers ) {
                         String alleleKey = createKey2(aa, assertedGeneCurie);
                         Integer geneAnnotIndex = diseaseGeneMap.get(alleleKey);
                         if (geneAnnotIndex != null) {
@@ -469,7 +461,7 @@ public class CurationDaf extends CurationObject {
             Map<String, Integer> diseaseAlleleMap = new HashMap<>();
             for (int i = 0; i < disease_allele_ingest_set.size(); i++) {
                 AlleleDiseaseAnnotation ga = disease_allele_ingest_set.get(i);
-                String key = createKey2(ga, ga.getCurie());
+                String key = createKey2(ga, ga.mod_internal_id);
                 Integer old = diseaseAlleleMap.put(key, i);
                 if (old != null) {
                     AlleleDiseaseAnnotation gaOld = disease_allele_ingest_set.get(old);
@@ -480,8 +472,8 @@ public class CurationDaf extends CurationObject {
             TreeSet<Integer> alleleAnnotIndexesForDelete = new TreeSet<>(); // use TreeSet to store indexes in numeric order
 
             for (AgmDiseaseAnnotation aa : disease_agm_ingest_set) {
-                if( aa.asserted_allele_curie!=null ) {
-                    String alleleKey = createKey2(aa, aa.asserted_allele_curie);
+                if( aa.asserted_allele_identifier!=null ) {
+                    String alleleKey = createKey2(aa, aa.asserted_allele_identifier);
                     Integer alleleAnnotIndex = diseaseAlleleMap.get(alleleKey);
                     if (alleleAnnotIndex != null) {
                         alleleAnnotIndexesForDelete.add(-alleleAnnotIndex); // store negative indexes to enforce descending order
@@ -498,7 +490,7 @@ public class CurationDaf extends CurationObject {
     }
 
     String createKey(DiseaseAnnotation_DTO ga, String id) {
-        String key = id+"|"+ga.getCurie()+"|"+ga.do_term_curie+"|"+ga.data_provider_dto.source_organization_abbreviation+"|"+ga.reference_curie+"|"+ga.negated
+        String key = id+"|"+ga.mod_internal_id+"|"+ga.do_term_curie+"|"+ga.data_provider_dto.source_organization_abbreviation+"|"+ga.reference_curie+"|"+ga.negated
                 +"|"+Utils.concatenate(ga.disease_qualifier_names,",")
                 +"|"+Utils.concatenate(ga.evidence_code_curies,",")
                 +"|"+(ga.note_dtos==null ? 0 : ga.note_dtos.size())
@@ -507,7 +499,7 @@ public class CurationDaf extends CurationObject {
     }
 
     String createKey2(DiseaseAnnotation_DTO ga, String id) {
-        String key = id+"|"+ga.getCurie()+"|"+ga.do_term_curie+"|"+ga.reference_curie+"|"+ga.negated
+        String key = id+"|"+ga.mod_internal_id+"|"+ga.do_term_curie+"|"+ga.reference_curie+"|"+ga.negated
                 +"|"+Utils.concatenate(ga.disease_qualifier_names,",")
                 +"|"+Utils.concatenate(ga.evidence_code_curies,",")
                 +"|"+(ga.condition_relation_dtos==null ? 0 : ga.condition_relation_dtos.size());

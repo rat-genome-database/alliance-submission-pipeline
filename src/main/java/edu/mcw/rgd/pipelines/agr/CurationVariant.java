@@ -16,7 +16,8 @@ public class CurationVariant extends CurationObject {
     public VariantModel add(RgdVariant v, Dao dao, String curie) throws Exception {
 
         VariantModel m = new VariantModel();
-        m.curie = curie;
+        m.mod_entity_id = curie;
+        m.mod_internal_id = curie;
         m.taxon_curie = "NCBITaxon:" + SpeciesType.getTaxonomicId(v.getSpeciesTypeKey());
         m.variant_type_curie = v.getType();
         m.data_provider_dto.setCrossReferenceDTO("RGD:"+v.getRgdId(), "allele", "RGD");
@@ -75,11 +76,12 @@ public class CurationVariant extends CurationObject {
     class VariantModel {
         public String created_by_curie = "RGD:curator";
         public List cross_reference_dtos = null;
-        public String curie;
         public DataProviderDTO data_provider_dto = new DataProviderDTO();
         public String date_created;
         public String date_updated;
         public boolean internal = false;
+        public String mod_entity_id = null;
+        public String mod_internal_id = null;
         public List note_dtos = null;
         public Boolean obsolete = null;
 
@@ -106,7 +108,7 @@ public class CurationVariant extends CurationObject {
         Collections.sort(list, new Comparator<VariantModel>() {
             @Override
             public int compare(VariantModel a1, VariantModel a2) {
-                return a1.curie.compareToIgnoreCase(a2.curie);
+                return a1.mod_entity_id.compareToIgnoreCase(a2.mod_entity_id);
             }
         });
     }
