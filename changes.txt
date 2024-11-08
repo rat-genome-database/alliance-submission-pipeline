@@ -1,3 +1,6 @@
+Nov 08, 2024
+  curation: genes: xrefs: display_name now has a database prefix
+
 Jul 18, 2024
   curation: added generation of allele association file
   curation: updated to schema 2.2.3
