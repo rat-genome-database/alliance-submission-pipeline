@@ -90,12 +90,8 @@ public class CurationGenes extends CurationObject {
 
     List getCrossReferences(Gene g, Dao dao, Set<String> canonicalProteins) throws Exception {
 
-        List<XdbId> ids = dao.getXdbIds(g.getRgdId(), XdbId.XDB_KEY_UNIPROT);
-        ids.addAll( dao.getXdbIds(g.getRgdId(), XdbId.XDB_KEY_OMIM) );
-        ids.addAll( dao.getXdbIds(g.getRgdId(), XdbId.XDB_KEY_ENSEMBL_GENES) );
-        ids.addAll( dao.getXdbIds(g.getRgdId(), XdbId.XDB_KEY_NCBI_GENE) );
-        ids.addAll( dao.getXdbIds(g.getRgdId(), XdbId.XDB_KEY_HGNC) );
-        ids.addAll( dao.getXdbIds(g.getRgdId(), 68) ); // RNACentral
+        // xrefs must be unique by RGDID|XDBKEY|ACC
+        List<XdbId> ids = loadUniqueXdbIds(g.getRgdId(), dao);
 
         if( ids.isEmpty() ) {
             return null;
@@ -161,6 +157,29 @@ public class CurationGenes extends CurationObject {
             }
         }
         return results;
+    }
+
+    List<XdbId> loadUniqueXdbIds( int rgdId, Dao dao ) throws Exception {
+
+        // xrefs must be unique by RGDID|XDBKEY|ACC
+        List<XdbId> ids = dao.getXdbIds(rgdId, XdbId.XDB_KEY_UNIPROT);
+        ids.addAll( dao.getXdbIds(rgdId, XdbId.XDB_KEY_OMIM) );
+        ids.addAll( dao.getXdbIds(rgdId, XdbId.XDB_KEY_ENSEMBL_GENES) );
+        ids.addAll( dao.getXdbIds(rgdId, XdbId.XDB_KEY_NCBI_GENE) );
+        ids.addAll( dao.getXdbIds(rgdId, XdbId.XDB_KEY_HGNC) );
+        ids.addAll( dao.getXdbIds(rgdId, 68) ); // RNACentral
+
+        Set<String> xrefIds = new HashSet<>();
+
+        List<XdbId> uniqueIds = new ArrayList<>();
+        for( XdbId xdbId: ids ) {
+
+            String xrefId = xdbId.getRgdId()+"|"+xdbId.getXdbKey()+"|"+xdbId.getAccId();
+            if( xrefIds.add( xrefId ) ) {
+                uniqueIds.add(xdbId);
+            }
+        }
+        return uniqueIds;
     }
 
     class GeneModel {

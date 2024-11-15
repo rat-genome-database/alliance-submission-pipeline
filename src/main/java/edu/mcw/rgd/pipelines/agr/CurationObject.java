@@ -23,7 +23,7 @@ public class CurationObject {
             String accIds = rgdId2HgncIdMap.get(xdbId.getRgdId());
             if( accIds==null ) {
                 rgdId2HgncIdMap.put(xdbId.getRgdId(), xdbId.getAccId());
-            } else {
+            } else if( !accIds.contains(xdbId.getAccId()) ){
                 rgdId2HgncIdMap.put(xdbId.getRgdId(), accIds+","+xdbId.getAccId());
             }
         }

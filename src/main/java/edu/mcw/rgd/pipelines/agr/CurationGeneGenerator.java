@@ -2,6 +2,7 @@ package edu.mcw.rgd.pipelines.agr;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.process.Utils;
@@ -55,8 +56,9 @@ public class CurationGeneGenerator {
         Set<String> canonicalProteins = dao.getCanonicalProteins(speciesTypeKey);
 
         List<Gene> genes = dao.getAllGenes(speciesTypeKey);
+
         log.info("  genes: "+genes.size());
-        genes.parallelStream().forEach( g -> {
+        genes.stream().forEach( g -> {
             String curie = null;
             if (speciesTypeKey == SpeciesType.RAT) {
                 curie = "RGD:" + g.getRgdId();
