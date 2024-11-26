@@ -33,8 +33,9 @@ public class CurationDaf extends CurationObject {
         AgmDiseaseAnnotation r = new AgmDiseaseAnnotation();
 
         r.agm_identifier = "RGD:"+a.getAnnotatedObjectRgdId();
-        r.mod_entity_id = r.agm_identifier;
-        r.mod_internal_id = r.agm_identifier;
+        // as of Nov 2024 -- do *not* submit these
+        //r.mod_entity_id = r.agm_identifier;
+        //r.mod_internal_id = r.agm_identifier;
 
         List<Integer> assertedAlleles = dao.getGeneAllelesForStrain(a.getAnnotatedObjectRgdId());
         if( assertedAlleles.size()!=1 ) {
@@ -67,8 +68,9 @@ public class CurationDaf extends CurationObject {
         AlleleDiseaseAnnotation r = new AlleleDiseaseAnnotation();
 
         r.allele_identifier = "RGD:"+a.getAnnotatedObjectRgdId();
-        r.mod_entity_id = r.allele_identifier;
-        r.mod_internal_id = r.allele_identifier;
+        // as of Nov 2024 -- do *not* submit these
+        //r.mod_entity_id = r.allele_identifier;
+        //r.mod_internal_id = r.allele_identifier;
 
         List<Gene> assertedGenes = dao.getGenesForAllele(a.getAnnotatedObjectRgdId());
         if( !assertedGenes.isEmpty() ) {
@@ -95,8 +97,9 @@ public class CurationDaf extends CurationObject {
         } else if( speciesTypeKey==SpeciesType.RAT ) {
             r.gene_identifier = "RGD:"+a.getAnnotatedObjectRgdId();
         }
-        r.mod_entity_id = "RGD:"+a.getAnnotatedObjectRgdId();
-        r.mod_internal_id = "RGD:"+a.getAnnotatedObjectRgdId();
+        // as of Nov 2024 -- do *not* submit these
+        //r.mod_entity_id = "RGD:"+a.getAnnotatedObjectRgdId();
+        //r.mod_internal_id = "RGD:"+a.getAnnotatedObjectRgdId();
 
         // process common fields
         if( processDTO(a, dao, isAllele, r, speciesTypeKey) ) {
