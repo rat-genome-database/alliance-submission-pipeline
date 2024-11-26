@@ -291,8 +291,8 @@ public class CurationDaf extends CurationObject {
         public List<String> evidence_curies; // not used
         public String genetic_sex_name;      // not used
         public Boolean internal = false;
-        public String mod_entity_id;
-        public String mod_internal_id;
+        //public String mod_entity_id; -- don't use it as of Nov 2024
+        //public String mod_internal_id; -- don't use it as of Nov 2024
         public Boolean negated = null;
         public List note_dtos;
         public String reference_curie;
@@ -301,6 +301,20 @@ public class CurationDaf extends CurationObject {
 
         public String updated_by_curie = "RGD:curator";
         public List<String> with_gene_identifiers;
+
+        public String retrieveRgdId() {
+
+            if( this instanceof AgmDiseaseAnnotation ) {
+                return ((AgmDiseaseAnnotation)this).agm_identifier;
+            }
+            if( this instanceof AlleleDiseaseAnnotation ) {
+                return ((AlleleDiseaseAnnotation)this).allele_identifier;
+            }
+            if( this instanceof GeneDiseaseAnnotation ) {
+                return ((GeneDiseaseAnnotation)this).gene_identifier;
+            }
+            return null;
+        }
     }
 
     void removeDuplicatesFromDiseaseGenes() throws IOException {
@@ -362,7 +376,7 @@ public class CurationDaf extends CurationObject {
     class Comparator_DTO implements Comparator<DiseaseAnnotation_DTO> {
         @Override
         public int compare(DiseaseAnnotation_DTO a1, DiseaseAnnotation_DTO a2) {
-            int r = a1.mod_internal_id.compareTo(a2.mod_internal_id);
+            int r = a1.retrieveRgdId().compareTo(a2.retrieveRgdId());
             if( r!=0 ) {
                 return r;
             }
@@ -428,7 +442,7 @@ public class CurationDaf extends CurationObject {
             Map<String, Integer> diseaseGeneMap = new HashMap<>();
             for (int i = 0; i < disease_gene_ingest_set.size(); i++) {
                 GeneDiseaseAnnotation ga = disease_gene_ingest_set.get(i);
-                String key = createKey2(ga, ga.mod_internal_id);
+                String key = createKey2(ga, ga.retrieveRgdId());
                 Integer old = diseaseGeneMap.put(key, i);
                 if (old != null) {
                     GeneDiseaseAnnotation gaOld = disease_gene_ingest_set.get(old);
@@ -464,7 +478,7 @@ public class CurationDaf extends CurationObject {
             Map<String, Integer> diseaseAlleleMap = new HashMap<>();
             for (int i = 0; i < disease_allele_ingest_set.size(); i++) {
                 AlleleDiseaseAnnotation ga = disease_allele_ingest_set.get(i);
-                String key = createKey2(ga, ga.mod_internal_id);
+                String key = createKey2(ga, ga.retrieveRgdId());
                 Integer old = diseaseAlleleMap.put(key, i);
                 if (old != null) {
                     AlleleDiseaseAnnotation gaOld = disease_allele_ingest_set.get(old);
@@ -493,7 +507,7 @@ public class CurationDaf extends CurationObject {
     }
 
     String createKey(DiseaseAnnotation_DTO ga, String id) {
-        String key = id+"|"+ga.mod_internal_id+"|"+ga.do_term_curie+"|"+ga.data_provider_dto.source_organization_abbreviation+"|"+ga.reference_curie+"|"+ga.negated
+        String key = id+"|"+ga.retrieveRgdId()+"|"+ga.do_term_curie+"|"+ga.data_provider_dto.source_organization_abbreviation+"|"+ga.reference_curie+"|"+ga.negated
                 +"|"+Utils.concatenate(ga.disease_qualifier_names,",")
                 +"|"+Utils.concatenate(ga.evidence_code_curies,",")
                 +"|"+(ga.note_dtos==null ? 0 : ga.note_dtos.size())
@@ -502,7 +516,7 @@ public class CurationDaf extends CurationObject {
     }
 
     String createKey2(DiseaseAnnotation_DTO ga, String id) {
-        String key = id+"|"+ga.mod_internal_id+"|"+ga.do_term_curie+"|"+ga.reference_curie+"|"+ga.negated
+        String key = id+"|"+ga.retrieveRgdId()+"|"+ga.do_term_curie+"|"+ga.reference_curie+"|"+ga.negated
                 +"|"+Utils.concatenate(ga.disease_qualifier_names,",")
                 +"|"+Utils.concatenate(ga.evidence_code_curies,",")
                 +"|"+(ga.condition_relation_dtos==null ? 0 : ga.condition_relation_dtos.size());
