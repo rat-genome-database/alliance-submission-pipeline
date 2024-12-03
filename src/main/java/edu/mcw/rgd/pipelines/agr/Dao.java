@@ -64,16 +64,6 @@ public class Dao {
         return q.execute(speciesTypeKey, mapKey, chr);
     }
 
-    public List<VariantTranscript> getVariantTranscripts(int mapKey, String chr) throws Exception{
-        String sql = "select vt.* from variant_transcript vt inner join  variant_map_data v on v.rgd_id=vt.variant_rgd_id AND v.map_key=? AND v.chromosome=?";
-        return this.executeVarTranscriptQuery(sql, mapKey, chr);
-    }
-
-    public List<VariantTranscript> getVariantTranscripts(int rgdId) throws Exception{
-        String sql = "select * from variant_transcript where variant_rgd_id = ?";
-        return this.executeVarTranscriptQuery(sql, rgdId);
-    }
-
     public List<VariantSampleDetail> getSampleIds(int mapKey, String chr) throws Exception{
         String sql = "select vs.* from variant_sample_detail vs inner join variant_map_data vm on vm.rgd_id = vs.rgd_id and vm.map_key=? and vm.chromosome = ?";
         VariantSampleQuery q = new VariantSampleQuery(this.getVariantDataSource(), sql);
@@ -85,10 +75,7 @@ public class Dao {
     public List<String> getChromosomes(int mapKey) throws Exception {
 
         String sql = "SELECT DISTINCT chromosome FROM chromosomes WHERE map_key=? ";
-        StringListQuery q = new StringListQuery(mapDAO.getDataSource(), sql);
-        q.declareParameter(new SqlParameter(Types.INTEGER));
-        q.compile();
-        return q.execute(new Object[]{mapKey});
+        return StringListQuery.execute(mapDAO, sql, mapKey);
     }
 
     public Sample getSample(int id) throws Exception{
@@ -108,18 +95,6 @@ public class Dao {
     public List<MapData> getMapData(int rgdId, int mapKey) throws Exception {
         return mapDAO.getMapData(rgdId, mapKey);
     }
-
-    public List<VariantMapData> executeVariantQuery(String query, Object... params) throws Exception {
-        VariantMapQuery q = new VariantMapQuery(getVariantDataSource(), query);
-        return q.execute(params);
-    }
-
-    public List<VariantTranscript> executeVarTranscriptQuery(String query, Object... params) throws Exception {
-        VariantTranscriptQuery q = new VariantTranscriptQuery(getVariantDataSource(), query);
-        return q.execute(params);
-    }
-
-
 
     public List<Annotation> getAnnotationsBySpecies(int speciesTypeKey, String aspect, String source) throws Exception {
         return annotationDAO.getAnnotationsBySpeciesAspectAndSource(speciesTypeKey, aspect, source);
