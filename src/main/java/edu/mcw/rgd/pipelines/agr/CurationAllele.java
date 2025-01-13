@@ -288,7 +288,7 @@ public class CurationAllele extends CurationObject {
         Collections.sort(list, new Comparator<AlleleModel>() {
             @Override
             public int compare(AlleleModel a1, AlleleModel a2) {
-                return a1.mod_internal_id.compareToIgnoreCase(a2.mod_internal_id);
+                return a1.mod_entity_id.compareToIgnoreCase(a2.mod_entity_id);
             }
         });
     }
