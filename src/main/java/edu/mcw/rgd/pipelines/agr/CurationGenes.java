@@ -14,7 +14,7 @@ public class CurationGenes extends CurationObject {
 
         GeneModel m = new GeneModel();
         m.mod_entity_id = curie;
-        m.mod_internal_id = "RGD:"+g.getRgdId();
+        //m.mod_internal_id = "RGD:"+g.getRgdId();
         m.taxon_curie = "NCBITaxon:" + SpeciesType.getTaxonomicId(g.getSpeciesTypeKey());
         m.gene_type_curie = Utils.NVL(g.getSoAccId(), "SO:0000704");  // if SO acc id not provided, use 'gene' SO:0000704
         m.data_provider_dto.setCrossReferenceDTO("RGD:"+g.getRgdId(), "gene", "RGD");
@@ -196,8 +196,11 @@ public class CurationGenes extends CurationObject {
         public String gene_type_curie;
 
         public boolean internal = false;
-        public String mod_entity_id;
-        public String mod_internal_id;
+
+        // only one of these ids can be submitted: mod_entity_id or mod_internal_id
+        public String mod_entity_id = null;
+        //public String mod_internal_id = null;
+
         public List note_dtos = null;
         public Boolean obsolete = null;
         public String taxon_curie;

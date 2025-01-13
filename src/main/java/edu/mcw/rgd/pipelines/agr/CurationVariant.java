@@ -17,7 +17,7 @@ public class CurationVariant extends CurationObject {
 
         VariantModel m = new VariantModel();
         m.mod_entity_id = curie;
-        m.mod_internal_id = curie;
+        //m.mod_internal_id = curie;
         m.taxon_curie = "NCBITaxon:" + SpeciesType.getTaxonomicId(v.getSpeciesTypeKey());
         m.variant_type_curie = v.getType();
         m.data_provider_dto.setCrossReferenceDTO("RGD:"+v.getRgdId(), "allele", "RGD");
@@ -80,8 +80,11 @@ public class CurationVariant extends CurationObject {
         public String date_created;
         public String date_updated;
         public boolean internal = false;
+
+        // only one of these ids can be submitted: mod_entity_id or mod_internal_id
         public String mod_entity_id = null;
-        public String mod_internal_id = null;
+        //public String mod_internal_id = null;
+
         public List note_dtos = null;
         public Boolean obsolete = null;
 

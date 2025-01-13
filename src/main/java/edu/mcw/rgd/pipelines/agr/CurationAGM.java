@@ -12,7 +12,7 @@ public class CurationAGM extends CurationObject {
 
         AgmModel m = new AgmModel();
         m.mod_entity_id = curie;
-        m.mod_internal_id = curie;
+        //m.mod_internal_id = curie;
         m.name = s.getSymbol();
 
         // we call this to find malformed strain symbols
@@ -48,8 +48,11 @@ public class CurationAGM extends CurationObject {
         public String date_created;
         public String date_updated;
         public boolean internal = false;
+
+        // only one of these attributes can be submitted: mod_entity_id or mod_internal_id
         public String mod_entity_id = null;
-        public String mod_internal_id = null;
+        //public String mod_internal_id = null;
+
         public String name;
         public Boolean obsolete = null;
         public List references_curies = null;

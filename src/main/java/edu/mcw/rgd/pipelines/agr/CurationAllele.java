@@ -15,7 +15,7 @@ public class CurationAllele extends CurationObject {
 
         AlleleModel m = new AlleleModel();
         m.mod_entity_id = curie;
-        m.mod_internal_id = curie;
+        //m.mod_internal_id = curie;
 
         // if allele name is not available, we use allele symbol instead
         String alleleName = Utils.NVL(a.getName(), a.getSymbol());
@@ -260,8 +260,11 @@ public class CurationAllele extends CurationObject {
         public boolean internal = false;
         public Boolean is_extinct = null;
         public String laboratory_of_origin_curie = null;
+
+        // only one of mod_entity_id,mod_internal_id can be submitted
         public String mod_entity_id = null;
-        public String mod_internal_id = null;
+        //public String mod_internal_id = null;
+
         public List note_dtos;
         public Boolean obsolete = null;
         public List<String> reference_curies = null;

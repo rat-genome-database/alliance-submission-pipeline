@@ -1,3 +1,7 @@
+Dec 11, 2024
+  curation: only one of the fields {fields mod_entity_id, mod_internal_id} can be submitted -- per request from the Alliance
+     thus commented out 'mod_internal_id' field so it won't be part of the submission anymore
+
 Dec 03, 2024
   dao: removed unused sql
 
