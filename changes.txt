@@ -1,5 +1,6 @@
 Feb 25, 2025
   curation: mod_entity_id -> primary_external_id
+  curation: added generation of agm-allele associations
 
 Dec 11, 2024
   curation: only one of the fields {fields mod_entity_id, mod_internal_id} can be submitted -- per request from the Alliance

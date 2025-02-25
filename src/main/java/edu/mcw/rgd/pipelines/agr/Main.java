@@ -72,6 +72,10 @@ public class Main {
                     CurationAlleleAssociationGenerator d = (CurationAlleleAssociationGenerator) (bf.getBean("curationAlleleAssociationGenerator"));
                     d.run();
                 }
+                case "--curation-agm-association-generator" -> {
+                    CurationAGMAssociationGenerator d = (CurationAGMAssociationGenerator) (bf.getBean("curationAGMAssociationGenerator"));
+                    d.run();
+                }
                 case "--curation-variant-generator" -> {
                     CurationVariantGenerator g = (CurationVariantGenerator) (bf.getBean("curationVariantGenerator"));
                     g.run();
