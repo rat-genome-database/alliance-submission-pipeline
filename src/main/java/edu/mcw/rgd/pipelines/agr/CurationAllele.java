@@ -14,8 +14,7 @@ public class CurationAllele extends CurationObject {
     public AlleleModel add(Gene a, Dao dao, String curie) throws Exception {
 
         AlleleModel m = new AlleleModel();
-        m.mod_entity_id = curie;
-        //m.mod_internal_id = curie;
+        m.primary_external_id = curie;
 
         // if allele name is not available, we use allele symbol instead
         String alleleName = Utils.NVL(a.getName(), a.getSymbol());
@@ -261,9 +260,8 @@ public class CurationAllele extends CurationObject {
         public Boolean is_extinct = null;
         public String laboratory_of_origin_curie = null;
 
-        // only one of mod_entity_id,mod_internal_id can be submitted
-        public String mod_entity_id = null;
-        //public String mod_internal_id = null;
+        // as of Jan 22, 2025: mod_entity_id or mod_internal_id should not be used
+        public String primary_external_id = null;
 
         public List note_dtos;
         public Boolean obsolete = null;
@@ -288,7 +286,7 @@ public class CurationAllele extends CurationObject {
         Collections.sort(list, new Comparator<AlleleModel>() {
             @Override
             public int compare(AlleleModel a1, AlleleModel a2) {
-                return a1.mod_entity_id.compareToIgnoreCase(a2.mod_entity_id);
+                return a1.primary_external_id.compareToIgnoreCase(a2.primary_external_id);
             }
         });
     }

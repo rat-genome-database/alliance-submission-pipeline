@@ -13,8 +13,8 @@ public class CurationGenes extends CurationObject {
     public GeneModel add(Gene g, Dao dao, String curie, Set<String> canonicalProteins) throws Exception {
 
         GeneModel m = new GeneModel();
-        m.mod_entity_id = curie;
-        //m.mod_internal_id = "RGD:"+g.getRgdId();
+        m.primary_external_id = curie;
+
         m.taxon_curie = "NCBITaxon:" + SpeciesType.getTaxonomicId(g.getSpeciesTypeKey());
         m.gene_type_curie = Utils.NVL(g.getSoAccId(), "SO:0000704");  // if SO acc id not provided, use 'gene' SO:0000704
         m.data_provider_dto.setCrossReferenceDTO("RGD:"+g.getRgdId(), "gene", "RGD");
@@ -197,9 +197,8 @@ public class CurationGenes extends CurationObject {
 
         public boolean internal = false;
 
-        // only one of these ids can be submitted: mod_entity_id or mod_internal_id
-        public String mod_entity_id = null;
-        //public String mod_internal_id = null;
+        // as of Jan 22, 2025: mod_entity_id or mod_internal_id should not be used
+        public String primary_external_id = null;
 
         public List note_dtos = null;
         public Boolean obsolete = null;
@@ -218,7 +217,7 @@ public class CurationGenes extends CurationObject {
         Collections.sort(list, new Comparator<GeneModel>() {
             @Override
             public int compare(GeneModel a1, GeneModel a2) {
-                return a1.mod_entity_id.compareToIgnoreCase(a2.mod_entity_id);
+                return a1.primary_external_id.compareToIgnoreCase(a2.primary_external_id);
             }
         });
     }

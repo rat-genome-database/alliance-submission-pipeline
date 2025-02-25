@@ -2,9 +2,9 @@
 
 export MOD_NAME=RGD
 export AGR_SCHEMA=1.0.2.4
-export UPLOAD_NR=1
+export UPLOAD_NR=9
 export BATCH="${MOD_NAME}_${AGR_SCHEMA}_${UPLOAD_NR}"
-export AGR_RELEASE="7.0.0"
+export AGR_RELEASE="8.0.0"
 
 export WORK_DIR=/home/rgddata/pipelines/AgrPipeline
 cd $WORK_DIR
@@ -40,6 +40,6 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
- $WORK_DIR/submit_files.sh
+$WORK_DIR/submit_files.sh
 
 echo "=== OK ==="
