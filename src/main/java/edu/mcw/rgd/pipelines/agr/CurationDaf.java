@@ -161,9 +161,9 @@ public class CurationDaf extends CurationObject {
 
         String pmid = dao.getPmid(a.getRefRgdId());
         if( pmid==null ) {
-            r.reference_curie = "RGD:"+a.getRefRgdId();
+            r.primary_external_id = "RGD:"+a.getRefRgdId();
         } else {
-            r.reference_curie = "PMID:"+pmid;
+            r.primary_external_id = "PMID:"+pmid;
         }
 
         List conditionRelationDtos = new ArrayList();
@@ -292,14 +292,14 @@ public class CurationDaf extends CurationObject {
         public String disease_relation_name; // assoc_type, one of (is_implicated_in, is_marker_for)
         public String do_term_curie;
         public List<String> evidence_code_curies;
-        public List<String> evidence_curies; // not used
+        public List<String> evidence_curie; // not used
         public String genetic_sex_name;      // not used
         public Boolean internal = false;
         //public String mod_entity_id; -- don't use it as of Nov 2024
         //public String mod_internal_id; -- don't use it as of Nov 2024
         public Boolean negated = null;
         public List note_dtos;
-        public String reference_curie;
+        public String primary_external_id;
 
         public DataProviderDTO secondary_data_provider_dto;
 
@@ -392,7 +392,7 @@ public class CurationDaf extends CurationObject {
             if( r!=0 ) {
                 return r;
             }
-            return a1.reference_curie.compareTo(a2.reference_curie);
+            return a1.primary_external_id.compareTo(a2.primary_external_id);
         }
     }
 
@@ -515,7 +515,8 @@ public class CurationDaf extends CurationObject {
     }
 
     String createKey(DiseaseAnnotation_DTO ga, String id) {
-        String key = id+"|"+ga.retrieveRgdId()+"|"+ga.do_term_curie+"|"+ga.data_provider_dto.source_organization_abbreviation+"|"+ga.reference_curie+"|"+ga.negated
+        String key = id+"|"+ga.retrieveRgdId()+"|"+ga.do_term_curie+"|"+ga.data_provider_dto.source_organization_abbreviation
+                +"|"+ga.primary_external_id+"|"+ga.negated
                 +"|"+Utils.concatenate(ga.disease_qualifier_names,",")
                 +"|"+Utils.concatenate(ga.evidence_code_curies,",")
                 +"|"+(ga.note_dtos==null ? 0 : ga.note_dtos.size())
@@ -524,7 +525,7 @@ public class CurationDaf extends CurationObject {
     }
 
     String createKey2(DiseaseAnnotation_DTO ga, String id) {
-        String key = id+"|"+ga.retrieveRgdId()+"|"+ga.do_term_curie+"|"+ga.reference_curie+"|"+ga.negated
+        String key = id+"|"+ga.retrieveRgdId()+"|"+ga.do_term_curie+"|"+ga.primary_external_id+"|"+ga.negated
                 +"|"+Utils.concatenate(ga.disease_qualifier_names,",")
                 +"|"+Utils.concatenate(ga.evidence_code_curies,",")
                 +"|"+(ga.condition_relation_dtos==null ? 0 : ga.condition_relation_dtos.size());
