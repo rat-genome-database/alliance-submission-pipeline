@@ -113,6 +113,8 @@ public class CurationDaf extends CurationObject {
 
     boolean processDTO(Annotation a, Dao dao, boolean isAllele, DiseaseAnnotation_DTO r, int speciesTypeKey) throws Exception {
 
+        r.primary_external_id = "RGD:"+a.getAnnotatedObjectRgdId();
+
         r.date_created = Utils2.formatDate(a.getCreatedDate());
         if( a.getLastModifiedDate()!=null ) {
             r.date_updated = Utils2.formatDate(a.getLastModifiedDate());
@@ -161,9 +163,9 @@ public class CurationDaf extends CurationObject {
 
         String pmid = dao.getPmid(a.getRefRgdId());
         if( pmid==null ) {
-            r.primary_external_id = "RGD:"+a.getRefRgdId();
+            r.evidence_curie = "RGD:"+a.getRefRgdId();
         } else {
-            r.primary_external_id = "PMID:"+pmid;
+            r.evidence_curie = "PMID:"+pmid;
         }
 
         List conditionRelationDtos = new ArrayList();
@@ -292,15 +294,15 @@ public class CurationDaf extends CurationObject {
         public String disease_relation_name; // assoc_type, one of (is_implicated_in, is_marker_for)
         public String do_term_curie;
         public List<String> evidence_code_curies;
-        public List<String> evidence_curie; // not used
+        public String evidence_curie;
         public String genetic_sex_name;      // not used
         public Boolean internal = false;
         //public String mod_entity_id; -- don't use it as of Nov 2024
         //public String mod_internal_id; -- don't use it as of Nov 2024
         public Boolean negated = null;
         public List note_dtos;
-        public String primary_external_id;
 
+        public String primary_external_id;
         public DataProviderDTO secondary_data_provider_dto;
 
         public String updated_by_curie = "RGD:curator";
@@ -392,7 +394,7 @@ public class CurationDaf extends CurationObject {
             if( r!=0 ) {
                 return r;
             }
-            return a1.primary_external_id.compareTo(a2.primary_external_id);
+            return a1.evidence_curie.compareTo(a2.evidence_curie);
         }
     }
 
@@ -515,8 +517,7 @@ public class CurationDaf extends CurationObject {
     }
 
     String createKey(DiseaseAnnotation_DTO ga, String id) {
-        String key = id+"|"+ga.retrieveRgdId()+"|"+ga.do_term_curie+"|"+ga.data_provider_dto.source_organization_abbreviation
-                +"|"+ga.primary_external_id+"|"+ga.negated
+        String key = id+"|"+ga.retrieveRgdId()+"|"+ga.do_term_curie+"|"+ga.data_provider_dto.source_organization_abbreviation+"|"+ga.evidence_curie +"|"+ga.negated
                 +"|"+Utils.concatenate(ga.disease_qualifier_names,",")
                 +"|"+Utils.concatenate(ga.evidence_code_curies,",")
                 +"|"+(ga.note_dtos==null ? 0 : ga.note_dtos.size())
@@ -525,7 +526,7 @@ public class CurationDaf extends CurationObject {
     }
 
     String createKey2(DiseaseAnnotation_DTO ga, String id) {
-        String key = id+"|"+ga.retrieveRgdId()+"|"+ga.do_term_curie+"|"+ga.primary_external_id+"|"+ga.negated
+        String key = id+"|"+ga.retrieveRgdId()+"|"+ga.do_term_curie+"|"+ga.evidence_curie +"|"+ga.negated
                 +"|"+Utils.concatenate(ga.disease_qualifier_names,",")
                 +"|"+Utils.concatenate(ga.evidence_code_curies,",")
                 +"|"+(ga.condition_relation_dtos==null ? 0 : ga.condition_relation_dtos.size());
