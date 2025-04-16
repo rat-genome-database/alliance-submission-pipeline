@@ -306,6 +306,10 @@ public class CurationDaf extends CurationObject {
         public String updated_by_curie = "RGD:curator";
         public List<String> with_gene_identifiers;
 
+        public DiseaseAnnotation_DTO() {
+            linkml_version = "v2.10.0";
+        }
+
         public String retrieveRgdId() {
 
             if( this instanceof AgmDiseaseAnnotation ) {
