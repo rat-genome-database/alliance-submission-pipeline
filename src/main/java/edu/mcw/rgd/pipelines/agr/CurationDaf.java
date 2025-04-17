@@ -113,8 +113,6 @@ public class CurationDaf extends CurationObject {
 
     boolean processDTO(Annotation a, Dao dao, boolean isAllele, DiseaseAnnotation_DTO r, int speciesTypeKey) throws Exception {
 
-        r.primary_external_id = "RGD:"+a.getAnnotatedObjectRgdId();
-
         r.date_created = Utils2.formatDate(a.getCreatedDate());
         if( a.getLastModifiedDate()!=null ) {
             r.date_updated = Utils2.formatDate(a.getLastModifiedDate());
@@ -302,14 +300,15 @@ public class CurationDaf extends CurationObject {
         public Boolean negated = null;
         public List note_dtos;
 
-        public String primary_external_id;
+        // public String primary_external_id; MOD annotation id -- optional -- don't use
         public DataProviderDTO secondary_data_provider_dto;
 
         public String updated_by_curie = "RGD:curator";
         public List<String> with_gene_identifiers;
 
         public DiseaseAnnotation_DTO() {
-            linkml_version = "v2.10.0";
+            linkml_version = null;
+            alliance_member_release_version = null;
         }
 
         public String retrieveRgdId() {
