@@ -59,7 +59,12 @@ public class CurationGenes extends CurationObject {
 
         m.gene_secondary_id_dtos = getSecondaryIdentifiers(curie, g.getRgdId(), dao);
         m.gene_synonym_dtos = getSynonyms(g.getRgdId(), dao);
-        m.cross_reference_dtos = getCrossReferences(g, dao, canonicalProteins);
+
+        Map gcrpXref = new HashMap();
+        m.cross_reference_dtos = getCrossReferences(g, dao, canonicalProteins, gcrpXref);
+        if( !gcrpXref.isEmpty() ) {
+            m.gcrp_cross_reference_db = gcrpXref;
+        }
 
         synchronized(gene_ingest_set) {
             gene_ingest_set.add(m);
@@ -88,7 +93,7 @@ public class CurationGenes extends CurationObject {
     }
 
 
-    List getCrossReferences(Gene g, Dao dao, Set<String> canonicalProteins) throws Exception {
+    List getCrossReferences(Gene g, Dao dao, Set<String> canonicalProteins, Map gcrpXref) throws Exception {
 
         // xrefs must be unique by RGDID|XDBKEY|ACC
         List<XdbId> ids = loadUniqueXdbIds(g.getRgdId(), dao);
@@ -109,6 +114,12 @@ public class CurationGenes extends CurationObject {
                 pageArea = "protein";
                 if (canonicalProteins.contains(id.getAccId())) {
                     pageArea = "canonical_protein";
+
+                    gcrpXref.put("internal", false);
+                    gcrpXref.put("referenced_curie", curie);
+                    gcrpXref.put("display_name", curie);
+                    gcrpXref.put("prefix", prefix);
+                    gcrpXref.put("page_area", pageArea);
                 }
             }
             else if( id.getXdbKey()==XdbId.XDB_KEY_OMIM ) {
@@ -188,6 +199,7 @@ public class CurationGenes extends CurationObject {
         public DataProviderDTO data_provider_dto = new DataProviderDTO();
         public String date_created;
         public String date_updated;
+        public Map gcrp_cross_reference_db = null; // CrossReferenceDTO
         public Map gene_full_name_dto;
         public List gene_secondary_id_dtos = null;
         public Map gene_symbol_dto;

@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class CurationObject {
 
-    public String linkml_version = "v2.9.1";
+    public String linkml_version = "v2.13.0";
     public String alliance_member_release_version = "v"+Utils2.formatDate2(new Date());
 
 

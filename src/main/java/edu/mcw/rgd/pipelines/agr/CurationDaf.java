@@ -15,7 +15,7 @@ public class CurationDaf extends CurationObject {
     public List<GeneDiseaseAnnotation> disease_gene_ingest_set = new ArrayList<>();
 
     public CurationDaf() {
-        linkml_version = "v2.10.0";
+        linkml_version = "v2.13.0";
     }
 
     public void addDiseaseAnnotation(Annotation a, Dao dao, Map<Integer, String> geneRgdId2HgncIdMap, int speciesTypeKey, boolean isAllele) throws Exception {
