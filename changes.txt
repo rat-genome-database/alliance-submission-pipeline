@@ -1,3 +1,6 @@
+Aug 15, 2025
+  alleles: improved sorting
+
 Aug 14, 2025
   updated linkml_schema_nr to 2.13.0; genes: added gcrp_cross_reference_db
 

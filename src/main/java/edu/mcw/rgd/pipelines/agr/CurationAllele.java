@@ -217,13 +217,13 @@ public class CurationAllele extends CurationObject {
         return results;
     }
 
-    List getReferences(int rgdId, Dao dao) throws Exception {
+    List<String> getReferences(int rgdId, Dao dao) throws Exception {
         // extract curated ref rgd ids
         List<Reference> refs = dao.getReferenceAssociations(rgdId);
         if( refs.isEmpty() ) {
             return null;
         }
-        List results = new ArrayList();
+        List<String> results = new ArrayList<>();
         for( Reference r: refs ) {
             results.add("RGD:"+r.getRgdId());
         }
@@ -234,6 +234,7 @@ public class CurationAllele extends CurationObject {
             results.add("PMID:"+xdbId.getAccId());
         }
 
+        Collections.sort(results);
         return results;
     }
 
@@ -283,11 +284,6 @@ public class CurationAllele extends CurationObject {
 
     void sort(List<AlleleModel> list) {
 
-        Collections.sort(list, new Comparator<AlleleModel>() {
-            @Override
-            public int compare(AlleleModel a1, AlleleModel a2) {
-                return a1.primary_external_id.compareToIgnoreCase(a2.primary_external_id);
-            }
-        });
+        list.sort( (a1, a2) -> a1.primary_external_id.compareToIgnoreCase(a2.primary_external_id) );
     }
 }
