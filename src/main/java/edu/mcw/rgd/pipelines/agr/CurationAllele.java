@@ -99,8 +99,20 @@ public class CurationAllele extends CurationObject {
         }
 
         if( !Utils.isStringEmpty(g.getDescription()) ) {
+
+            // per communication with Jennifer as of Oct 10, 2025:
+            // comment type should be set to 'mutation_description' if description in RGD
+            //   contains one of these 3 words: [muta, deletion, insertion]
+            String noteType = "comment";
+            if( g.getDescription().contains("muta") ||
+                g.getDescription().contains("deletion") ||
+                g.getDescription().contains("insertion") ) {
+
+                noteType = "mutation_description";
+            }
+
             HashMap noteDto = new HashMap();
-            noteDto.put("note_type_name", g.getDescription().contains("mutation")?"mutation_description":"comment");
+            noteDto.put("note_type_name", noteType);
             noteDto.put("free_text", g.getDescription());
             noteDto.put("internal", false);
             results.add(noteDto);
