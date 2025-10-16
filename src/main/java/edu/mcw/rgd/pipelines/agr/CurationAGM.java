@@ -14,7 +14,8 @@ public class CurationAGM extends CurationObject {
         m.primary_external_id = curie;
 
         // we call this to find malformed strain symbols
-        String friendlyName = getHumanFriendlyName(s.getSymbol(), s.getRgdId());
+        String friendlyName1 = getHumanFriendlyName(s.getSymbol(), s.getRgdId());
+        String friendlyName2 = getHumanFriendlyName(s.getTaglessStrainSymbol(), s.getRgdId());
 
         HashMap agmFullNameDto = new HashMap();
         agmFullNameDto.put("name_type_name", "full_name");
