@@ -19,7 +19,7 @@ public class CurationAGM extends CurationObject {
         HashMap agmFullNameDto = new HashMap();
         agmFullNameDto.put("name_type_name", "full_name");
         agmFullNameDto.put("display_text", s.getSymbol());
-        agmFullNameDto.put("format_text", friendlyName);
+        agmFullNameDto.put("format_text", s.getTaglessStrainSymbol());
         agmFullNameDto.put("internal", false);
         m.agm_full_name_dto = agmFullNameDto;
 
