@@ -77,7 +77,9 @@ public class CurationAGM extends CurationObject {
         Collections.sort(list, new Comparator<AgmModel>() {
             @Override
             public int compare(AgmModel a1, AgmModel a2) {
-                return a1.name.compareToIgnoreCase(a2.name);
+                String name1 = a1.agm_full_name_dto.get("display_text").toString();
+                String name2 = a2.agm_full_name_dto.get("display_text").toString();
+                return name1.compareToIgnoreCase(name2);
             }
         });
     }
