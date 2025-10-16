@@ -12,10 +12,16 @@ public class CurationAGM extends CurationObject {
 
         AgmModel m = new AgmModel();
         m.primary_external_id = curie;
-        m.name = s.getSymbol();
 
         // we call this to find malformed strain symbols
-        String friendlyName = getHumanFriendlyName(m.name, s.getRgdId());
+        String friendlyName = getHumanFriendlyName(s.getSymbol(), s.getRgdId());
+
+        HashMap agmFullNameDto = new HashMap();
+        agmFullNameDto.put("name_type_name", "full_name");
+        agmFullNameDto.put("display_text", s.getSymbol());
+        agmFullNameDto.put("format_text", friendlyName);
+        agmFullNameDto.put("internal", false);
+        m.agm_full_name_dto = agmFullNameDto;
 
         m.agm_secondary_id_dtos = getSecondaryIdentifiers(curie, s.getRgdId(), dao);
 
@@ -39,20 +45,21 @@ public class CurationAGM extends CurationObject {
     }
 
     class AgmModel {
+        public HashMap agm_full_name_dto = null;
         public List agm_secondary_id_dtos = null;
-        public List component_dtos = null;
+        public List agm_synonym_dtos = null;
         public String created_by_curie = null;
         public List cross_reference_dtos = null;
         public DataProviderDTO data_provider_dto = new DataProviderDTO();
         public String date_created;
         public String date_updated;
         public boolean internal = false;
+        public List note_dtos = null;
+        public Boolean obsolete = null;
 
         // as of Jan 22, 2025: mod_entity_id or mod_internal_id should not be used
         public String primary_external_id = null;
 
-        public String name;
-        public Boolean obsolete = null;
         public List references_curies = null;
         public String subtype_name = "strain";
         public String taxon_curie = "NCBITaxon:10116";
