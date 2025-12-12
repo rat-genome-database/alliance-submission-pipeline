@@ -1,6 +1,6 @@
 #####
 #
-APITOKEN=`cat api.token`
+APITOKEN=`cat APIToken`
 
 set -e
 

@@ -3,19 +3,15 @@
 #
 APITOKEN=`cat APIToken`
 
-
-BGI_SPEC="8.3.0_BGI_HUMAN"
-BGI_LOC="data/genes.9606.json"
-BGI_FILE="${BGI_SPEC}=@${BGI_LOC}"
-echo "$BGI_FILE"
-
-
+EXPR_SPEC="8.3.0_ALLELE_RGD"
+EXPR_LOC="data/alleles.10116.json"
+EXPRESSION_FILE="${EXPR_SPEC}=@${EXPR_LOC}"
+echo "$EXPRESSION_FILE"
 
 curl -k \
  -H "Authorization: Bearer $APITOKEN" \
  -X POST "https://fms.alliancegenome.org/api/data/submit" \
- -F "$BGI_FILE" \
- | tee human_bgi_submission.log
+ -F "$EXPRESSION_FILE" \
+ | tee expr_submission.log
 
 echo "=== OK ==="
-
