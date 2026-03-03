@@ -20,7 +20,7 @@ public class CurationGenes extends CurationObject {
         m.data_provider_dto.setCrossReferenceDTO("RGD:"+g.getRgdId(), "gene", "RGD");
 
         if( g.getSymbol().contains("<") || g.getSymbol().contains("'") || g.getSymbol().contains("\"")) {
-            System.out.println(" ### punctuation RGD:"+g.getRgdId());
+            System.out.println(" ### punctuation RGD:"+g.getRgdId()+" ["+g.getSymbol()+"]");
         }
         Map symbolDTO = new HashMap<>();
         symbolDTO.put("display_text", g.getSymbol());
@@ -28,15 +28,6 @@ public class CurationGenes extends CurationObject {
         symbolDTO.put("internal", false);
         symbolDTO.put("name_type_name", "nomenclature_symbol");
         m.gene_symbol_dto = symbolDTO;
-
-        /* not used in RGD
-        Map systematicNameDTO = new HashMap<>();
-        systematicNameDTO.put("display_text", g.getSymbol());
-        systematicNameDTO.put("format_text", g.getSymbol());
-        systematicNameDTO.put("internal", false);
-        systematicNameDTO.put("name_type_name", "systematic_name");
-        m.gene_systematic_name_dto = systematicNameDTO;
-        */
 
         if( !Utils.isStringEmpty( g.getName()) ) {
             Map nameDTO = new HashMap<>();
@@ -63,8 +54,10 @@ public class CurationGenes extends CurationObject {
         Map gcrpXref = new HashMap();
         m.cross_reference_dtos = getCrossReferences(g, dao, canonicalProteins, gcrpXref);
         if( !gcrpXref.isEmpty() ) {
-            m.gcrp_cross_reference_db = gcrpXref;
+            m.gcrp_cross_reference_dto = gcrpXref;
         }
+
+        m.note_dtos = getNotes_DTO(g);
 
         synchronized(gene_ingest_set) {
             gene_ingest_set.add(m);
@@ -153,6 +146,11 @@ public class CurationGenes extends CurationObject {
                 prefix = "RNAcentral";
                 pageArea = "gene";
             }
+            else if( id.getXdbKey()==XdbId.XDB_KEY_PANTHER ) {
+                curie = "PANTHER:" + id.getAccId();
+                prefix = "PANTHER";
+                pageArea = "protein";
+            }
 
             // not sure why other values did not work
             pageArea = "default";
@@ -170,20 +168,34 @@ public class CurationGenes extends CurationObject {
         return results;
     }
 
+    static List<Integer> ALLOWED_XREF_XDB_KEYS = new ArrayList<>( Arrays.stream(new int[]{
+        XdbId.XDB_KEY_UNIPROT,
+        XdbId.XDB_KEY_OMIM,
+        XdbId.XDB_KEY_ENSEMBL_GENES,
+        XdbId.XDB_KEY_NCBI_GENE,
+        XdbId.XDB_KEY_HGNC,
+        68, // RNACentral
+        XdbId.XDB_KEY_PANTHER,
+    }).boxed().toList());
+
     List<XdbId> loadUniqueXdbIds( int rgdId, Dao dao ) throws Exception {
 
-        // xrefs must be unique by RGDID|XDBKEY|ACC
-        List<XdbId> ids = dao.getXdbIds(rgdId, XdbId.XDB_KEY_UNIPROT);
-        ids.addAll( dao.getXdbIds(rgdId, XdbId.XDB_KEY_OMIM) );
-        ids.addAll( dao.getXdbIds(rgdId, XdbId.XDB_KEY_ENSEMBL_GENES) );
-        ids.addAll( dao.getXdbIds(rgdId, XdbId.XDB_KEY_NCBI_GENE) );
-        ids.addAll( dao.getXdbIds(rgdId, XdbId.XDB_KEY_HGNC) );
-        ids.addAll( dao.getXdbIds(rgdId, 68) ); // RNACentral
+        List<XdbId> ids = dao.getXdbIds(ALLOWED_XREF_XDB_KEYS, rgdId);
 
         Set<String> xrefIds = new HashSet<>();
 
+        // xrefs must be unique by RGDID|XDBKEY|ACC
         List<XdbId> uniqueIds = new ArrayList<>();
         for( XdbId xdbId: ids ) {
+
+            // for PANTHER, accessions are like PTHR24061 or PTHR24061:SF411
+            // remove the part after ':'
+            if( xdbId.getXdbKey()==XdbId.XDB_KEY_PANTHER ) {
+                int colonPos = xdbId.getAccId().indexOf(':');
+                if( colonPos>0 ) {
+                    xdbId.setAccId( xdbId.getAccId().substring(0, colonPos) );
+                }
+            }
 
             String xrefId = xdbId.getRgdId()+"|"+xdbId.getXdbKey()+"|"+xdbId.getAccId();
             if( xrefIds.add( xrefId ) ) {
@@ -193,13 +205,37 @@ public class CurationGenes extends CurationObject {
         return uniqueIds;
     }
 
+    List getNotes_DTO(Gene g) throws Exception {
+
+        String geneSynopsis;
+        // emit merged-descriptions (AGR automated desc merged with RGD automated desc) for rat genes
+        if( g.getSpeciesTypeKey()==SpeciesType.RAT ) {
+            geneSynopsis = g.getMergedDescription();
+        } else { // and RGD automated desc for human genes
+            geneSynopsis = Utils.getGeneDescription(g);
+        }
+        if( !Utils.isStringEmpty(geneSynopsis) ) {
+
+            HashMap noteDto = new HashMap();
+            noteDto.put("note_type_name", "MOD_provided_gene_description");
+            noteDto.put("free_text", geneSynopsis);
+            noteDto.put("internal", false);
+
+            List results = new ArrayList();
+            results.add(noteDto);
+            return results;
+        }
+
+        return null;
+    }
+
     class GeneModel {
         public String created_by_curie = "RGD";
         public List cross_reference_dtos = null;
         public DataProviderDTO data_provider_dto = new DataProviderDTO();
         public String date_created;
         public String date_updated;
-        public Map gcrp_cross_reference_db = null; // CrossReferenceDTO
+        public Map gcrp_cross_reference_dto = null; // CrossReferenceDTO
         public Map gene_full_name_dto;
         public List gene_secondary_id_dtos = null;
         public Map gene_symbol_dto;

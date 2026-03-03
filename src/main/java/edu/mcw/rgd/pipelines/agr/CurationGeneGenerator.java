@@ -58,7 +58,7 @@ public class CurationGeneGenerator {
         List<Gene> genes = dao.getAllGenes(speciesTypeKey);
 
         log.info("  genes: "+genes.size());
-        genes.parallelStream().forEach( g -> {
+        genes.stream().parallel().forEach( g -> {
             String curie = null;
             if (speciesTypeKey == SpeciesType.RAT) {
                 curie = "RGD:" + g.getRgdId();

@@ -1,3 +1,6 @@
+Mar 03, 2026
+  genes: updated to curation_schema v2.15.0
+  
 Oct 16, 2025
   agm: replaced legacy field 'name' with 'agm_full_name_dto'
 

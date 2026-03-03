@@ -4,7 +4,7 @@
 APITOKEN=`cat APIToken`
 
 
-BGI_SPEC="8.3.0_BGI_RGD"
+BGI_SPEC="9.0.0_BGI_RGD"
 BGI_LOC="data/genes.10116.json"
 BGI_FILE="${BGI_SPEC}=@${BGI_LOC}"
 echo "$BGI_FILE"

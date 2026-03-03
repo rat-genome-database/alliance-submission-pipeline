@@ -4,7 +4,7 @@
 APITOKEN=`cat APIToken`
 
 
-GAF_SPEC="8.3.0_GAF_HUMAN"
+GAF_SPEC="9.0.0_GAF_HUMAN"
 GAF_LOC="data/9606_genes_go.gaf"
 GAF_FILE="${GAF_SPEC}=@${GAF_LOC}"
 echo "$GAF_FILE"

@@ -3,7 +3,7 @@
 #
 APITOKEN=`cat APIToken`
 
-EXPR_SPEC="8.3.0_DAF_RGD"
+EXPR_SPEC="9.0.0_DAF_RGD"
 EXPR_LOC="data/disease.10116.daf.json"
 EXPRESSION_FILE="${EXPR_SPEC}=@${EXPR_LOC}"
 echo "$EXPRESSION_FILE"
@@ -15,7 +15,7 @@ curl -k \
  | tee expr_submission.log
 
 
-EXPR_SPEC="8.3.0_DAF_HUMAN"
+EXPR_SPEC="9.0.0_DAF_HUMAN"
 EXPR_LOC="data/disease.9606.daf.json"
 EXPRESSION_FILE="${EXPR_SPEC}=@${EXPR_LOC}"
 echo "$EXPRESSION_FILE"

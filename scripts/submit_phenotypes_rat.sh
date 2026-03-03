@@ -4,7 +4,7 @@
 APITOKEN=`cat APIToken`
 
 
-GAF_SPEC="8.3.0_PHENOTYPE_RGD"
+GAF_SPEC="9.0.0_PHENOTYPE_RGD"
 GAF_LOC="data/phenotypes.10116.json"
 GAF_FILE="${GAF_SPEC}=@${GAF_LOC}"
 echo "$GAF_FILE"
