@@ -1,0 +1,17 @@
+rat
+https://fms.alliancegenome.org/api/datafile/by/EXPRESSION/RGD?latest=true
+https://fms.alliancegenome.org/api/datafile/by/AGM/RGD?latest=true
+https://fms.alliancegenome.org/api/datafile/by/ALLELE/RGD?latest=true
+https://fms.alliancegenome.org/api/datafile/by/BGI/RGD?latest=true
+https://fms.alliancegenome.org/api/datafile/by/DAF/RGD?latest=true
+https://fms.alliancegenome.org/api/datafile/by/GFF/RGD?latest=true
+https://fms.alliancegenome.org/api/datafile/by/HTPDATASAMPLE/RGD?latest=true
+https://fms.alliancegenome.org/api/datafile/by/HTPDATASET/RGD?latest=true
+https://fms.alliancegenome.org/api/datafile/by/PHENOTYPE/RGD?latest=true
+https://fms.alliancegenome.org/api/datafile/by/VARIATION/RGD?latest=true
+human:
+https://fms.alliancegenome.org/api/datafile/by/BGI/HUMAN?latest=true
+https://fms.alliancegenome.org/api/datafile/by/DAF/HUMAN?latest=true
+https://fms.alliancegenome.org/api/datafile/by/GAF/HUMAN?latest=true
+https://fms.alliancegenome.org/api/datafile/by/GFF/HUMAN?latest=true
+https://fms.alliancegenome.org/api/datafile/by/PHENOTYPE/HUMAN?latest=true

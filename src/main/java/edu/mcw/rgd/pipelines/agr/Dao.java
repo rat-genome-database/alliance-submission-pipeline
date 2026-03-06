@@ -133,6 +133,10 @@ public class Dao {
         return xdbIdDAO.getXdbIdsByRgdId(xdbKey, rgdId);
     }
 
+    public List<XdbId> getXdbIds(List xdbKeys, int rgdId) throws Exception {
+        return xdbIdDAO.getXdbIdsByRgdId(xdbKeys, rgdId);
+    }
+
     public List<XdbId> getCuratedPubmedIds ( int rgdId ) throws Exception {
         return xdbIdDAO.getCuratedPubmedIds(rgdId);
     }
