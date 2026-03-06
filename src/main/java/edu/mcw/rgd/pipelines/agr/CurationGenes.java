@@ -106,7 +106,8 @@ public class CurationGenes extends CurationObject {
                 prefix = "UniProtKB";
                 pageArea = "protein";
                 if (canonicalProteins.contains(id.getAccId())) {
-                    pageArea = "canonical_protein";
+                    //pageArea = "canonical_protein";
+                    pageArea = "default";
 
                     gcrpXref.put("internal", false);
                     gcrpXref.put("referenced_curie", curie);
