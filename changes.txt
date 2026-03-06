@@ -1,3 +1,7 @@
+Mar 06, 2026
+  agm associations: filter out inactive alleles from AGM-allele associations
+  updated dependencies
+
 Mar 03, 2026
   genes: updated to curation_schema v2.15.0
 

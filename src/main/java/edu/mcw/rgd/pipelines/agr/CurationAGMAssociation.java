@@ -1,5 +1,6 @@
 package edu.mcw.rgd.pipelines.agr;
 
+import edu.mcw.rgd.datamodel.RgdId;
 import edu.mcw.rgd.datamodel.Strain;
 
 import java.util.*;
@@ -13,10 +14,14 @@ public class CurationAGMAssociation extends CurationObject {
         // get agm-allele associations from RGD
         List<Integer> associatedAlleles = dao.getGeneAllelesForStrain(s.getRgdId());
         for( int associatedAllele: associatedAlleles ) {
-            AGMAlleleAssociationModel m = new AGMAlleleAssociationModel();
-            m.agm_subject_identifier = "RGD:"+s.getRgdId();
-            m.allele_identifier = "RGD:"+associatedAllele;
-            agm_allele_association_ingest_set.add(m);
+
+            RgdId id = dao.getRgdId(associatedAllele);
+            if( id.getObjectStatus().equals("ACTIVE") ) {
+                AGMAlleleAssociationModel m = new AGMAlleleAssociationModel();
+                m.agm_subject_identifier = "RGD:" + s.getRgdId();
+                m.allele_identifier = "RGD:" + associatedAllele;
+                agm_allele_association_ingest_set.add(m);
+            }
         }
     }
 
