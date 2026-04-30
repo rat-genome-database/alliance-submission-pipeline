@@ -7,12 +7,12 @@ import edu.mcw.rgd.dao.spring.IntStringMapQuery;
 import edu.mcw.rgd.dao.spring.StringListQuery;
 import edu.mcw.rgd.dao.spring.variants.VariantMapQuery;
 import edu.mcw.rgd.dao.spring.variants.VariantSampleQuery;
-import edu.mcw.rgd.dao.spring.variants.VariantTranscriptQuery;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
+import edu.mcw.rgd.datamodel.ontologyx.Term;
+import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.datamodel.variants.VariantMapData;
 import edu.mcw.rgd.datamodel.variants.VariantSampleDetail;
-import edu.mcw.rgd.datamodel.variants.VariantTranscript;
 import edu.mcw.rgd.process.Utils;
 import org.springframework.jdbc.core.SqlParameter;
 
@@ -36,6 +36,7 @@ public class Dao {
     private NomenclatureDAO nomenclatureDAO = new NomenclatureDAO();
     private NotesDAO notesDAO = new NotesDAO();
     private OmimDAO omimDAO = new OmimDAO();
+    private OntologyXDAO ontologyDAO = new OntologyXDAO();
     private ProteinDAO proteinDAO = new ProteinDAO();
     private ReferenceDAO refDAO = associationDAO.getReferenceDAO();
     private RGDManagementDAO rgdIdDAO = new RGDManagementDAO();
@@ -238,6 +239,20 @@ public class Dao {
 
     public Omim getOmimByNr(String mimNr) throws Exception {
         return omimDAO.getOmimByNr(mimNr);
+    }
+
+    public List<Term> getParentTerms(String termAcc) throws Exception {
+        return ontologyDAO.getParentTerm(termAcc);
+    }
+
+    public TermWithStats getTermWithStatsCached(String termAcc) throws Exception {
+        return ontologyDAO.getTermWithStatsCached(termAcc);
+    }
+
+    public List<String> getPSParentTermAccessions( String childTermAcc) throws Exception {
+        String sql = "SELECT parent_term_acc FROM omim_ps_custom_do WHERE child_term_acc=?";
+        List<String> termAccIds = StringListQuery.execute(ontologyDAO, sql, childTermAcc);
+        return termAccIds;
     }
 
     public List<RgdVariant> getVariantsForSpecies(int speciesTypeKey) throws Exception {

@@ -18,6 +18,7 @@ public class CurationGeneGenerator {
 
     private Dao dao;
     private Map<Integer, String> rgdId2HgncIdMap;
+    private String phenotypeFile;
 
     Logger log = LogManager.getLogger("status");
 
@@ -45,6 +46,14 @@ public class CurationGeneGenerator {
         log.info("START "+speciesName+" GENE file");
 
         CurationGenes curationGenes = new CurationGenes();
+
+        // for human, load the set of HGNC ids that have phenotype data so that
+        // gene/phenotypes xrefs are emitted only for genes that actually have phenotypes
+        if( speciesTypeKey == SpeciesType.HUMAN && phenotypeFile != null && !phenotypeFile.isEmpty() ) {
+            Set<String> phenoHgncIds = CurationGenes.loadPhenotypeHgncIds(phenotypeFile);
+            log.info("  loaded HGNC ids with phenotype data from "+phenotypeFile+": "+phenoHgncIds.size());
+            curationGenes.setPhenotypeHgncIds(phenoHgncIds);
+        }
 
         // setup a JSON object array to collect all CurationGene objects
         ObjectMapper json = new ObjectMapper();
@@ -107,5 +116,13 @@ public class CurationGeneGenerator {
 
     public void setDao(Dao dao) {
         this.dao = dao;
+    }
+
+    public String getPhenotypeFile() {
+        return phenotypeFile;
+    }
+
+    public void setPhenotypeFile(String phenotypeFile) {
+        this.phenotypeFile = phenotypeFile;
     }
 }

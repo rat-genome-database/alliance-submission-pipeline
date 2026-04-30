@@ -2,11 +2,14 @@ package edu.mcw.rgd.pipelines.agr;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.mcw.rgd.dao.spring.StringListQuery;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.RgdId;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
+import edu.mcw.rgd.datamodel.ontologyx.Term;
+import edu.mcw.rgd.process.CounterPool;
 import edu.mcw.rgd.process.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -132,7 +135,7 @@ public class CurationDafGenerator {
 
     Collection<Annotation> applyFilters(Collection<Annotation> annots, int speciesTypeKey) throws Exception {
 
-        int omimPsReplacements = 0;
+        CounterPool counters = new CounterPool();
         int excludedSpliceAnnotations = 0;
         int IGIsplits = 0;
         List<Annotation> annots2 = new ArrayList<>(annots.size());
@@ -159,23 +162,21 @@ public class CurationDafGenerator {
                 continue;
             }
 
-            // exclude DO+ custom terms (that were added by RGD and are not present in DO ontology)
-            if( a.getTermAcc().startsWith("DOID:90") && a.getTermAcc().length() == 12) {
+            // special processing for DO+ custom terms (that were added by RGD and are not present in DO ontology)
+            if( isCustomRdoTerm(a.getTermAcc()) ) {
 
-                // perform DO+ child-to-parent PS mapping, if possible
-                // see if this term could be mapped to an OMIM PS id
-                String parentTermAcc = getDao().getOmimPSTermAccForChildTerm(a.getTermAcc());
-                if (parentTermAcc == null) {
+                // see if this term could be mapped to a DO term via OMIM PS id or looking up direct parents up to level 2
+                String parentTermAcc;
+                try {
+                    parentTermAcc = getDoTermReplacementForRdoCustomTerm(a.getTermAcc(), a.getTerm(), counters);
+                } catch( Exception e ) {
+                    throw new RuntimeException(e);
+                }
+                if( parentTermAcc==null ) {
                     continue;
                 }
 
-                if (parentTermAcc.startsWith("DOID:90") && parentTermAcc.length() == 12) {
-                    continue;
-                } else {
-                    // replaced custom DO+ term with a parent non-DO+ term, via OMIM:PS mapping
-                    a.setTermAcc(parentTermAcc);
-                    omimPsReplacements++;
-                }
+                a.setTermAcc(parentTermAcc);
             }
 
             // split for IGI annotations having multiple values in WITH field
@@ -200,10 +201,95 @@ public class CurationDafGenerator {
         }
 
         log.info(annots.size()+";  excluded DO+ terms; excluded splice annots;  annotations left: "+annots2.size());
-        log.info("    OMIM:PS replacements: "+omimPsReplacements);
         log.info("    splice annotations excluded: "+excludedSpliceAnnotations);
         log.info("    IGI splits: "+IGIsplits);
+        log.info(counters.dumpAlphabetically());
         return annots2;
+    }
+
+    public boolean isCustomRdoTerm(String termAcc) {
+        return termAcc.length() == 12 && termAcc.startsWith("DOID:9");
+    }
+
+    public String getDoTermReplacementForRdoCustomTerm(String childTermAcc, String childTermName, CounterPool counters) throws Exception {
+
+        List<String> termAccIds = dao.getPSParentTermAccessions(childTermAcc);
+
+        // remove custom DO terms from the results
+        termAccIds.removeIf(termAccId -> isCustomRdoTerm(termAccId));
+
+        // PS parent term acc found
+        if( !termAccIds.isEmpty() ) {
+            String psParentTermAcc = termAccIds.get(0);
+
+            counters.increment("OMIM:PS conversion OK: " + childTermAcc + " [" + childTermName + "]) replaced with " + psParentTermAcc);
+            counters.increment("omimPSConversions");
+            return psParentTermAcc;
+        }
+
+        // no PS parent term acc found; look at the parents
+        int[] parentLevel = new int[1];
+        Term bestMatchParentTerm = getBestMatchParentTerm(childTermAcc, parentLevel);
+        if( bestMatchParentTerm!=null ) {
+            counters.increment("custom term replacement, parent level " + parentLevel[0] + ": " + childTermAcc + " [" + childTermName +
+                    "]) replaced with " + bestMatchParentTerm.getAccId() + " ["+bestMatchParentTerm.getTerm()+"]");
+            counters.increment("customTermReplacementsParentLevel"+parentLevel[0]);
+            return bestMatchParentTerm.getAccId();
+        }
+
+        // no regular DO term among parent terms level 1 and 2
+        counters.increment("no custom term replacement: " + childTermAcc + " [" + childTermName + "]");
+        counters.increment("noCustomTermReplacementsFound");
+
+        return null;
+    }
+
+    Term getBestMatchParentTerm(String childTermAcc, int[] parentLevel) throws Exception {
+
+        List<Term> parentTerms = dao.getParentTerms(childTermAcc);
+        parentLevel[0] = 1;
+        List<Term> doParentTerms = new ArrayList<>(parentTerms.size());
+        for( Term parentTerm: parentTerms ) {
+            if( !isCustomRdoTerm(parentTerm.getAccId()) ) {
+                doParentTerms.add(parentTerm);
+            }
+        }
+        // parent terms that always should be excluded as too general
+        final String rdoRootTermAcc = "DOID:4"; // DOID:4 == 'disease'
+        doParentTerms.removeIf( t -> t.getAccId().equals(rdoRootTermAcc) );
+
+        if( doParentTerms.isEmpty() ) {
+            parentLevel[0] = 2;
+            for( Term term: parentTerms ) {
+                List<Term> parentTermsLevel2 = dao.getParentTerms(term.getAccId());
+                for( Term parentTermLevel2: parentTermsLevel2 ) {
+                    if( !isCustomRdoTerm(parentTermLevel2.getAccId()) ) {
+                        doParentTerms.add(parentTermLevel2);
+                    }
+                }
+            }
+            doParentTerms.removeIf( t -> t.getAccId().equals(rdoRootTermAcc) );
+        }
+
+
+        Term bestMatchParentTerm = null;
+        if( doParentTerms.isEmpty() ) {
+            // no non-custom parent terms found
+        }
+        else if( doParentTerms.size()==1 ) {
+            bestMatchParentTerm = doParentTerms.get(0);
+
+        } else {
+            int annotCunt = 0;
+            for( Term t: doParentTerms ) {
+                int termAnnotCount = dao.getTermWithStatsCached(t.getAccId()).getAnnotObjectCountForTerm();
+                if( termAnnotCount > annotCunt ) {
+                    annotCunt = termAnnotCount;
+                    bestMatchParentTerm = t;
+                }
+            }
+        }
+        return bestMatchParentTerm;
     }
 
     /**

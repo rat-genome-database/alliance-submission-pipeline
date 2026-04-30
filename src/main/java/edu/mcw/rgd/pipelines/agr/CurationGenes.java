@@ -3,12 +3,53 @@ package edu.mcw.rgd.pipelines.agr;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.process.Utils;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.*;
 import java.util.Map;
 
 public class CurationGenes extends CurationObject {
 
     public List<GeneModel> gene_ingest_set = new ArrayList<>();
+
+    /** HGNC ids of genes that have phenotype data; populated from the AGR phenotype JSON */
+    private Set<String> phenotypeHgncIds = Collections.emptySet();
+
+    public void setPhenotypeHgncIds(Set<String> phenotypeHgncIds) {
+        this.phenotypeHgncIds = phenotypeHgncIds;
+    }
+
+    /**
+     * Load HGNC ids from an AGR phenotype JSON file.
+     * <p>
+     * Assumes each occurrence of the {@code "objectId"} field with an {@code HGNC:xxx}
+     * value sits on its own line, so we can scan line-by-line and pull the value out
+     * with a simple substring instead of streaming the JSON parser through a 277 MB file.
+     */
+    public static Set<String> loadPhenotypeHgncIds(String filename) throws Exception {
+        Set<String> hgncIds = new HashSet<>();
+        final String marker = "\"objectId\"";
+        try( BufferedReader br = new BufferedReader(new FileReader(filename)) ) {
+            String line;
+            while( (line = br.readLine()) != null ) {
+                int idx = line.indexOf(marker);
+                if( idx < 0 ) {
+                    continue;
+                }
+                int hgncStart = line.indexOf("\"HGNC:", idx);
+                if( hgncStart < 0 ) {
+                    continue;
+                }
+                hgncStart++; // skip the opening quote
+                int hgncEnd = line.indexOf('"', hgncStart);
+                if( hgncEnd < 0 ) {
+                    continue;
+                }
+                hgncIds.add(line.substring(hgncStart, hgncEnd));
+            }
+        }
+        return hgncIds;
+    }
 
     public GeneModel add(Gene g, Dao dao, String curie, Set<String> canonicalProteins) throws Exception {
 
@@ -91,10 +132,15 @@ public class CurationGenes extends CurationObject {
         // xrefs must be unique by RGDID|XDBKEY|ACC
         List<XdbId> ids = loadUniqueXdbIds(g.getRgdId(), dao);
 
+        List results = new ArrayList();
+
+        if( g.getSpeciesTypeKey()==SpeciesType.HUMAN ) {
+            addGenePhenotypeXref(results, ids);
+        }
+
         if( ids.isEmpty() ) {
             return null;
         }
-        List results = new ArrayList();
         for( XdbId id: ids ) {
 
             String curie = null;
@@ -167,6 +213,33 @@ public class CurationGenes extends CurationObject {
             }
         }
         return results;
+    }
+
+    void addGenePhenotypeXref( List results, List<XdbId> ids ) {
+
+        if( phenotypeHgncIds.isEmpty() ) {
+            return;
+        }
+
+        // find the gene's HGNC accession among its xrefs
+        String hgncCurie = null;
+        for( XdbId id: ids ) {
+            if( id.getXdbKey() == XdbId.XDB_KEY_HGNC ) {
+                hgncCurie = id.getAccId().startsWith("HGNC:") ? id.getAccId() : "HGNC:" + id.getAccId();
+                break;
+            }
+        }
+        if( hgncCurie == null || !phenotypeHgncIds.contains(hgncCurie) ) {
+            return;
+        }
+
+        HashMap xref = new HashMap();
+        xref.put("internal", false);
+        xref.put("referenced_curie", hgncCurie);
+        xref.put("display_name", hgncCurie);
+        xref.put("prefix", "HGNC");
+        xref.put("page_area", "gene/phenotypes");
+        results.add(xref);
     }
 
     static List<Integer> ALLOWED_XREF_XDB_KEYS = new ArrayList<>( Arrays.stream(new int[]{

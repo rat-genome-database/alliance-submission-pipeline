@@ -1,9 +1,13 @@
+Apr 30, 2026
+  curation genes: emit gene/phenotypes xref for human genes with phenotype data; updated dependencies
+
 Mar 06, 2026
   agm associations: filter out inactive alleles from AGM-allele associations
   updated dependencies
 
 Mar 03, 2026
   genes: updated to curation_schema v2.15.0
+
 
 Oct 16, 2025
   agm: replaced legacy field 'name' with 'agm_full_name_dto'

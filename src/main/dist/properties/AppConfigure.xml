@@ -2,7 +2,7 @@
 
 <beans>
     <bean id="main" class="edu.mcw.rgd.pipelines.agr.Main" >
-        <property name="version" value="alliance-submission-pipeline  -- build Mar 06, 2026" />
+        <property name="version" value="alliance-submission-pipeline  -- build Apr 30, 2026" />
         <property name="dao" ref="dao"/>
     </bean>
 
@@ -97,6 +97,8 @@
 
     <bean id="curationGeneGenerator" class="edu.mcw.rgd.pipelines.agr.CurationGeneGenerator" >
         <property name="dao" ref="dao"/>
+        <!-- AGR phenotype JSON file (HUMAN); used to flag which HGNC ids get a gene/phenotypes xref -->
+        <property name="phenotypeFile" value="/home/rgddata/pipelines/AgrPipeline/data/phenotypes.9606.json"/>
     </bean>
 
     <bean id="curationAGMGenerator" class="edu.mcw.rgd.pipelines.agr.CurationAGMGenerator" >
