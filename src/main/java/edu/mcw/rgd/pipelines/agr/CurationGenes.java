@@ -135,7 +135,7 @@ public class CurationGenes extends CurationObject {
         List results = new ArrayList();
 
         if( g.getSpeciesTypeKey()==SpeciesType.HUMAN ) {
-            addGenePhenotypeXref(results, ids);
+            addGenePhenotypeXref(results, ids, g);
         }
 
         if( ids.isEmpty() ) {
@@ -215,13 +215,13 @@ public class CurationGenes extends CurationObject {
         return results;
     }
 
-    void addGenePhenotypeXref( List results, List<XdbId> ids ) {
+    void addGenePhenotypeXref( List results, List<XdbId> ids, Gene g ) {
 
         if( phenotypeHgncIds.isEmpty() ) {
             return;
         }
 
-        // find the gene's HGNC accession among its xrefs
+        // gate on whether the gene has phenotype data: look up its HGNC accession in the set
         String hgncCurie = null;
         for( XdbId id: ids ) {
             if( id.getXdbKey() == XdbId.XDB_KEY_HGNC ) {
@@ -233,11 +233,13 @@ public class CurationGenes extends CurationObject {
             return;
         }
 
+        // emit the xref using the gene's RGD identifier rather than its HGNC id
+        String rgdCurie = "RGD:" + g.getRgdId();
         HashMap xref = new HashMap();
         xref.put("internal", false);
-        xref.put("referenced_curie", hgncCurie);
-        xref.put("display_name", hgncCurie);
-        xref.put("prefix", "HGNC");
+        xref.put("referenced_curie", rgdCurie);
+        xref.put("display_name", "RGD");
+        xref.put("prefix", "RGD");
         xref.put("page_area", "gene/phenotypes");
         results.add(xref);
     }
