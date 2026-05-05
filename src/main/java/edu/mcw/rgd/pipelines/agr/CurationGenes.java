@@ -160,6 +160,7 @@ public class CurationGenes extends CurationObject {
                     gcrpXref.put("display_name", curie);
                     gcrpXref.put("prefix", prefix);
                     gcrpXref.put("page_area", pageArea);
+                    continue;
                 }
             }
             else if( id.getXdbKey()==XdbId.XDB_KEY_OMIM ) {

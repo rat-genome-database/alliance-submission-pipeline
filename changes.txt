@@ -1,3 +1,7 @@
+May 05, 2026
+  curation genes: canonical UniProt xref now emitted only in gcrp_cross_reference_dto (deduplicates Summary)
+  updated dependencies
+
 Apr 30, 2026
   curation genes: emit gene/phenotypes xref for human genes with phenotype data; updated dependencies
 
