@@ -211,12 +211,18 @@ public class CurationDafGenerator {
         return termAcc.length() == 12 && termAcc.startsWith("DOID:9");
     }
 
+    // parent terms that always should be excluded as too general
+    //   DOID:4   == 'disease'
+    //   DOID:225 == 'syndrome'
+    //   DOID:630 == 'genetic disease'
+    static final Set<String> TOO_GENERAL_DO_TERMS = new HashSet<>(Arrays.asList("DOID:4", "DOID:225", "DOID:630"));
+
     public String getDoTermReplacementForRdoCustomTerm(String childTermAcc, String childTermName, CounterPool counters) throws Exception {
 
         List<String> termAccIds = dao.getPSParentTermAccessions(childTermAcc);
 
-        // remove custom DO terms from the results
-        termAccIds.removeIf(termAccId -> isCustomRdoTerm(termAccId));
+        // remove custom DO terms and too-general DO terms from the results
+        termAccIds.removeIf(termAccId -> isCustomRdoTerm(termAccId) || TOO_GENERAL_DO_TERMS.contains(termAccId));
 
         // PS parent term acc found
         if( !termAccIds.isEmpty() ) {
@@ -254,9 +260,7 @@ public class CurationDafGenerator {
                 doParentTerms.add(parentTerm);
             }
         }
-        // parent terms that always should be excluded as too general
-        final String rdoRootTermAcc = "DOID:4"; // DOID:4 == 'disease'
-        doParentTerms.removeIf( t -> t.getAccId().equals(rdoRootTermAcc) );
+        doParentTerms.removeIf( t -> TOO_GENERAL_DO_TERMS.contains(t.getAccId()) );
 
         if( doParentTerms.isEmpty() ) {
             parentLevel[0] = 2;
@@ -268,7 +272,7 @@ public class CurationDafGenerator {
                     }
                 }
             }
-            doParentTerms.removeIf( t -> t.getAccId().equals(rdoRootTermAcc) );
+            doParentTerms.removeIf( t -> TOO_GENERAL_DO_TERMS.contains(t.getAccId()) );
         }
 
 
