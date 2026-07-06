@@ -1,6 +1,7 @@
 package edu.mcw.rgd.pipelines.agr;
 
 import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.process.Utils;
 
 import java.util.*;
 
@@ -17,12 +18,22 @@ public class CurationAGM extends CurationObject {
         String friendlyName1 = getHumanFriendlyName(s.getSymbol(), s.getRgdId());
         String friendlyName2 = getHumanFriendlyName(s.getTaglessStrainSymbol(), s.getRgdId());
 
-        HashMap agmFullNameDto = new HashMap();
-        agmFullNameDto.put("name_type_name", "full_name");
-        agmFullNameDto.put("display_text", s.getSymbol());
-        agmFullNameDto.put("format_text", s.getTaglessStrainSymbol());
-        agmFullNameDto.put("internal", false);
-        m.agm_full_name_dto = agmFullNameDto;
+        HashMap agmSymbolDto = new HashMap();
+        agmSymbolDto.put("name_type_name", "nomenclature_symbol");
+        agmSymbolDto.put("display_text", s.getSymbol());
+        agmSymbolDto.put("format_text", s.getTaglessStrainSymbol());
+        agmSymbolDto.put("internal", false);
+        m.agm_symbol_dto = agmSymbolDto;
+
+        // strain full name, when available
+        if( !Utils.isStringEmpty(s.getName()) ) {
+            HashMap agmFullNameDto = new HashMap();
+            agmFullNameDto.put("name_type_name", "full_name");
+            agmFullNameDto.put("display_text", s.getName());
+            agmFullNameDto.put("format_text", generateTaglessSymbol(s.getName()));
+            agmFullNameDto.put("internal", false);
+            m.agm_full_name_dto = agmFullNameDto;
+        }
 
         m.agm_secondary_id_dtos = getSecondaryIdentifiers(curie, s.getRgdId(), dao);
 
@@ -45,9 +56,39 @@ public class CurationAGM extends CurationObject {
         return m;
     }
 
+    // strip html tags from a symbol/name so it can be used as 'format_text'
+    // '<sup>'/'</sup>' become '^['/']'; all other tags (f.e. '<i>','</i>') are removed
+    // (same logic as data-qc-pipeline QC.generateTaglessSymbol, which builds tagless_strain_symbol)
+    String generateTaglessSymbol( String symbol ) {
+
+        for( ;; ) {
+
+            int tagStartPos = symbol.indexOf('<');
+            int tagStopPos = symbol.indexOf('>');
+            if( tagStartPos<0 || tagStopPos<0 || tagStartPos>tagStopPos ) {
+                break;
+            }
+
+            // we have a tag!
+            String tag = symbol.substring(tagStartPos+1, tagStopPos).trim().toLowerCase();
+            String replacement = "";
+            if( tag.equals("sup") ) {
+                replacement = "^[";
+            }
+            else if( tag.equals("/sup") ) {
+                replacement = "]";
+            }
+
+            symbol = symbol.substring(0, tagStartPos) + replacement + symbol.substring(tagStopPos+1);
+        }
+
+        return symbol;
+    }
+
     class AgmModel {
         public HashMap agm_full_name_dto = null;
         public List agm_secondary_id_dtos = null;
+        public HashMap agm_symbol_dto = null;
         public List agm_synonym_dtos = null;
         public String created_by_curie = null;
         public List cross_reference_dtos = null;
@@ -78,8 +119,8 @@ public class CurationAGM extends CurationObject {
         Collections.sort(list, new Comparator<AgmModel>() {
             @Override
             public int compare(AgmModel a1, AgmModel a2) {
-                String name1 = a1.agm_full_name_dto.get("display_text").toString();
-                String name2 = a2.agm_full_name_dto.get("display_text").toString();
+                String name1 = a1.agm_symbol_dto.get("display_text").toString();
+                String name2 = a2.agm_symbol_dto.get("display_text").toString();
                 return name1.compareToIgnoreCase(name2);
             }
         });

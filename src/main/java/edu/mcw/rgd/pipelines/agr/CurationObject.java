@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class CurationObject {
 
-    public String linkml_version = "v2.15.0";
+    public String linkml_version = "v2.16.0";
     public String alliance_member_release_version = "v"+Utils2.formatDate2(new Date());
 
 
@@ -60,8 +60,8 @@ public class CurationObject {
             mapKey1 = 38;
             mapKey2 = 40;
         } else {
-            mapKey1 = 372;
-            mapKey2 = 373;
+            mapKey1 = 380;
+            mapKey2 = 381;
         }
         String assembly = MapManager.getInstance().getMap(mapKey1).getName();
 
