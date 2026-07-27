@@ -1,5 +1,7 @@
 Jul 27, 2026
   agm: added local option 'emitBothFullNamesAndSymbols' (default false); when false, submit the strain symbol as full_name (no separate symbol slot), per AGR request
+  agm: back up the previous CURATION_AGM file before regenerating (gzip, versioned by alliance_member_release_version); generic Utils2.backupOutputFile helper reusable by other modules
+  agm: fall back to computing the tagless symbol for format_text when tagless_strain_symbol is empty, so the required field is never empty
 
 Jul 06, 2026
   curation: updated to schema v2.16.0; AGM emits agm_symbol_dto

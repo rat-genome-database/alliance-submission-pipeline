@@ -35,8 +35,12 @@ public class CurationAGMGenerator {
     void createAgmFile(int speciesTypeKey) throws Exception {
 
         String speciesName = SpeciesType.getCommonName(speciesTypeKey).toUpperCase();
+        String jsonFileName = "CURATION_AGM-"+speciesName+".json";
 
         log.info("START "+speciesName+" AGM file");
+
+        // back up the previous output file (if any) before it is regenerated
+        Utils2.backupOutputFile(jsonFileName, log);
 
         CurationAGM curationAGM = new CurationAGM();
         curationAGM.emitBothFullNamesAndSymbols = isEmitBothFullNamesAndSymbols();
@@ -65,7 +69,6 @@ public class CurationAGMGenerator {
 
         // dump records to a file in JSON format
         try {
-            String jsonFileName = "CURATION_AGM-"+speciesName+".json";
             BufferedWriter jsonWriter = Utils.openWriter(jsonFileName);
 
             jsonWriter.write(json.writerWithDefaultPrettyPrinter().writeValueAsString(curationAGM));

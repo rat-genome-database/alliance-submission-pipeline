@@ -29,7 +29,7 @@ public class CurationAGM extends CurationObject {
             HashMap agmSymbolDto = new HashMap();
             agmSymbolDto.put("name_type_name", "nomenclature_symbol");
             agmSymbolDto.put("display_text", s.getSymbol());
-            agmSymbolDto.put("format_text", s.getTaglessStrainSymbol());
+            agmSymbolDto.put("format_text", taglessSymbolFormatText(s));
             agmSymbolDto.put("internal", false);
             m.agm_symbol_dto = agmSymbolDto;
 
@@ -49,7 +49,7 @@ public class CurationAGM extends CurationObject {
             HashMap agmFullNameDto = new HashMap();
             agmFullNameDto.put("name_type_name", "full_name");
             agmFullNameDto.put("display_text", s.getSymbol());
-            agmFullNameDto.put("format_text", s.getTaglessStrainSymbol());
+            agmFullNameDto.put("format_text", taglessSymbolFormatText(s));
             agmFullNameDto.put("internal", false);
             m.agm_full_name_dto = agmFullNameDto;
         }
@@ -102,6 +102,17 @@ public class CurationAGM extends CurationObject {
         }
 
         return symbol;
+    }
+
+    // format_text (tagless symbol) is a required field and must be non-empty; prefer the strain's
+    // tagless_strain_symbol, but fall back to computing it from the symbol when that DB field is
+    // not yet populated (f.e. before the RGD tagless-symbol pipeline has run for a new strain)
+    String taglessSymbolFormatText(Strain s) {
+        String formatText = s.getTaglessStrainSymbol();
+        if( Utils.isStringEmpty(formatText) ) {
+            formatText = generateTaglessSymbol(s.getSymbol());
+        }
+        return formatText;
     }
 
     class AgmModel {

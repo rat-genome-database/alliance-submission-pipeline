@@ -1,10 +1,13 @@
 package edu.mcw.rgd.pipelines.agr;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.mcw.rgd.datamodel.Omim;
 import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.process.Utils;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -119,6 +122,75 @@ public class Utils2 {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Back up an existing curation output file before it is regenerated. Generic helper that any
+     * module producing an Alliance curation JSON file can call at startup.
+     * <p>
+     * Reads the top-level 'alliance_member_release_version' field from the current file and writes a
+     * gzip-compressed copy to data/&lt;name&gt;.&lt;version&gt;.json.gz
+     * (f.e. 'CURATION_AGM-RAT.json' with release version 'v2026-07-07' becomes
+     * 'data/CURATION_AGM-RAT.v2026-07-07.json.gz').
+     * <p>
+     * No-op (logged) if the file does not yet exist or has no release version.
+     *
+     * @param jsonFileName name of the output file about to be regenerated (f.e. "CURATION_AGM-RAT.json")
+     * @param log logger for status messages
+     */
+    public static void backupOutputFile(String jsonFileName, Logger log) throws IOException {
+
+        File src = new File(jsonFileName);
+        if( !src.exists() ) {
+            log.info("  no existing "+jsonFileName+" to back up");
+            return;
+        }
+
+        String releaseVersion = readAllianceMemberReleaseVersion(src);
+        if( releaseVersion==null ) {
+            log.warn("  skipping backup of "+jsonFileName+": no 'alliance_member_release_version' field found");
+            return;
+        }
+
+        // strip the trailing '.json' and build 'data/<name>.<version>.json.gz'
+        String baseName = src.getName();
+        if( baseName.endsWith(".json") ) {
+            baseName = baseName.substring(0, baseName.length()-".json".length());
+        }
+        File backupDir = new File("data");
+        backupDir.mkdirs();
+        File backupFile = new File(backupDir, baseName+"."+releaseVersion+".json.gz");
+
+        try( InputStream in = new BufferedInputStream(new FileInputStream(src));
+             OutputStream out = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(backupFile))) ) {
+            byte[] buf = new byte[65536];
+            int bytesRead;
+            while( (bytesRead=in.read(buf))>0 ) {
+                out.write(buf, 0, bytesRead);
+            }
+        }
+
+        log.info("  backed up "+jsonFileName+" to "+backupFile.getPath());
+    }
+
+    // read the top-level 'alliance_member_release_version' field via streaming, without loading the
+    // (potentially large) file into memory; the field appears near the top, before the ingest set array
+    static String readAllianceMemberReleaseVersion(File src) throws IOException {
+
+        try( JsonParser p = new ObjectMapper().getFactory().createParser(src) ) {
+            if( p.nextToken()!=JsonToken.START_OBJECT ) {
+                return null;
+            }
+            while( p.nextToken()==JsonToken.FIELD_NAME ) {
+                String field = p.getCurrentName();
+                p.nextToken(); // advance to the field value
+                if( "alliance_member_release_version".equals(field) ) {
+                    return p.getValueAsString();
+                }
+                p.skipChildren(); // skip nested arrays/objects we do not care about
+            }
+        }
+        return null;
     }
 
     public static BufferedWriter openWriterUTF8(String fileName) throws IOException {
