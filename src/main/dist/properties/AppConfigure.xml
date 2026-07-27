@@ -2,7 +2,7 @@
 
 <beans>
     <bean id="main" class="edu.mcw.rgd.pipelines.agr.Main" >
-        <property name="version" value="alliance-submission-pipeline  -- build Jul 06, 2026" />
+        <property name="version" value="alliance-submission-pipeline  -- build Jul 27, 2026" />
         <property name="dao" ref="dao"/>
     </bean>
 
@@ -103,6 +103,10 @@
 
     <bean id="curationAGMGenerator" class="edu.mcw.rgd.pipelines.agr.CurationAGMGenerator" >
         <property name="dao" ref="dao"/>
+        <!-- when true: emit both agm_symbol_dto (nomenclature symbol) and agm_full_name_dto (sparse strain full name);
+             when false: revert to legacy behavior, submitting the always-populated strain symbol as full_name only.
+             Set to false per AGR request (Jul 2026) so the public site's full_name-based display works for all RGD strains. -->
+        <property name="emitBothFullNamesAndSymbols" value="false"/>
     </bean>
 
     <bean id="curationAlleleGenerator" class="edu.mcw.rgd.pipelines.agr.CurationAlleleGenerator" >

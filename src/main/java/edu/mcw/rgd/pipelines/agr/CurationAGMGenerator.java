@@ -14,6 +14,7 @@ import java.util.List;
 public class CurationAGMGenerator {
 
     private Dao dao;
+    private boolean emitBothFullNamesAndSymbols;
 
     Logger log = LogManager.getLogger("status");
 
@@ -38,6 +39,7 @@ public class CurationAGMGenerator {
         log.info("START "+speciesName+" AGM file");
 
         CurationAGM curationAGM = new CurationAGM();
+        curationAGM.emitBothFullNamesAndSymbols = isEmitBothFullNamesAndSymbols();
 
         // setup a JSON object array to collect all CurationAGM objects
         ObjectMapper json = new ObjectMapper();
@@ -82,5 +84,13 @@ public class CurationAGMGenerator {
 
     public void setDao(Dao dao) {
         this.dao = dao;
+    }
+
+    public boolean isEmitBothFullNamesAndSymbols() {
+        return emitBothFullNamesAndSymbols;
+    }
+
+    public void setEmitBothFullNamesAndSymbols(boolean emitBothFullNamesAndSymbols) {
+        this.emitBothFullNamesAndSymbols = emitBothFullNamesAndSymbols;
     }
 }

@@ -1,3 +1,6 @@
+Jul 27, 2026
+  agm: added local option 'emitBothFullNamesAndSymbols' (default false); when false, submit the strain symbol as full_name (no separate symbol slot), per AGR request
+
 Jul 06, 2026
   curation: updated to schema v2.16.0; AGM emits agm_symbol_dto
   scripts: AGR release bumped to 9.1.0
