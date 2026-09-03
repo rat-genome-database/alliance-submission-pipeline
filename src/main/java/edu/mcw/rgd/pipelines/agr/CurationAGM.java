@@ -9,12 +9,6 @@ public class CurationAGM extends CurationObject {
 
     public List<AgmModel> agm_ingest_set = new ArrayList<>();
 
-    // when true, emit the current schema-v2.16.0 form: a nomenclature symbol (agm_symbol_dto) plus,
-    // when available, the sparse strain full name (agm_full_name_dto).
-    // when false, revert to the legacy form: submit the always-populated strain symbol as full_name,
-    // and emit no separate nomenclature symbol.
-    public boolean emitBothFullNamesAndSymbols = false;
-
     public AgmModel add(Strain s, Dao dao, String curie) throws Exception {
 
         AgmModel m = new AgmModel();
@@ -24,34 +18,26 @@ public class CurationAGM extends CurationObject {
         String friendlyName1 = getHumanFriendlyName(s.getSymbol(), s.getRgdId());
         String friendlyName2 = getHumanFriendlyName(s.getTaglessStrainSymbol(), s.getRgdId());
 
-        if( emitBothFullNamesAndSymbols ) {
-            // current schema-v2.16.0 form: nomenclature symbol + (when available) strain full name
-            HashMap agmSymbolDto = new HashMap();
-            agmSymbolDto.put("name_type_name", "nomenclature_symbol");
-            agmSymbolDto.put("display_text", s.getSymbol());
-            agmSymbolDto.put("format_text", taglessSymbolFormatText(s));
-            agmSymbolDto.put("internal", false);
-            m.agm_symbol_dto = agmSymbolDto;
+        // per agreement with AGR disease WG (Sep 2026): submit the always-populated strain symbol
+        // as full_name, so the Alliance public site (which displays full_name) shows the symbol
+        // for every RGD strain
+        HashMap agmFullNameDto = new HashMap();
+        agmFullNameDto.put("name_type_name", "full_name");
+        agmFullNameDto.put("display_text", s.getSymbol());
+        agmFullNameDto.put("format_text", taglessSymbolFormatText(s));
+        agmFullNameDto.put("internal", false);
+        m.agm_full_name_dto = agmFullNameDto;
 
-            // strain full name, when available
-            if( !Utils.isStringEmpty(s.getName()) ) {
-                HashMap agmFullNameDto = new HashMap();
-                agmFullNameDto.put("name_type_name", "full_name");
-                agmFullNameDto.put("display_text", s.getName());
-                agmFullNameDto.put("format_text", generateTaglessSymbol(s.getName()));
-                agmFullNameDto.put("internal", false);
-                m.agm_full_name_dto = agmFullNameDto;
-            }
-        } else {
-            // legacy form (requested Jul 2026): submit the always-populated strain symbol as full_name,
-            // so the Alliance public site (which displays full_name) has a name for every RGD strain;
-            // no separate nomenclature symbol is emitted
-            HashMap agmFullNameDto = new HashMap();
-            agmFullNameDto.put("name_type_name", "full_name");
-            agmFullNameDto.put("display_text", s.getSymbol());
-            agmFullNameDto.put("format_text", taglessSymbolFormatText(s));
-            agmFullNameDto.put("internal", false);
-            m.agm_full_name_dto = agmFullNameDto;
+        // the strain full name, when available, is submitted as a synonym of type 'full_name'
+        if( !Utils.isStringEmpty(s.getName()) ) {
+            HashMap synonymDto = new HashMap();
+            synonymDto.put("name_type_name", "full_name");
+            synonymDto.put("display_text", s.getName());
+            synonymDto.put("format_text", generateTaglessSymbol(s.getName()));
+            synonymDto.put("internal", false);
+            List synonymDtos = new ArrayList();
+            synonymDtos.add(synonymDto);
+            m.agm_synonym_dtos = synonymDtos;
         }
 
         m.agm_secondary_id_dtos = getSecondaryIdentifiers(curie, s.getRgdId(), dao);
@@ -154,10 +140,8 @@ public class CurationAGM extends CurationObject {
         });
     }
 
-    // the always-populated name field depends on the mode: agm_symbol_dto when emitting both,
-    // agm_full_name_dto (which holds the symbol) in legacy mode
+    // agm_full_name_dto is always populated (it holds the strain symbol)
     String sortName(AgmModel m) {
-        HashMap dto = emitBothFullNamesAndSymbols ? m.agm_symbol_dto : m.agm_full_name_dto;
-        return dto.get("display_text").toString();
+        return m.agm_full_name_dto.get("display_text").toString();
     }
 }
