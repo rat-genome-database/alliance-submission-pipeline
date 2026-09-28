@@ -13,8 +13,13 @@ fi
 cd $APPDIR
 java -jar -Dspring.config=$APPDIR/../properties/default_db2.xml \
     -Dlog4j.configurationFile=file://$APPDIR/properties/log4j2.xml \
-    -jar lib/$APPNAME.jar "$@" > run.log 2>&1
+    -jar lib/$APPNAME.jar "$@" > $APPDIR/run.log 2>&1
+EXIT_CODE=$?
+
+# on failure summary.log could be empty or stale, so mail run.log: it has the error message and the stack trace
+if [ $EXIT_CODE -ne 0 ]; then
+  mailx -s "[$SERVER] Alliance Submission Pipeline FAILED (exit code $EXIT_CODE)" $EMAIL_LIST < $APPDIR/run.log
+  exit $EXIT_CODE
+fi
 
 mailx -s "[$SERVER] Alliance Submission Pipeline OK!" $EMAIL_LIST < $APPDIR/logs/summary.log
-
-

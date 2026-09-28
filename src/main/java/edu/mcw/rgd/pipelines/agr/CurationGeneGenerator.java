@@ -48,11 +48,10 @@ public class CurationGeneGenerator {
         CurationGenes curationGenes = new CurationGenes();
 
         // for human, load the set of HGNC ids that have phenotype data so that
-        // gene/phenotypes xrefs are emitted only for genes that actually have phenotypes
-        if( speciesTypeKey == SpeciesType.HUMAN && phenotypeFile != null && !phenotypeFile.isEmpty() ) {
-            Set<String> phenoHgncIds = CurationGenes.loadPhenotypeHgncIds(phenotypeFile);
-            log.info("  loaded HGNC ids with phenotype data from "+phenotypeFile+": "+phenoHgncIds.size());
-            curationGenes.setPhenotypeHgncIds(phenoHgncIds);
+        // gene/phenotypes xrefs are emitted only for genes that actually have phenotypes;
+        // the phenotypes file is mandatory: the run is aborted if it is missing or does not load properly
+        if( speciesTypeKey == SpeciesType.HUMAN ) {
+            curationGenes.setPhenotypeHgncIds(loadHumanPhenotypeHgncIds());
         }
 
         // setup a JSON object array to collect all CurationGene objects
@@ -107,6 +106,49 @@ public class CurationGeneGenerator {
         log.info("END "+speciesName+" gene file:  genes="+curationGenes.gene_ingest_set.size());
         log.info("   obsolete gene count: "+obsoleteGeneCount.get());
         log.info("");
+    }
+
+    /**
+     * Load the HGNC ids having phenotype data from the AGR phenotypes JSON file (HUMAN only).
+     * <p>
+     * The phenotypes file is required: if it is not configured, not found, unreadable, or yields
+     * no HGNC ids, an error is written to the status log and to the console, and the run is aborted.
+     */
+    Set<String> loadHumanPhenotypeHgncIds() throws Exception {
+
+        if( phenotypeFile == null || phenotypeFile.isEmpty() ) {
+            throw abort("HUMAN phenotypes file is NOT CONFIGURED: set property 'phenotypeFile' of bean 'curationGeneGenerator' in AppConfigure.xml");
+        }
+
+        File file = new File(phenotypeFile);
+        if( !file.exists() ) {
+            throw abort("HUMAN phenotypes file NOT FOUND: "+file.getAbsolutePath());
+        }
+        if( !file.isFile() || !file.canRead() ) {
+            throw abort("HUMAN phenotypes file is NOT A READABLE FILE: "+file.getAbsolutePath());
+        }
+
+        Set<String> phenoHgncIds;
+        try {
+            phenoHgncIds = CurationGenes.loadPhenotypeHgncIds(phenotypeFile);
+        } catch( Exception e ) {
+            throw abort("HUMAN phenotypes file COULD NOT BE LOADED: "+file.getAbsolutePath()+" ("+e+")");
+        }
+
+        if( phenoHgncIds.isEmpty() ) {
+            throw abort("HUMAN phenotypes file DID NOT LOAD PROPERLY: no HGNC ids found in "+file.getAbsolutePath()
+                    +" (file size: "+Utils.formatThousands(file.length())+" bytes)");
+        }
+
+        log.info("  loaded HGNC ids with phenotype data from "+file.getAbsolutePath()+": "+Utils.formatThousands(phenoHgncIds.size()));
+        return phenoHgncIds;
+    }
+
+    /** write the error to the status log and to the console, and return the exception that aborts the run */
+    Exception abort(String msg) {
+        String fullMsg = "ERROR: "+msg+" -- ABORTING HUMAN GENE file generation";
+        log.error(fullMsg);
+        return new Exception(fullMsg);
     }
 
 

@@ -1,3 +1,7 @@
+Sep 28, 2026
+  curation genes: HUMAN phenotypes file is now mandatory; a clear error is logged and the run aborts when the file is missing or does not load properly
+  run.sh: emails FAILED (with run.log) when the java process exits with an error; log4j date pattern fixed to yyyy-MM-dd
+
 Sep 3, 2026
   agm: submit strain full names as synonyms of type full_name (symbol stays in the name slot), per AGR disease WG agreement; removed the now-obsolete emitBothFullNamesAndSymbols option
 
