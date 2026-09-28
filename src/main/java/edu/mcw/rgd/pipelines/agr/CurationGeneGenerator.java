@@ -110,6 +110,8 @@ public class CurationGeneGenerator {
 
     /**
      * Load the HGNC ids having phenotype data from the AGR phenotypes JSON file (HUMAN only).
+     * The file may be plain or gzipped (by .gz extension); if the configured name is not found,
+     * its sibling name (with/without .gz) is tried before giving up.
      * <p>
      * The phenotypes file is required: if it is not configured, not found, unreadable, or yields
      * no HGNC ids, an error is written to the status log and to the console, and the run is aborted.
@@ -122,7 +124,15 @@ public class CurationGeneGenerator {
 
         File file = new File(phenotypeFile);
         if( !file.exists() ) {
-            throw abort("HUMAN phenotypes file NOT FOUND: "+file.getAbsolutePath());
+            // the AGR phenotypes file may be delivered gzipped or plain: try the sibling name before giving up
+            File sibling = new File(phenotypeFile.endsWith(".gz")
+                    ? phenotypeFile.substring(0, phenotypeFile.length()-3)
+                    : phenotypeFile+".gz");
+            if( !sibling.exists() ) {
+                throw abort("HUMAN phenotypes file NOT FOUND: "+file.getAbsolutePath()+" (also tried "+sibling.getAbsolutePath()+")");
+            }
+            log.info("  HUMAN phenotypes file "+file.getAbsolutePath()+" not found; using "+sibling.getAbsolutePath());
+            file = sibling;
         }
         if( !file.isFile() || !file.canRead() ) {
             throw abort("HUMAN phenotypes file is NOT A READABLE FILE: "+file.getAbsolutePath());
@@ -130,7 +140,7 @@ public class CurationGeneGenerator {
 
         Set<String> phenoHgncIds;
         try {
-            phenoHgncIds = CurationGenes.loadPhenotypeHgncIds(phenotypeFile);
+            phenoHgncIds = CurationGenes.loadPhenotypeHgncIds(file.getAbsolutePath());
         } catch( Exception e ) {
             throw abort("HUMAN phenotypes file COULD NOT BE LOADED: "+file.getAbsolutePath()+" ("+e+")");
         }

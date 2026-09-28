@@ -4,7 +4,6 @@ import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.process.Utils;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.*;
 import java.util.Map;
 
@@ -20,7 +19,7 @@ public class CurationGenes extends CurationObject {
     }
 
     /**
-     * Load HGNC ids from an AGR phenotype JSON file.
+     * Load HGNC ids from an AGR phenotype JSON file, plain or gzipped (by .gz extension).
      * <p>
      * Assumes each occurrence of the {@code "objectId"} field with an {@code HGNC:xxx}
      * value sits on its own line, so we can scan line-by-line and pull the value out
@@ -29,7 +28,7 @@ public class CurationGenes extends CurationObject {
     public static Set<String> loadPhenotypeHgncIds(String filename) throws Exception {
         Set<String> hgncIds = new HashSet<>();
         final String marker = "\"objectId\"";
-        try( BufferedReader br = new BufferedReader(new FileReader(filename)) ) {
+        try( BufferedReader br = Utils.openReaderUtf8(filename) ) {
             String line;
             while( (line = br.readLine()) != null ) {
                 int idx = line.indexOf(marker);

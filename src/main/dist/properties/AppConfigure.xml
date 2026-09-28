@@ -97,8 +97,8 @@
 
     <bean id="curationGeneGenerator" class="edu.mcw.rgd.pipelines.agr.CurationGeneGenerator" >
         <property name="dao" ref="dao"/>
-        <!-- AGR phenotype JSON file (HUMAN); used to flag which HGNC ids get a gene/phenotypes xref -->
-        <property name="phenotypeFile" value="/home/rgddata/pipelines/AgrPipeline/data/phenotypes.9606.json"/>
+        <!-- AGR phenotype JSON file (HUMAN), plain or gzipped; used to flag which HGNC ids get a gene/phenotypes xref; if not found, the sibling name (with/without .gz) is tried -->
+        <property name="phenotypeFile" value="/home/rgddata/pipelines/AgrPipeline/data/phenotypes.9606.json.gz"/>
     </bean>
 
     <bean id="curationAGMGenerator" class="edu.mcw.rgd.pipelines.agr.CurationAGMGenerator" >
