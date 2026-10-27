@@ -1,3 +1,6 @@
+Oct 27, 2026
+  migrated to postgres
+
 Sep 28, 2026
   curation genes: HUMAN phenotypes file is now mandatory; a clear error is logged and the run aborts when the file is missing or does not load properly
   run.sh: emails FAILED (with run.log) when the java process exits with an error; log4j date pattern fixed to yyyy-MM-dd
