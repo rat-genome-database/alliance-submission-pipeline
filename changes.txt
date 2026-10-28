@@ -1,3 +1,6 @@
+Oct 28, 2026
+  LinkML schema v2.18.0; genes: symbol/name changes from nomenclature events are submitted as gene change events (rename)
+
 Oct 27, 2026
   migrated to postgres
 

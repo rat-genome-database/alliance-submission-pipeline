@@ -2,7 +2,7 @@
 
 <beans>
     <bean id="main" class="edu.mcw.rgd.pipelines.agr.Main" >
-        <property name="version" value="alliance-submission-pipeline  -- build Oct 27, 2026" />
+        <property name="version" value="alliance-submission-pipeline  -- build Oct 28, 2026" />
         <property name="dao" ref="dao"/>
     </bean>
 
