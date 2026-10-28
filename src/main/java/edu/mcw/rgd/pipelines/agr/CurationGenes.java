@@ -98,12 +98,75 @@ public class CurationGenes extends CurationObject {
         }
 
         m.note_dtos = getNotes_DTO(g);
+        if( EMIT_GENE_CHANGE_EVENTS ) {
+            m.gene_change_event_dtos = getChangeEvents(curie, g.getRgdId(), dao);
+        }
 
         synchronized(gene_ingest_set) {
             gene_ingest_set.add(m);
         }
 
         return m;
+    }
+
+
+    /** submit gene change events (gene_change_event_dtos); off until the Alliance starts accepting them (Oct 2026) */
+    static final boolean EMIT_GENE_CHANGE_EVENTS = false;
+
+    /**
+     * gene change events (LinkML v2.18.0+, GeneChangeEventSlotAnnotationDTO): renames from NOMEN_EVENTS
+     */
+    List getChangeEvents(String curie, int rgdId, Dao dao) throws Exception {
+
+        List results = new ArrayList();
+        for( NomenclatureEvent event: dao.getNomenEvents(rgdId) ) {
+            Map ev = getRenameEvent(curie, event, dao);
+            if( ev!=null ) {
+                results.add(ev);
+            }
+        }
+        return results.isEmpty() ? null : results;
+    }
+
+    /** 'rename' event when the symbol and/or name changed; null for status-only events and initial assignments */
+    Map getRenameEvent(String curie, NomenclatureEvent event, Dao dao) throws Exception {
+
+        boolean symbolChanged = event.getPreviousSymbol()!=null && !event.getPreviousSymbol().equals(event.getSymbol());
+        boolean nameChanged = event.getPreviousName()!=null && !event.getPreviousName().equals(event.getName());
+        if( !symbolChanged && !nameChanged ) {
+            return null;
+        }
+
+        Map ev = new HashMap();
+        ev.put("gene_identifier", curie);
+        ev.put("event_type_name", "rename");
+        ev.put("internal", false);
+        ev.put("created_by_curie", "RGD");
+        if( symbolChanged ) {
+            ev.put("symbol_renamed_from", event.getPreviousSymbol());
+            ev.put("symbol_renamed_to", event.getSymbol());
+        }
+        if( nameChanged ) {
+            ev.put("full_name_renamed_from", event.getPreviousName());
+            ev.put("full_name_renamed_to", event.getName());
+        }
+
+        String status = event.getNomenStatusType();
+        if( "APPROVED".equals(status) || "PROVISIONAL".equals(status) ) {
+            ev.put("event_status_name", status.toLowerCase());
+        }
+        if( event.getEventDate()!=null ) {
+            ev.put("date_created", Utils2.formatDate(event.getEventDate()));
+        }
+        if( !Utils.isStringEmpty(event.getRefKey()) ) {
+            int refRgdId = dao.getRefRgdId(Integer.parseInt(event.getRefKey()));
+            if( refRgdId!=0 ) {
+                List<String> refRgdIds = new ArrayList<>();
+                refRgdIds.add("RGD:"+refRgdId);
+                ev.put("evidence_curies", refRgdIds);
+            }
+        }
+        return ev;
     }
 
 
@@ -312,6 +375,7 @@ public class CurationGenes extends CurationObject {
         public String date_created;
         public String date_updated;
         public Map gcrp_cross_reference_dto = null; // CrossReferenceDTO
+        public List gene_change_event_dtos = null; // GeneChangeEventSlotAnnotationDTO, LinkML v2.18.0+
         public Map gene_full_name_dto;
         public List gene_secondary_id_dtos = null;
         public Map gene_symbol_dto;
