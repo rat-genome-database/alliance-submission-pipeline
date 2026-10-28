@@ -98,7 +98,9 @@ public class CurationGenes extends CurationObject {
         }
 
         m.note_dtos = getNotes_DTO(g);
-        m.gene_change_event_dtos = getChangeEvents(curie, g.getRgdId(), dao);
+        if( EMIT_GENE_CHANGE_EVENTS ) {
+            m.gene_change_event_dtos = getChangeEvents(curie, g.getRgdId(), dao);
+        }
 
         synchronized(gene_ingest_set) {
             gene_ingest_set.add(m);
@@ -107,6 +109,9 @@ public class CurationGenes extends CurationObject {
         return m;
     }
 
+
+    /** submit gene change events (gene_change_event_dtos); off until the Alliance starts accepting them (Oct 2026) */
+    static final boolean EMIT_GENE_CHANGE_EVENTS = false;
 
     /**
      * gene change events (LinkML v2.18.0+, GeneChangeEventSlotAnnotationDTO): renames from NOMEN_EVENTS
