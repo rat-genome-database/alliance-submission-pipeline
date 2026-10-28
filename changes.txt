@@ -1,6 +1,7 @@
 Oct 28, 2026
   LinkML schema v2.18.0; genes: symbol/name changes from nomenclature events are submitted as gene change events (rename)
   gene change events disabled by a code flag until the Alliance accepts them
+  submit scripts: release version read from scripts/RELEASE.txt; files submitted gzipped from data/<release>/
 
 Oct 27, 2026
   migrated to postgres

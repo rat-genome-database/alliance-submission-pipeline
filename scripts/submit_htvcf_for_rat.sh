@@ -1,9 +1,10 @@
 #####
 #
 APITOKEN=`cat api.token`
+RELEASE=$(tr -d "[:space:]" < "$(dirname "$0")/RELEASE.txt")
 
-HTVCF_SPEC="5.4.0_HTVCF_RGD"
-HTVCF_LOC="5.4.0_HTVCF_RGD.vcf.gz"
+HTVCF_SPEC="${RELEASE}_HTVCF_RGD"
+HTVCF_LOC="data/${RELEASE}/${RELEASE}_HTVCF_RGD.vcf.gz"
 HTVCF_FILE="${HTVCF_SPEC}=@${HTVCF_LOC}"
 echo "$HTVCF_FILE"
 

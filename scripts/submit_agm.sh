@@ -2,16 +2,17 @@
 ## submission via API for rat files (taxon id: 10116)
 #
 APITOKEN=`cat APIToken`
+RELEASE=$(tr -d "[:space:]" < "$(dirname "$0")/RELEASE.txt")
 
-EXPR_SPEC="9.1.0_AGM_RGD"
-EXPR_LOC="data/affectedGenomicModels.10116.json"
-EXPRESSION_FILE="${EXPR_SPEC}=@${EXPR_LOC}"
-echo "$EXPRESSION_FILE"
+AGM_SPEC="${RELEASE}_AGM_RGD"
+AGM_LOC="data/${RELEASE}/affectedGenomicModels.10116.json.gz"
+AGM_FILE="${AGM_SPEC}=@${AGM_LOC}"
+echo "$AGM_FILE"
 
 curl -k \
  -H "Authorization: Bearer $APITOKEN" \
  -X POST "https://fms.alliancegenome.org/api/data/submit" \
- -F "$EXPRESSION_FILE" \
- | tee expr_submission.log
+ -F "$AGM_FILE" \
+ | tee agm_submission.log
 
 echo "=== OK ==="

@@ -2,10 +2,11 @@
 ## submission via API for rat files (taxon id: 10116)
 #
 APITOKEN=`cat APIToken`
+RELEASE=$(tr -d "[:space:]" < "$(dirname "$0")/RELEASE.txt")
 
-EXPR_SPEC="9.1.0_EXPRESSION_RGD"
-EXPR_LOC="data/expression.10116.json"
-EXPRESSION_FILE="${EXPR_SPEC}=@${EXPR_LOC}"
+EXPRESSION_SPEC="${RELEASE}_EXPRESSION_RGD"
+EXPRESSION_LOC="data/${RELEASE}/expression.10116.json.gz"
+EXPRESSION_FILE="${EXPRESSION_SPEC}=@${EXPRESSION_LOC}"
 echo "$EXPRESSION_FILE"
 
 curl -k \

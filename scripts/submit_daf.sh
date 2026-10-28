@@ -2,28 +2,29 @@
 ## submission via API for rat files (taxon id: 10116)
 #
 APITOKEN=`cat APIToken`
+RELEASE=$(tr -d "[:space:]" < "$(dirname "$0")/RELEASE.txt")
 
-EXPR_SPEC="9.1.0_DAF_RGD"
-EXPR_LOC="data/disease.10116.daf.json"
-EXPRESSION_FILE="${EXPR_SPEC}=@${EXPR_LOC}"
-echo "$EXPRESSION_FILE"
-
-curl -k \
- -H "Authorization: Bearer $APITOKEN" \
- -X POST "https://fms.alliancegenome.org/api/data/submit" \
- -F "$EXPRESSION_FILE" \
- | tee expr_submission.log
-
-
-EXPR_SPEC="9.1.0_DAF_HUMAN"
-EXPR_LOC="data/disease.9606.daf.json"
-EXPRESSION_FILE="${EXPR_SPEC}=@${EXPR_LOC}"
-echo "$EXPRESSION_FILE"
+DAF_SPEC="${RELEASE}_DAF_RGD"
+DAF_LOC="data/${RELEASE}/disease.10116.daf.json.gz"
+DAF_FILE="${DAF_SPEC}=@${DAF_LOC}"
+echo "$DAF_FILE"
 
 curl -k \
  -H "Authorization: Bearer $APITOKEN" \
  -X POST "https://fms.alliancegenome.org/api/data/submit" \
- -F "$EXPRESSION_FILE" \
- | tee expr_submission.log
+ -F "$DAF_FILE" \
+ | tee daf_submission_rat.log
+
+
+DAF_SPEC="${RELEASE}_DAF_HUMAN"
+DAF_LOC="data/${RELEASE}/disease.9606.daf.json.gz"
+DAF_FILE="${DAF_SPEC}=@${DAF_LOC}"
+echo "$DAF_FILE"
+
+curl -k \
+ -H "Authorization: Bearer $APITOKEN" \
+ -X POST "https://fms.alliancegenome.org/api/data/submit" \
+ -F "$DAF_FILE" \
+ | tee daf_submission_human.log
 
 echo "=== OK ==="
