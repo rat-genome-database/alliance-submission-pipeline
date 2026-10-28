@@ -4,25 +4,27 @@
 TAXON=10116
 SPECIES=RGD
 APITOKEN=`cat api.token`
+RELEASE=$(tr -d "[:space:]" < "$(dirname "$0")/RELEASE.txt")
 
 
 
 
 export MOD_NAME=RGD
-export AGR_SCHEMA=1.0.1.4
-export AGR_RELEASE="5.1.0"
 
 export WORK_DIR=/home/rgddata/pipelines/AgrPipeline
 cd $WORK_DIR
 export DATA_DIR=$WORK_DIR
 
 
-FASTA="$WORK_DIR/mRatBN7.2.fa.gz"
+FASTA_SPEC="${RELEASE}_FASTA_mRatBN7.2"
+FASTA_LOC="data/${RELEASE}/mRatBN7.2.fa.gz"
+FASTA_FILE="${FASTA_SPEC}=@${FASTA_LOC}"
+echo "$FASTA_FILE"
 
 curl -k \
  -H "Authorization: Bearer $APITOKEN" \
  -X POST "https://fms.alliancegenome.org/api/data/submit" \
- -F "5.1.0_FASTA_mRatBN7.2=@${FASTA}" \
+ -F "$FASTA_FILE" \
  | tee fasta_submission.log
 
 echo "=== OK ==="

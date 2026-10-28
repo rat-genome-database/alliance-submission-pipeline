@@ -2,10 +2,11 @@
 ## submission via API for rat files (taxon id: 10116)
 #
 APITOKEN=`cat APIToken`
+RELEASE=$(tr -d "[:space:]" < "$(dirname "$0")/RELEASE.txt")
 
 
-BGI_SPEC="9.1.0_BGI_HUMAN"
-BGI_LOC="data/genes.9606.json"
+BGI_SPEC="${RELEASE}_BGI_HUMAN"
+BGI_LOC="data/${RELEASE}/genes.9606.json.gz"
 BGI_FILE="${BGI_SPEC}=@${BGI_LOC}"
 echo "$BGI_FILE"
 
