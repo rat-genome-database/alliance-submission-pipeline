@@ -1,5 +1,6 @@
 Nov 18, 2026
   all curation generators back up the previous output file to data/ before regenerating it
+  curation genes: HUMAN phenotypes file now read from /home/rgddata/data_release/agr
 
 Oct 28, 2026
   LinkML schema v2.18.0; genes: symbol/name changes from nomenclature events are submitted as gene change events (rename)
