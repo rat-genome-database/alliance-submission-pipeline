@@ -74,6 +74,8 @@ public class CurationVariantGenerator {
         // dump records to a file in JSON format
         try {
             String jsonFileName = "CURATION_VARIANT-"+speciesName+".json";
+            // back up the previous output file (if any) before it is regenerated
+            Utils2.backupOutputFile(jsonFileName, log);
             BufferedWriter jsonWriter = Utils.openWriter(jsonFileName);
 
             jsonWriter.write(json.writerWithDefaultPrettyPrinter().writeValueAsString(curationVariants));

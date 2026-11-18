@@ -63,6 +63,8 @@ public class CurationAlleleAssociationGenerator {
         // dump records to a file in JSON format
         try {
             String jsonFileName = "CURATION_ALLELE_ASSOCIATIONS-"+speciesName+".json";
+            // back up the previous output file (if any) before it is regenerated
+            Utils2.backupOutputFile(jsonFileName, log);
             BufferedWriter jsonWriter = Utils.openWriter(jsonFileName);
 
             jsonWriter.write(json.writerWithDefaultPrettyPrinter().writeValueAsString(curationAlleleAssociations));

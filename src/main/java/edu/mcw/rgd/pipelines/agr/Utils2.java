@@ -129,7 +129,7 @@ public class Utils2 {
      * module producing an Alliance curation JSON file can call at startup.
      * <p>
      * Reads the top-level 'alliance_member_release_version' field from the current file and writes a
-     * gzip-compressed copy to data/&lt;name&gt;.&lt;version&gt;.json.gz
+     * gzip-compressed copy to data/&lt;name&gt;.&lt;version&gt;.&lt;ext&gt;.gz
      * (f.e. 'CURATION_AGM-RAT.json' with release version 'v2026-07-07' becomes
      * 'data/CURATION_AGM-RAT.v2026-07-07.json.gz').
      * <p>
@@ -152,14 +152,17 @@ public class Utils2 {
             return;
         }
 
-        // strip the trailing '.json' and build 'data/<name>.<version>.json.gz'
+        // split off the extension ('.json', '.daf') and build 'data/<name>.<version><ext>.gz'
         String baseName = src.getName();
-        if( baseName.endsWith(".json") ) {
-            baseName = baseName.substring(0, baseName.length()-".json".length());
+        String ext = "";
+        int dotPos = baseName.lastIndexOf('.');
+        if( dotPos>0 ) {
+            ext = baseName.substring(dotPos);
+            baseName = baseName.substring(0, dotPos);
         }
         File backupDir = new File("data");
         backupDir.mkdirs();
-        File backupFile = new File(backupDir, baseName+"."+releaseVersion+".json.gz");
+        File backupFile = new File(backupDir, baseName+"."+releaseVersion+ext+".gz");
 
         try( InputStream in = new BufferedInputStream(new FileInputStream(src));
              OutputStream out = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(backupFile))) ) {
