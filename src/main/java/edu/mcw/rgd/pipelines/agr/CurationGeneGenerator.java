@@ -95,6 +95,8 @@ public class CurationGeneGenerator {
         // dump DafAnnotation records to a file in JSON format
         try {
             String jsonFileName = "CURATION_GENES-"+speciesName+".json";
+            // back up the previous output file (if any) before it is regenerated
+            Utils2.backupOutputFile(jsonFileName, log);
             BufferedWriter jsonWriter = Utils2.openWriterUTF8(jsonFileName);
 
             jsonWriter.write(json.writerWithDefaultPrettyPrinter().writeValueAsString(curationGenes));
